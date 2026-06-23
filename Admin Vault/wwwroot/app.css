@@ -1,0 +1,7 @@
+html, body, #app {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #0f172a; /* Forces slate-900 canvas layer match */
+}

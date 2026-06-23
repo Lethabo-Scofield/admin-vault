@@ -1,0 +1,75 @@
+﻿@page "/audit-logs"
+@inject IJSRuntime JS
+
+<PageTitle>System Audit Logs | Olyxee Vault</PageTitle>
+
+<div class="mb-8">
+    <h2 class="text-xl font-bold text-gray-900">Immutable Security Audit Logs</h2>
+    <p class="text-xs text-gray-500">Real-time recording of low-level infrastructure transactions and cryptographic key modification streams.</p>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/50">
+        <div>
+            <h3 class="font-bold text-base text-gray-900">System Event Ledger</h3>
+            <p class="text-xs text-gray-500">SIEM-synchronized records tracking unique action blocks.</p>
+        </div>
+        <input type="text" placeholder="Filter actors..." class="bg-white border border-gray-200 text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:border-gray-400 w-full sm:w-48 transition-all text-gray-800" />
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-gray-50 text-gray-500 uppercase font-semibold tracking-wider border-b border-gray-200 text-[10px]">
+                <tr>
+                    <th class="px-6 py-3.5">Timestamp Context</th>
+                    <th class="px-6 py-3.5">Operational Action Block</th>
+                    <th class="px-6 py-3.5">Security Actor Identity</th>
+                    <th class="px-6 py-3.5">IP Location Origin</th>
+                    <th class="px-6 py-3.5">Status Check</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 font-mono text-gray-700">
+                @foreach (var log in Logs)
+                {
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4 text-gray-400">@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")</td>
+                        <td class="px-6 py-4 font-sans font-semibold text-gray-900">@log.ActionDescription</td>
+                        <td class="px-6 py-4 font-sans text-gray-600">
+                            <div class="font-medium text-gray-800">@log.ActorEmail</div>
+                            <div class="text-[10px] text-gray-400">@log.ActorRole</div>
+                        </td>
+                        <td class="px-6 py-4 font-sans text-gray-500">@log.IpAddress</td>
+                        <td class="px-6 py-4 font-sans">
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                @log.StatusResult
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<AuditLogModel> Logs = new()
+    {
+        new AuditLogModel { Timestamp = DateTime.Now.AddSeconds(-12), ActionDescription = "Decrypted 'OpenAI Production Token' Secret Key String", ActorEmail = "siyanda@olyxee.com", ActorRole = "Engineering Lead", IpAddress = "102.132.45.18 (Gauteng)", StatusResult = "SUCCESS" },
+        new AuditLogModel { Timestamp = DateTime.Now.AddMinutes(-42), ActionDescription = "Provisioned compliance documentation asset 'ISO_27001.pdf'", ActorEmail = "system-auditor", ActorRole = "Automated Compliance Link", IpAddress = "Internal Cluster Loopback", StatusResult = "SUCCESS" }
+    };
+
+    public class AuditLogModel
+    {
+        public DateTime Timestamp { get; set; }
+        public string ActionDescription { get; set; } = string.Empty;
+        public string ActorEmail { get; set; } = string.Empty;
+        public string ActorRole { get; set; } = string.Empty;
+        public string IpAddress { get; set; } = string.Empty;
+        public string StatusResult { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("refreshTailwindAndIcons");
+    }
+}

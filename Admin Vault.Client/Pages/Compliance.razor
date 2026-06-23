@@ -1,0 +1,125 @@
+﻿@page "/compliance"
+@inject IJSRuntime JS
+
+<PageTitle>Documents & Compliance | Olyxee Vault</PageTitle>
+
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h2 class="text-xl font-bold text-gray-900">Documents & Regulatory Audits</h2>
+        <p class="text-xs text-gray-500">Repository for corporate certification records and statutory cryptographic proof assets.</p>
+    </div>
+
+    <label class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer">
+        <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+        <span>Upload Document</span>
+        <InputFile OnChange="HandleFileSelection" class="hidden" />
+    </label>
+</div>
+
+@if (!string.IsNullOrEmpty(statusFeedbackMessage))
+{
+    <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl mb-6 flex items-center gap-2 animate-fadeIn">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+        <span>@statusFeedbackMessage</span>
+    </div>
+}
+
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/50">
+        <div>
+            <h3 class="font-bold text-base text-gray-900">Regulatory Artifact Ledger</h3>
+            <p class="text-xs text-gray-500">Validated compliance source files.</p>
+        </div>
+        <input type="text" placeholder="Search files..." class="bg-white border border-gray-200 text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:border-gray-400 w-full sm:w-48 transition-all text-gray-800" />
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-gray-50 text-gray-500 uppercase font-semibold tracking-wider border-b border-gray-200 text-[10px]">
+                <tr>
+                    <th class="px-6 py-3.5">Document File Parameters</th>
+                    <th class="px-6 py-3.5">SHA-256 Checksum Signature</th>
+                    <th class="px-6 py-3.5">Intake Timestamp / Actor</th>
+                    <th class="px-6 py-3.5">Classification</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-gray-700">
+                @foreach (var doc in Documents)
+                {
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-400"><i data-lucide="file-text" class="w-5 h-5"></i></span>
+                                <div>
+                                    <div class="font-bold text-gray-900">@doc.FileName</div>
+                                    <div class="text-[10px] text-gray-400 mt-0.5">@doc.FileSizeStrings</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-gray-500 text-[11px]">@doc.SHA256Checksum</td>
+                        <td class="px-6 py-4">
+                            <div class="text-gray-800 font-medium">@doc.UploadedAt.ToString("yyyy-MM-dd HH:mm")</div>
+                            <div class="text-[10px] text-gray-400">@doc.UploadedBy</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-md border border-gray-200">
+                                @doc.ClassificationLevel
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private string statusFeedbackMessage = string.Empty;
+
+    private List<ComplianceDocModel> Documents = new()
+    {
+        new ComplianceDocModel { FileName = "CIPC_Registration_2026.pdf", FileSizeStrings = "2.4 MB", SHA256Checksum = "8a4f9b2c...e1d3c4b5", UploadedAt = DateTime.Now.AddDays(-5), UploadedBy = "system-process", ClassificationLevel = "Confidential / Legal" },
+        new ComplianceDocModel { FileName = "B-BBEE_Verification_Certificate.pdf", FileSizeStrings = "1.1 MB", SHA256Checksum = "f3e2d1c0...9a8b7c6d", UploadedAt = DateTime.Now.AddMonths(-2), UploadedBy = "audit-compliance", ClassificationLevel = "Statutory Public" }
+    };
+
+    // Process file streams dynamically when selected from local filesystem storage
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            // Convert file metadata bytes into readable units
+            double sizeInMb = (double)file.Size / (1024 * 1024);
+
+            var temporaryDoc = new ComplianceDocModel
+            {
+                FileName = file.Name,
+                FileSizeStrings = $"{sizeInMb:F1} MB",
+                SHA256Checksum = "e3b0c442...ceb57067", // Simulated runtime SHA calculation string block
+                UploadedAt = DateTime.Now,
+                UploadedBy = "siyanda@olyxee.com",
+                ClassificationLevel = "Confidential / Legal"
+            };
+
+            Documents.Insert(0, temporaryDoc);
+            statusFeedbackMessage = $"Document '{file.Name}' securely buffered to storage ledger.";
+            StateHasChanged();
+            await JS.InvokeVoidAsync("refreshTailwindAndIcons");
+        }
+    }
+
+    public class ComplianceDocModel
+    {
+        public string FileName { get; set; } = string.Empty;
+        public string FileSizeStrings { get; set; } = string.Empty;
+        public string SHA256Checksum { get; set; } = string.Empty;
+        public DateTime UploadedAt { get; set; }
+        public string UploadedBy { get; set; } = string.Empty;
+        public string ClassificationLevel { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("refreshTailwindAndIcons");
+    }
+}

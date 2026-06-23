@@ -1,0 +1,130 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex w-full">
+
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+        <div class="p-6">
+
+            <div class="flex flex-col items-center gap-4 mb-8 text-center select-none">
+                <div class="p-2">
+                    <img src="Olyxee-White-Logo.png" alt="Olyxee Brandmark" class="w-12 h-12 object-contain" />
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight text-gray-950">Olyxee Vault</h1>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                </a>
+
+                <a href="credentials" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("credentials") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="key-round" class="w-4 h-4"></i> API Keys & Credentials
+                </a>
+
+                <!--<a href="business-profile" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("business-profile") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="briefcase" class="w-4 h-4"></i> Business Profile
+                </a>-->
+
+                <a href="compliance" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("compliance") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Documents & Compliance
+                </a>
+
+                <a href="audit-logs" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("audit-logs") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="history" class="w-4 h-4"></i> Audit Logs
+                </a>
+
+                <!--<a href="access-control" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("access-control") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
+                    <i data-lucide="users" class="w-4 h-4"></i> Access Control (RBAC)
+                </a>-->
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-sm">
+                    SE
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-800">Siyanda</p>
+                    <p class="text-[10px] text-gray-500">Engineering Lead</p>
+                </div>
+            </div>
+            <button class="text-gray-700 hover:text-rose-600 transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="h-16 border-b border-gray-200 bg-white/80 backdrop-blur px-8 flex items-center justify-between sticky top-0 z-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <span class="bg-gray-100 text-xs font-semibold px-2.5 py-1 rounded-full text-gray-700 border border-gray-200">
+                    Environment: Production
+                </span>
+                <span class="bg-gray-950 text-xs font-semibold px-2.5 py-1 rounded-full text-white tracking-wide">
+                    Tenant: Olyxee HQ
+                </span>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8 flex-1 overflow-y-auto bg-white">
+            @Body
+        </div>
+    </main>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Bind navigation lifecycle listeners to catch internal page shifts cleanly
+        NavManager.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TriggerUIRefreshAsync();
+        }
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // 1. Force state tree update loop
+        StateHasChanged();
+
+        // 2. Allow render tree components to append to DOM before running text utilities
+        await Task.Delay(100);
+
+        // 3. Complete structural style syncs
+        await TriggerUIRefreshAsync();
+    }
+
+    private async Task TriggerUIRefreshAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("refreshTailwindAndIcons");
+        }
+        catch
+        {
+            // Context fallbacks for standard pre-render threads
+        }
+    }
+
+    private bool IsActive(string relativePath)
+    {
+        var currentUri = NavManager.ToBaseRelativePath(NavManager.Uri).TrimEnd('/');
+        return currentUri == relativePath;
+    }
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
+}

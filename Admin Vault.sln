@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37216.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin Vault", "Admin Vault\Admin Vault.csproj", "{01569C95-3E39-418F-B77E-075691326822}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin Vault.Client", "Admin Vault.Client\Admin Vault.Client.csproj", "{D5A4203E-028F-4E39-B9BE-0ABA81CB008F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01569C95-3E39-418F-B77E-075691326822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01569C95-3E39-418F-B77E-075691326822}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01569C95-3E39-418F-B77E-075691326822}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01569C95-3E39-418F-B77E-075691326822}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5A4203E-028F-4E39-B9BE-0ABA81CB008F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5A4203E-028F-4E39-B9BE-0ABA81CB008F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5A4203E-028F-4E39-B9BE-0ABA81CB008F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5A4203E-028F-4E39-B9BE-0ABA81CB008F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83976F1C-55CA-4606-80FB-CC9D6A0DF744}
+	EndGlobalSection
+EndGlobal
