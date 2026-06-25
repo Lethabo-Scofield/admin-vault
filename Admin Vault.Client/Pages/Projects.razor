@@ -1,4 +1,5 @@
 ﻿@page "/projects"
+@attribute [StreamRendering]
 @using Admin_Vault.Client.Models
 @using Admin_Vault.Client.Services
 @inject IVaultDataService Data
@@ -44,7 +45,27 @@
     </div>
 }
 
-@if (ProjectsList.Count == 0)
+@if (loading)
+{
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (int i = 0; i < 6; i++)
+        {
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="skeleton" style="width:44px;height:44px;border-radius:14px;"></div>
+                    <div class="skeleton" style="width:54px;height:18px;"></div>
+                </div>
+                <div class="skeleton" style="width:60%;height:16px;"></div>
+                <div class="skeleton mt-2" style="width:90%;height:11px;"></div>
+                <div class="flex gap-4 mt-5 pt-4 border-t border-gray-100">
+                    <div class="skeleton" style="width:60px;height:11px;"></div>
+                    <div class="skeleton" style="width:60px;height:11px;"></div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ProjectsList.Count == 0)
 {
     <div class="bg-white border border-dashed border-gray-300 rounded-xl p-12 text-center">
         <div class="w-12 h-12 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-4">
@@ -84,6 +105,7 @@ else
 @code {
     private List<Project> ProjectsList = new();
     private bool showCreateForm = false;
+    private bool loading = true;
     private Project newProject = new();
 
     protected override async Task OnInitializedAsync()
@@ -94,6 +116,7 @@ else
     private async Task LoadProjects()
     {
         ProjectsList = await Data.GetProjectsAsync();
+        loading = false;
     }
 
     private void ToggleCreateForm()

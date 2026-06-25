@@ -3,54 +3,54 @@
 @inject IJSRuntime JS
 @implements IDisposable
 
-<div class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex w-full">
+<div class="bg-[#f5f5f7] text-gray-800 font-sans antialiased min-h-screen flex w-full">
 
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+    @if (sidebarOpen)
+    {
+        <div class="fixed inset-0 bg-black/30 z-40 lg:hidden animate-ios-in" @onclick="CloseSidebar"></div>
+    }
+
+    <aside class="@SidebarClasses">
         <div class="p-6">
 
-            <div class="flex flex-col items-center gap-4 mb-8 text-center select-none">
-                <div class="p-2">
-                    <img src="Olyxee-White-Logo.png" alt="Olyxee Brandmark" class="w-12 h-12 object-contain" />
+            <div class="flex items-center justify-between lg:justify-center gap-4 mb-8 select-none">
+                <div class="flex items-center gap-3 lg:flex-col lg:text-center">
+                    <div class="p-2 bg-gray-900 rounded-2xl shadow-sm">
+                        <img src="Olyxee-White-Logo.png" alt="Olyxee Brandmark" class="w-8 h-8 lg:w-10 lg:h-10 object-contain" />
+                    </div>
+                    <h1 class="font-bold text-lg lg:text-xl tracking-tight text-gray-950">Olyxee Vault</h1>
                 </div>
-                <div>
-                    <h1 class="font-bold text-xl tracking-tight text-gray-950">Olyxee Vault</h1>
-                </div>
+                <button @onclick="CloseSidebar" class="lg:hidden text-gray-400 hover:text-gray-900 p-1" aria-label="Close menu">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
 
-            <nav class="space-y-1">
-                <a href="/" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+            <nav class="space-y-1.5">
+                <a href="/" class="@NavClass(IsActive(""))">
+                    <i data-lucide="layout-dashboard" class="w-[18px] h-[18px]"></i> Dashboard
                 </a>
 
-                <a href="/projects" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsSection("projects") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="folder" class="w-4 h-4"></i> Projects
+                <a href="/projects" class="@NavClass(IsSection("projects"))">
+                    <i data-lucide="folder" class="w-[18px] h-[18px]"></i> Projects
                 </a>
 
-                <a href="/credentials" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("credentials") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="key-round" class="w-4 h-4"></i> API Keys & Credentials
+                <a href="/credentials" class="@NavClass(IsActive("credentials"))">
+                    <i data-lucide="key-round" class="w-[18px] h-[18px]"></i> API Keys & Credentials
                 </a>
 
-                <!--<a href="business-profile" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("business-profile") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="briefcase" class="w-4 h-4"></i> Business Profile
-                </a>-->
-
-                <a href="/compliance" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("compliance") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="file-text" class="w-4 h-4"></i> Documents & Compliance
+                <a href="/compliance" class="@NavClass(IsActive("compliance"))">
+                    <i data-lucide="file-text" class="w-[18px] h-[18px]"></i> Documents & Compliance
                 </a>
 
-                <a href="/audit-logs" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("audit-logs") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="history" class="w-4 h-4"></i> Audit Logs
+                <a href="/audit-logs" class="@NavClass(IsActive("audit-logs"))">
+                    <i data-lucide="history" class="w-[18px] h-[18px]"></i> Audit Logs
                 </a>
-
-                <!--<a href="access-control" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors @(IsActive("access-control") ? "bg-gray-100 text-gray-950 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-950")">
-                    <i data-lucide="users" class="w-4 h-4"></i> Access Control (RBAC)
-                </a>-->
             </nav>
         </div>
 
-        <div class="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div class="p-4 m-3 border border-gray-200/70 rounded-2xl bg-gray-50 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-sm">
+                <div class="w-9 h-9 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-xs">
                     SE
                 </div>
                 <div>
@@ -58,34 +58,44 @@
                     <p class="text-[10px] text-gray-500">Engineering Lead</p>
                 </div>
             </div>
-            <button class="text-gray-700 hover:text-rose-600 transition-colors">
+            <button class="text-gray-400 hover:text-rose-600 transition-colors p-1" aria-label="Sign out">
                 <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0">
-        <header class="h-16 border-b border-gray-200 bg-white/80 backdrop-blur px-8 flex items-center justify-between sticky top-0 z-10 shrink-0">
-            <div class="flex items-center gap-4">
-                <span class="bg-gray-100 text-xs font-semibold px-2.5 py-1 rounded-full text-gray-700 border border-gray-200">
-                    Environment: Production
-                </span>
-                <span class="bg-gray-950 text-xs font-semibold px-2.5 py-1 rounded-full text-white tracking-wide">
-                    Tenant: Olyxee HQ
-                </span>
+        <header class="h-16 border-b border-gray-200/70 ios-glass px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button @onclick="ToggleSidebar" class="lg:hidden text-gray-700 hover:text-gray-950 p-2 -ml-2 rounded-xl active:bg-gray-100" aria-label="Open menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                    <span class="bg-gray-100 text-[11px] font-semibold px-2.5 py-1 rounded-full text-gray-700 border border-gray-200 whitespace-nowrap">
+                        Production
+                    </span>
+                    <span class="bg-gray-950 text-[11px] font-semibold px-2.5 py-1 rounded-full text-white tracking-wide whitespace-nowrap">
+                        Olyxee HQ
+                    </span>
+                </div>
             </div>
         </header>
 
-        <div class="p-8 space-y-8 flex-1 overflow-y-auto bg-white">
-            @Body
+        <div class="p-4 sm:p-6 lg:p-8 space-y-8 flex-1 overflow-y-auto">
+            <div class="animate-ios-in" @key="currentPageKey">
+                @Body
+            </div>
         </div>
     </main>
 </div>
 
 @code {
+    private bool sidebarOpen = false;
+    private string currentPageKey = "";
+
     protected override void OnInitialized()
     {
-        // Bind navigation lifecycle listeners to catch internal page shifts cleanly
+        currentPageKey = NavManager.Uri;
         NavManager.LocationChanged += OnLocationChanged;
     }
 
@@ -97,16 +107,31 @@
         }
     }
 
-    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    private void ToggleSidebar() => sidebarOpen = !sidebarOpen;
+    private void CloseSidebar() => sidebarOpen = false;
+
+    private string SidebarClasses =>
+        "fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 bg-white border-r border-gray-200/70 flex flex-col justify-between shrink-0 " +
+        "transform transition-transform duration-300 ease-out lg:translate-x-0 " +
+        (sidebarOpen ? "translate-x-0 shadow-2xl lg:shadow-none" : "-translate-x-full");
+
+    private string NavClass(bool active) =>
+        "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors " +
+        (active
+            ? "bg-gray-900 text-white font-semibold shadow-sm"
+            : "text-gray-600 hover:bg-gray-100 hover:text-gray-950");
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        // 1. Force state tree update loop
-        StateHasChanged();
+        _ = InvokeAsync(async () =>
+        {
+            sidebarOpen = false;
+            currentPageKey = e.Location;
+            StateHasChanged();
 
-        // 2. Allow render tree components to append to DOM before running text utilities
-        await Task.Delay(100);
-
-        // 3. Complete structural style syncs
-        await TriggerUIRefreshAsync();
+            await Task.Delay(100);
+            await TriggerUIRefreshAsync();
+        });
     }
 
     private async Task TriggerUIRefreshAsync()

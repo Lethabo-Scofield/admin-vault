@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f5f7" />
     <base href="/" />
     <PageTitle>Olyxee Vault</PageTitle>
     <HeadOutlet />
@@ -18,15 +19,109 @@
                 window.lucide.createIcons();
             }
 
-            // 2. Force Tailwind v4 CDN script to re-evaluate the full layout canvas
-            // We trick the MutationObserver by changing an arbitrary text node attribute on the core container body element.
-            // This immediately triggers a fresh utility compiler compilation pass across all current child layouts.
+            // 2. Nudge the Tailwind v4 CDN MutationObserver so it recompiles utilities
+            // for markup that was just streamed/rendered into the DOM.
             document.body.setAttribute('data-render-cycle', Date.now().toString());
         };
     </script>
+
+    <style>
+        :root {
+            --ios-bg: #f5f5f7;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: -0.011em;
+        }
+
+        /* iOS soft, layered shadows applied to all cards */
+        .shadow-sm {
+            box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 8px 24px -12px rgba(17, 24, 39, 0.10) !important;
+        }
+
+        .shadow-md {
+            box-shadow: 0 8px 30px -8px rgba(17, 24, 39, 0.14) !important;
+        }
+
+        /* iOS continuous-corner rounding */
+        .rounded-lg { border-radius: 12px !important; }
+        .rounded-xl { border-radius: 16px !important; }
+        .rounded-2xl { border-radius: 22px !important; }
+
+        /* Tap feedback on primary controls (buttons + button-style links) */
+        button, .bg-gray-900, a[href] {
+            transition: transform .18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+        button:active, .bg-gray-900:active {
+            transform: scale(0.96);
+        }
+
+        /* Skeleton shimmer */
+        @@keyframes ios-shimmer {
+            0% { background-position: -560px 0; }
+            100% { background-position: 560px 0; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #e9e9ec 25%, #f2f2f5 50%, #e9e9ec 75%);
+            background-size: 560px 100%;
+            animation: ios-shimmer 1.5s linear infinite;
+            border-radius: 8px;
+            display: block;
+        }
+
+        /* Entrance animations */
+        @@keyframes ios-fade-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-ios-in {
+            animation: ios-fade-up .55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+        }
+
+        /* Refined thin scrollbars */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(60, 60, 67, 0.25) transparent;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(60, 60, 67, 0.22);
+            border-radius: 999px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(60, 60, 67, 0.4); background-clip: content-box; }
+
+        /* Frosted glass utility */
+        .ios-glass {
+            background-color: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 
-<body class="bg-slate-900 text-slate-100 antialiased">
+<body class="bg-[#f5f5f7] text-gray-900 antialiased">
     <Routes @rendermode="InteractiveServer" />
 
     <script src="_framework/blazor.web.js"></script>

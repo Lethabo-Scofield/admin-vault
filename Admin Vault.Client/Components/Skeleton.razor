@@ -1,0 +1,10 @@
+<div class="skeleton @Class" style="@StyleString"></div>
+
+@code {
+    [Parameter] public string? Width { get; set; }
+    [Parameter] public string Height { get; set; } = "14px";
+    [Parameter] public string Class { get; set; } = "";
+
+    private string StyleString =>
+        $"{(string.IsNullOrEmpty(Width) ? "" : $"width:{Width};")}height:{Height};";
+}

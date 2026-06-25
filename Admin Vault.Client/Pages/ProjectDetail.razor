@@ -1,4 +1,5 @@
 ﻿@page "/projects/{Id:int}"
+@attribute [StreamRendering]
 @using System.Security.Cryptography
 @using Admin_Vault.Client.Models
 @using Admin_Vault.Client.Services
@@ -8,10 +9,26 @@
 
 <PageTitle>@(project?.Name ?? "Project") | Olyxee Vault</PageTitle>
 
-@if (project == null)
+@if (loading)
 {
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
-        <p class="text-sm text-gray-500">@(loading ? "Loading project..." : "Project not found.")</p>
+    <div class="mb-8 flex items-center gap-4">
+        <div class="skeleton" style="width:48px;height:48px;border-radius:16px;"></div>
+        <div class="flex-1">
+            <div class="skeleton" style="width:min(200px,60%);height:18px;"></div>
+            <div class="skeleton mt-2" style="width:min(280px,80%);height:11px;"></div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-3">
+        @for (int i = 0; i < 4; i++)
+        {
+            <div class="skeleton" style="width:100%;height:38px;"></div>
+        }
+    </div>
+}
+else if (project == null)
+{
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-12 text-center">
+        <p class="text-sm text-gray-500">Project not found.</p>
         <a href="/projects" class="text-xs font-semibold text-gray-700 hover:text-gray-950 mt-3 inline-block">&larr; Back to projects</a>
     </div>
 }

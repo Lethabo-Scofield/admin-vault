@@ -1,0 +1,25 @@
+@for (int r = 0; r < Rows; r++)
+{
+    <tr class="border-b border-gray-100">
+        @for (int c = 0; c < Columns; c++)
+        {
+            <td class="px-6 py-4">
+                <div class="skeleton" style="height:13px; width:@ColumnWidth(c); opacity:@RowOpacity(r);"></div>
+                @if (c == 0)
+                {
+                    <div class="skeleton mt-2" style="height:9px; width:40%; opacity:@RowOpacity(r);"></div>
+                }
+            </td>
+        }
+    </tr>
+}
+
+@code {
+    [Parameter] public int Rows { get; set; } = 5;
+    [Parameter] public int Columns { get; set; } = 4;
+
+    private string ColumnWidth(int c) => c == 0 ? "62%" : (c % 2 == 0 ? "48%" : "70%");
+
+    // Subtle vertical fade so the list feels like it is materializing
+    private string RowOpacity(int r) => (1.0 - (r * 0.13)).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+}

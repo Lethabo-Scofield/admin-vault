@@ -22,6 +22,14 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = /home/runner/workspace/Admin Vault.Client
 build_property._RazorSourceGeneratorDebug = 
 
+[/home/runner/workspace/Admin Vault.Client/Components/Skeleton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Ta2VsZXRvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/runner/workspace/Admin Vault.Client/Components/SkeletonRows.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Ta2VsZXRvblJvd3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/runner/workspace/Admin Vault.Client/Pages/Audit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQXVkaXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

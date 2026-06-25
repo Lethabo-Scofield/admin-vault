@@ -1,4 +1,5 @@
 ﻿@page "/"
+@attribute [StreamRendering]
 @using Admin_Vault.Client.Models
 @using Admin_Vault.Client.Services
 @inject IVaultDataService Data
@@ -14,7 +15,7 @@
             <span class="text-gray-400"><i data-lucide="key-round" class="w-4 h-4"></i></span>
         </div>
         <div class="mt-2">
-            <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.TotalCredentials</h3>
+            @if (loading) { <div class="skeleton" style="width:44px;height:26px;"></div> } else { <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.TotalCredentials</h3> }
             <p class="text-[11px] text-emerald-600 font-medium mt-1">All Encrypted AES-256</p>
         </div>
     </div>
@@ -25,7 +26,7 @@
             <span class="text-amber-500"><i data-lucide="folder" class="w-4 h-4"></i></span>
         </div>
         <div class="mt-2">
-            <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.TotalProjects</h3>
+            @if (loading) { <div class="skeleton" style="width:44px;height:26px;"></div> } else { <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.TotalProjects</h3> }
             <p class="text-[11px] text-gray-500 mt-1">Organized workspaces</p>
         </div>
     </div>
@@ -36,7 +37,7 @@
             <span class="text-gray-400"><i data-lucide="file-text" class="w-4 h-4"></i></span>
         </div>
         <div class="mt-2">
-            <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.ComplianceDocuments</h3>
+            @if (loading) { <div class="skeleton" style="width:44px;height:26px;"></div> } else { <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.ComplianceDocuments</h3> }
             <p class="text-[11px] text-gray-500 font-medium mt-1">Stored artifacts</p>
         </div>
     </div>
@@ -47,7 +48,7 @@
             <span class="text-indigo-600"><i data-lucide="activity" class="w-4 h-4"></i></span>
         </div>
         <div class="mt-2">
-            <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.AuditTriggers24h</h3>
+            @if (loading) { <div class="skeleton" style="width:44px;height:26px;"></div> } else { <h3 class="text-2xl font-bold text-gray-900 leading-none">@stats.AuditTriggers24h</h3> }
             <p class="text-[11px] text-gray-500 mt-1">@stats.UnauthorizedAttempts24h Unauthorized attempts</p>
         </div>
     </div>
@@ -76,7 +77,11 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-gray-700">
-                        @if (recentCredentials.Count == 0)
+                        @if (loading)
+                        {
+                            <SkeletonRows Rows="4" Columns="4" />
+                        }
+                        else if (recentCredentials.Count == 0)
                         {
                             <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">No credentials stored yet.</td></tr>
                         }
@@ -120,7 +125,18 @@
             </div>
 
             <div class="space-y-4">
-                @if (recentLogs.Count == 0)
+                @if (loading)
+                {
+                    @for (int i = 0; i < 4; i++)
+                    {
+                        <div class="pl-4 border-l-2 border-gray-200 space-y-2">
+                            <div class="skeleton" style="width:50%;height:11px;"></div>
+                            <div class="skeleton" style="width:80%;height:11px;"></div>
+                            <div class="skeleton" style="width:35%;height:9px;"></div>
+                        </div>
+                    }
+                }
+                else if (recentLogs.Count == 0)
                 {
                     <p class="text-xs text-gray-400">No audit events recorded yet.</p>
                 }
@@ -152,12 +168,14 @@
     private DashboardStats stats = new();
     private List<VaultCredential> recentCredentials = new();
     private List<AuditLog> recentLogs = new();
+    private bool loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         stats = await Data.GetDashboardStatsAsync();
         recentCredentials = (await Data.GetCredentialsAsync()).Take(5).ToList();
         recentLogs = (await Data.GetAuditLogsAsync(5)).ToList();
+        loading = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

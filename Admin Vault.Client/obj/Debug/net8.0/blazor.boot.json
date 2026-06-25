@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Admin_Vault.Client",
   "resources": {
-    "hash": "sha256-MmlL4jjj0V9lFzrLmNcZh4XmIZXaWwyobGjx9zAxye4=",
+    "hash": "sha256-MYMEDSsSJD+qMUhP75+ZJERGWXxUGDEWDP07I04Aj5s=",
     "jsModuleNative": {
       "dotnet.native.8.0.22.te9w5f1aae.js": "sha256-vtotCeXt2UD6oc459laJT32vBgigZ+eLoUmdeFkvYDk="
     },
@@ -208,10 +208,10 @@
       "mscorlib.wasm": "sha256-UzRTTeY8BezBltrUF59UgvVNxbmnZS3LeowarsPY8+Y=",
       "netstandard.wasm": "sha256-xHQSNwqHm8E9DM86qW7CTJoRXXsQuGmPeNipDwQFNr8=",
       "System.Private.CoreLib.wasm": "sha256-N9/Djwpe2mX4HdyhCGu9jrxG/DSYKoTPbtsIOv6VFDk=",
-      "Admin_Vault.Client.wasm": "sha256-D5qKwFECJ0yKIaCONfcMxg6NEpsZngLGspqAM/eTRK0="
+      "Admin_Vault.Client.wasm": "sha256-yrFIj8bN5sKZVlAuY9O6z5KCMcmPe9ojCV1Lt4xIZ9Y="
     },
     "pdb": {
-      "Admin_Vault.Client.pdb": "sha256-bEaV84UowTKmSIS+RB0FwVL+skp88F/+pC3y7t1twNg="
+      "Admin_Vault.Client.pdb": "sha256-K7O95BzpKCqI/D/fEd144B6yZ1bF+1CEykM9x7GKEcQ="
     }
   },
   "cacheBootResources": true,

@@ -1,4 +1,5 @@
 ﻿@page "/audit-logs"
+@attribute [StreamRendering]
 @using Admin_Vault.Client.Models
 @using Admin_Vault.Client.Services
 @inject IVaultDataService Data
@@ -31,7 +32,11 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 font-mono text-gray-700">
-                @if (Logs.Count == 0)
+                @if (loading)
+                {
+                    <SkeletonRows Rows="7" Columns="5" />
+                }
+                else if (Logs.Count == 0)
                 {
                     <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400 font-sans">No audit events recorded yet.</td></tr>
                 }
@@ -62,10 +67,12 @@
 
 @code {
     private List<AuditLog> Logs = new();
+    private bool loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         Logs = await Data.GetAuditLogsAsync();
+        loading = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
