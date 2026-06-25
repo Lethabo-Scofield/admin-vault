@@ -1,66 +1,129 @@
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.Client.staticwebassets.runtime.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.Client.staticwebassets.endpoints.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\appsettings.Development.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\appsettings.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\BrowserDebugHost.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\BrowserDebugHost.runtimeconfig.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\BrowserDebugProxy.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.CodeAnalysis.CSharp.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.CodeAnalysis.CSharp.Scripting.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.CodeAnalysis.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.CodeAnalysis.Scripting.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.FileFormats.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.NET.WebAssembly.Webcil.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Microsoft.SymbolStore.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\BlazorDebugProxy\Newtonsoft.Json.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.staticwebassets.runtime.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.staticwebassets.endpoints.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.exe
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.deps.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.runtimeconfig.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.pdb
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Authorization.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Components.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Components.Forms.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Components.Web.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Components.WebAssembly.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Components.WebAssembly.Server.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.AspNetCore.Metadata.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Binder.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Configuration.FileExtensions.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Json.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.JSInterop.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Microsoft.JSInterop.WebAssembly.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.Client.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\bin\Debug\net8.0\Admin_Vault.Client.pdb
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.csproj.AssemblyReference.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\rpswa.dswa.cache.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.AssemblyInfoInputs.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.AssemblyInfo.cs
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.csproj.CoreCompileInputs.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin_Vault.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\rjimswa.dswa.cache.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\scopedcss\Components\Layout\MainLayout.razor.rz.scp.css
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\scopedcss\Components\Layout\NavMenu.razor.rz.scp.css
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\scopedcss\bundle\Admin_Vault.styles.css
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\scopedcss\projectbundle\Admin_Vault.bundle.scp.css
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\staticwebassets.build.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\staticwebassets.build.json.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\staticwebassets.development.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Va.A4C4C2B6.Up2Date
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin_Vault.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\refint\Admin_Vault.dll
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin_Vault.pdb
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\Admin Vault.genruntimeconfig.cache
-C:\Users\User\Desktop\oxylee\Admin Vault\Admin Vault\obj\Debug\net8.0\ref\Admin_Vault.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.staticwebassets.runtime.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.staticwebassets.endpoints.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/appsettings.Development.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/appsettings.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugHost.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugHost.runtimeconfig.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugProxy.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.CSharp.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.Scripting.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.FileFormats.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.NET.WebAssembly.Webcil.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.SymbolStore.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Newtonsoft.Json.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.staticwebassets.runtime.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.staticwebassets.endpoints.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.exe
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.deps.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.runtimeconfig.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.pdb
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Forms.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.Server.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Binder.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.FileExtensions.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Json.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Logging.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.JSInterop.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Microsoft.JSInterop.WebAssembly.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.pdb
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.csproj.AssemblyReference.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/rpswa.dswa.cache.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.GeneratedMSBuildEditorConfig.editorconfig
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.AssemblyInfoInputs.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.AssemblyInfo.cs
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.csproj.CoreCompileInputs.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin_Vault.MvcApplicationPartsAssemblyInfo.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/rjimswa.dswa.cache.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/rjsmrazor.dswa.cache.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/scopedcss/Components/Layout/MainLayout.razor.rz.scp.css
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/scopedcss/Components/Layout/NavMenu.razor.rz.scp.css
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/scopedcss/bundle/Admin_Vault.styles.css
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/scopedcss/projectbundle/Admin_Vault.bundle.scp.css
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/staticwebassets.build.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/staticwebassets.build.json.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/staticwebassets.development.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/staticwebassets.build.endpoints.json
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/staticwebassets.upToDateCheck.txt
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Va.A4C4C2B6.Up2Date
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin_Vault.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/refint/Admin_Vault.dll
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin_Vault.pdb
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/Admin Vault.genruntimeconfig.cache
+C:/Users/User/Desktop/oxylee/Admin Vault/Admin Vault/obj/Debug/net8.0/ref/Admin_Vault.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/appsettings.Development.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/appsettings.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugHost.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugHost.runtimeconfig.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/BrowserDebugProxy.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.CSharp.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.CSharp.Scripting.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.CodeAnalysis.Scripting.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.FileFormats.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.NET.WebAssembly.Webcil.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Microsoft.SymbolStore.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/BlazorDebugProxy/Newtonsoft.Json.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.staticwebassets.runtime.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.staticwebassets.runtime.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.deps.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.runtimeconfig.json
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.pdb
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Forms.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.Server.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Binder.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.FileExtensions.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Json.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Logging.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.JSInterop.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Microsoft.JSInterop.WebAssembly.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.dll
+/home/runner/workspace/Admin Vault/bin/Debug/net8.0/Admin_Vault.Client.pdb
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.csproj.AssemblyReference.cache
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.GeneratedMSBuildEditorConfig.editorconfig
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.AssemblyInfoInputs.cache
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.AssemblyInfo.cs
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.csproj.CoreCompileInputs.cache
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin_Vault.MvcApplicationPartsAssemblyInfo.cache
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.sourcelink.json
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets.build.json
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets.development.json
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets/msbuild.Admin_Vault.Microsoft.AspNetCore.StaticWebAssets.props
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets/msbuild.build.Admin_Vault.props
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.Admin_Vault.props
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.Admin_Vault.props
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/staticwebassets.pack.json
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/scopedcss/Components/Layout/MainLayout.razor.rz.scp.css
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/scopedcss/Components/Layout/NavMenu.razor.rz.scp.css
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/scopedcss/bundle/Admin_Vault.styles.css
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/scopedcss/projectbundle/Admin_Vault.bundle.scp.css
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Va.A4C4C2B6.Up2Date
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin_Vault.dll
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/refint/Admin_Vault.dll
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin_Vault.pdb
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/Admin Vault.genruntimeconfig.cache
+/home/runner/workspace/Admin Vault/obj/Debug/net8.0/ref/Admin_Vault.dll

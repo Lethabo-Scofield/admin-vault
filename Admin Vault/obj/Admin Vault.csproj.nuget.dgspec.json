@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault\\Admin Vault.csproj": {}
+    "/home/runner/workspace/Admin Vault/Admin Vault.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\Admin Vault.Client.csproj": {
+    "/home/runner/workspace/Admin Vault.Client/Admin Vault.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\Admin Vault.Client.csproj",
+        "projectUniqueName": "/home/runner/workspace/Admin Vault.Client/Admin Vault.Client.csproj",
         "projectName": "Admin_Vault.Client",
-        "projectPath": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\Admin Vault.Client.csproj",
-        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\obj\\",
+        "projectPath": "/home/runner/workspace/Admin Vault.Client/Admin Vault.Client.csproj",
+        "packagesPath": "/home/runner/.nuget/packages/",
+        "outputPath": "/home/runner/workspace/Admin Vault.Client/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/runner/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -44,8 +37,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -58,13 +50,13 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.26, )",
+              "version": "[8.0.22, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.15, )",
+              "version": "[8.0.22, )",
               "autoReferenced": true
             }
           },
@@ -82,7 +74,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[8.0.26, 8.0.26]"
+              "version": "[8.0.22, 8.0.22]"
             }
           ],
           "frameworkReferences": {
@@ -90,7 +82,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/nix/store/1blv644vinali34masnw6g5fjjjaa4y6-dotnet-sdk-8.0.416/share/dotnet/sdk/8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {
@@ -99,37 +91,30 @@
         }
       }
     },
-    "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault\\Admin Vault.csproj": {
+    "/home/runner/workspace/Admin Vault/Admin Vault.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault\\Admin Vault.csproj",
+        "projectUniqueName": "/home/runner/workspace/Admin Vault/Admin Vault.csproj",
         "projectName": "Admin_Vault",
-        "projectPath": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault\\Admin Vault.csproj",
-        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault\\obj\\",
+        "projectPath": "/home/runner/workspace/Admin Vault/Admin Vault.csproj",
+        "packagesPath": "/home/runner/.nuget/packages/",
+        "outputPath": "/home/runner/workspace/Admin Vault/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/runner/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\Admin Vault.Client.csproj": {
-                "projectPath": "C:\\Users\\User\\Desktop\\oxylee\\Admin Vault\\Admin Vault.Client\\Admin Vault.Client.csproj"
+              "/home/runner/workspace/Admin Vault.Client/Admin Vault.Client.csproj": {
+                "projectPath": "/home/runner/workspace/Admin Vault.Client/Admin Vault.Client.csproj"
               }
             }
           }
@@ -143,8 +128,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -174,7 +158,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/nix/store/1blv644vinali34masnw6g5fjjjaa4y6-dotnet-sdk-8.0.416/share/dotnet/sdk/8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,0 +1,14 @@
+## .NET build artifacts
+bin/
+obj/
+
+## Rider/VS
+.vs/
+.idea/
+
+## User-specific files
+*.user
+*.suo
+
+## Misc
+*.swp

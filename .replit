@@ -1,0 +1,40 @@
+modules = ["web", "dotnet-8.0"]
+[agent]
+expertMode = true
+stack = "BEST_EFFORT_FALLBACK"
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd 'Admin Vault' && ASPNETCORE_URLS='http://0.0.0.0:5000' ASPNETCORE_ENVIRONMENT=Development dotnet run --no-launch-profile"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "vm"
+run = ["dotnet", "publish/Admin_Vault.dll", "--urls", "http://0.0.0.0:5000"]
+build = ["dotnet", "publish", "Admin Vault/Admin Vault.csproj", "-c", "Release", "-o", "publish"]
