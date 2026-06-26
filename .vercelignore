@@ -1,0 +1,10 @@
+.agents
+.local
+.cache
+.config
+.upm
+.replit
+replit.md
+node_modules
+.next
+tsconfig.tsbuildinfo

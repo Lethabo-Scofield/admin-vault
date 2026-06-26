@@ -30,3 +30,4 @@ yarn-error.log*
 [Bb]in/
 [Oo]bj/
 /publish/
+.vercel
