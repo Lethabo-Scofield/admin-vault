@@ -1,0 +1,3 @@
+{
+  "installCommand": "npx --yes pnpm@9 install --no-frozen-lockfile"
+}
