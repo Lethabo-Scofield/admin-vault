@@ -63,7 +63,12 @@ created automatically on first DB access.
 - `DATABASE_URL` — Replit's built-in PostgreSQL connection string (managed
   automatically by Replit). The DB client uses `prepare:false`; SSL is
   conditional — disabled for the local `helium`/localhost proxy (which does not
-  speak TLS), `"require"` for any external host.
+  speak TLS), `"require"` for any external host. When `DATABASE_URL` is unset,
+  the client falls back to Vercel-style names (`POSTGRES_URL`,
+  `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`) so the same code runs on
+  Vercel. `ensureSchema()` skips request-time DDL only on Replit production
+  (detected via `REPLIT_DEPLOYMENT`/`REPL_ID`); on other hosts (e.g. Vercel) it
+  runs the idempotent `CREATE TABLE IF NOT EXISTS` schema once per process.
 - `ADMIN_PASSWORD` — **required** for login. Also used as the session-signing
   key when `SESSION_SECRET` is unset. Stored in Replit Secrets.
 - `ADMIN_EMAIL` — admin login email (defaults to `admin@olyxee.com`).

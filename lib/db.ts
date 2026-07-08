@@ -7,11 +7,22 @@ const globalForDb = globalThis as unknown as {
   __schemaReady?: Promise<void>;
 };
 
+function getConnectionString(): string | undefined {
+  // DATABASE_URL is the canonical name (Replit's built-in PostgreSQL).
+  // Vercel's Postgres/Neon integrations expose POSTGRES_URL variants instead.
+  return (
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING
+  );
+}
+
 export function getSql(): Sql {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = getConnectionString();
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is not configured. Provision the built-in PostgreSQL database."
+      "No database connection string found. Set DATABASE_URL (or POSTGRES_URL) in this environment. On Replit, provision the built-in PostgreSQL database; on Vercel, add the variable under Settings → Environment Variables for Production and redeploy."
     );
   }
   if (!globalForDb.__sql) {
@@ -82,9 +93,13 @@ create index if not exists idx_audit_timestamp on audit_logs(timestamp desc);
 `;
 
 export function ensureSchema(): Promise<void> {
-  // In production the schema is managed by Replit's publish flow; never run
-  // DDL at request time there.
-  if (process.env.NODE_ENV === "production") {
+  // On Replit, the production schema is managed by the publish flow; never run
+  // DDL at request time there. On other hosts (e.g. Vercel) nothing else
+  // creates the tables, so run the idempotent DDL once per process.
+  const isReplitProduction =
+    process.env.NODE_ENV === "production" &&
+    Boolean(process.env.REPLIT_DEPLOYMENT || process.env.REPL_ID);
+  if (isReplitProduction) {
     return Promise.resolve();
   }
   if (!globalForDb.__schemaReady) {
