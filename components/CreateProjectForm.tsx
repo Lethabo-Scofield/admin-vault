@@ -71,6 +71,17 @@ export default function CreateProjectForm() {
               className="vault-input resize-none"
             />
           </Field>
+          <Field label="Project Logo (optional)">
+            <input
+              name="logo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              className="vault-input file:mr-3 file:rounded-lg file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-gray-700"
+            />
+            <span className="mt-1 block text-[12px] text-gray-400">
+              PNG, JPEG, WebP, GIF or SVG · up to 1 MB
+            </span>
+          </Field>
 
           <button
             type="submit"

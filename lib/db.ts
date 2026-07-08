@@ -15,9 +15,14 @@ export function getSql(): Sql {
     );
   }
   if (!globalForDb.__sql) {
+    // Replit's built-in PostgreSQL is reached through a local proxy (e.g.
+    // host "helium") that does not speak TLS; external hosts require it.
+    const host = new URL(connectionString).hostname;
+    const isLocal =
+      host === "helium" || host === "localhost" || host === "127.0.0.1";
     globalForDb.__sql = postgres(connectionString, {
       prepare: false,
-      ssl: "require",
+      ssl: isLocal ? false : "require",
       max: 5,
       idle_timeout: 20,
       connect_timeout: 15,
@@ -32,8 +37,11 @@ create table if not exists projects (
   name         text not null,
   category     text not null default '',
   description  text not null default '',
+  logo_url     text not null default '',
   created_at   timestamptz not null default now()
 );
+
+alter table projects add column if not exists logo_url text not null default '';
 
 create table if not exists credentials (
   id            serial primary key,

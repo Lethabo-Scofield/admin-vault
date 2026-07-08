@@ -35,12 +35,21 @@ export default async function ProjectsPage() {
                 className="group tap flex flex-col rounded-ios bg-white p-5 shadow-ios hover:shadow-ios-md"
               >
                 <div className="mb-4 flex items-center gap-3">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-2xl text-[16px] font-bold text-white"
-                    style={{ backgroundColor: tint }}
-                  >
-                    {initials(p.name)}
-                  </div>
+                  {p.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.logoUrl}
+                      alt={`${p.name} logo`}
+                      className="h-12 w-12 shrink-0 rounded-2xl bg-white object-cover shadow-ios"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl text-[16px] font-bold text-white"
+                      style={{ backgroundColor: tint }}
+                    >
+                      {initials(p.name)}
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[16px] font-semibold text-gray-900">
                       {p.name}

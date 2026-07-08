@@ -7,6 +7,7 @@ import type { VaultCredential } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { EnvBadge, StatusBadge, EmptyState } from "@/components/ui";
 import SecretCell from "@/components/SecretCell";
+import EditCredentialForm from "@/components/EditCredentialForm";
 
 export default function CredentialsTable({
   credentials,
@@ -57,7 +58,8 @@ export default function CredentialsTable({
             <span className="col-span-3">Secret</span>
             <span className="col-span-2">Project</span>
             <span className="col-span-2">Environment</span>
-            <span className="col-span-2">Status</span>
+            <span className="col-span-1">Status</span>
+            <span className="col-span-1 text-right">Edit</span>
           </div>
           <div className="divide-y divide-gray-100">
             {filtered.map((c) => (
@@ -94,8 +96,11 @@ export default function CredentialsTable({
                 <div className="md:col-span-2">
                   <EnvBadge environment={c.environment} />
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <StatusBadge status={c.status} />
+                </div>
+                <div className="flex md:col-span-1 md:justify-end">
+                  <EditCredentialForm credential={c} />
                 </div>
               </div>
             ))}

@@ -3,6 +3,7 @@ export interface Project {
   name: string;
   category: string;
   description: string;
+  logoUrl: string;
   createdAt: string;
   keyCount: number;
   docCount: number;

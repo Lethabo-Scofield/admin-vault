@@ -29,9 +29,12 @@ immutable audit trail.
   - `db.ts` — lazy postgres.js client + `ensureSchema()` (runs `CREATE TABLE IF
     NOT EXISTS` once per process). Reads `DATABASE_URL`.
   - `queries.ts` — read functions (snake_case columns aliased to camelCase).
-  - `actions.ts` — server actions for create project / add credential / upload
-    document, each writing an audit log entry attributed to the signed-in admin
-    (via `requireUser()`).
+  - `actions.ts` — server actions for create/update/delete project, add/update/
+    delete credential, and upload document, each writing an audit log entry
+    attributed to the signed-in admin (via `requireUser()`). Project logos are
+    optional uploads (≤1 MB, PNG/JPEG/WebP/GIF/SVG) stored as base64 data URLs
+    in `projects.logo_url`; editing a credential with a blank secret keeps the
+    existing value.
   - `format.ts` — display helpers (secret masking, file size, checksum, initials,
     accent color, environment colors).
   - `auth.ts` — edge-safe session crypto (Web Crypto HMAC), credential check,
@@ -58,8 +61,9 @@ created automatically on first DB access.
 ## Environment / Secrets
 
 - `DATABASE_URL` — Replit's built-in PostgreSQL connection string (managed
-  automatically by Replit). The DB client uses `prepare:false` and
-  `ssl: "require"`.
+  automatically by Replit). The DB client uses `prepare:false`; SSL is
+  conditional — disabled for the local `helium`/localhost proxy (which does not
+  speak TLS), `"require"` for any external host.
 - `ADMIN_PASSWORD` — **required** for login. Also used as the session-signing
   key when `SESSION_SECRET` is unset. Stored in Replit Secrets.
 - `ADMIN_EMAIL` — admin login email (defaults to `admin@olyxee.com`).

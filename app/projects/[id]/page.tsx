@@ -22,6 +22,8 @@ import { EnvBadge, StatusBadge } from "@/components/ui";
 import SecretCell from "@/components/SecretCell";
 import AddCredentialForm from "@/components/AddCredentialForm";
 import UploadDocumentForm from "@/components/UploadDocumentForm";
+import EditProjectForm from "@/components/EditProjectForm";
+import EditCredentialForm from "@/components/EditCredentialForm";
 
 export const dynamic = "force-dynamic";
 
@@ -54,16 +56,28 @@ export default async function ProjectDetailPage({
       </Link>
 
       <div className="mb-8 flex items-start gap-4">
-        <div
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-[22px] font-bold text-white shadow-ios"
-          style={{ backgroundColor: tint }}
-        >
-          {initials(project.name)}
-        </div>
+        {project.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={project.logoUrl}
+            alt={`${project.name} logo`}
+            className="h-16 w-16 shrink-0 rounded-3xl bg-white object-cover shadow-ios"
+          />
+        ) : (
+          <div
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-[22px] font-bold text-white shadow-ios"
+            style={{ backgroundColor: tint }}
+          >
+            {initials(project.name)}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-[26px] font-bold tracking-tight text-gray-900 sm:text-[30px]">
-            {project.name}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-[26px] font-bold tracking-tight text-gray-900 sm:text-[30px]">
+              {project.name}
+            </h1>
+            <EditProjectForm project={project} />
+          </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-gray-500">
             {project.category && <span>{project.category}</span>}
             <span className="text-gray-300">·</span>
@@ -114,6 +128,7 @@ export default async function ProjectDetailPage({
                   <div className="flex items-center gap-2">
                     <EnvBadge environment={c.environment} />
                     <StatusBadge status={c.status} />
+                    <EditCredentialForm credential={c} />
                   </div>
                 </div>
               ))}

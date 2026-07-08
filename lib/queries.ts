@@ -50,6 +50,7 @@ export async function getProjects(): Promise<Project[]> {
       name: string;
       category: string;
       description: string;
+      logoUrl: string;
       createdAt: string;
       keyCount: string;
       docCount: string;
@@ -60,6 +61,7 @@ export async function getProjects(): Promise<Project[]> {
       p.name,
       p.category,
       p.description,
+      p.logo_url   as "logoUrl",
       p.created_at as "createdAt",
       (select count(*) from credentials c where c.project_id = p.id) as "keyCount",
       (select count(*) from documents d where d.project_id = p.id)   as "docCount"
@@ -81,6 +83,7 @@ export async function getProject(id: number): Promise<Project | null> {
       name: string;
       category: string;
       description: string;
+      logoUrl: string;
       createdAt: string;
       keyCount: string;
       docCount: string;
@@ -91,6 +94,7 @@ export async function getProject(id: number): Promise<Project | null> {
       p.name,
       p.category,
       p.description,
+      p.logo_url   as "logoUrl",
       p.created_at as "createdAt",
       (select count(*) from credentials c where c.project_id = p.id) as "keyCount",
       (select count(*) from documents d where d.project_id = p.id)   as "docCount"
