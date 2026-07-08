@@ -86,12 +86,12 @@ export default function AppShell({
 
   const brand = (
     <div className="flex items-center gap-3 px-5 py-5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-500 to-gray-700 shadow-ios">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-800 to-black shadow-ios">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo-mark.png"
           alt="Olyxee"
-          className="h-7 w-7 object-contain"
+          className="h-8 w-8 object-contain"
         />
       </div>
       <div className="leading-tight">
