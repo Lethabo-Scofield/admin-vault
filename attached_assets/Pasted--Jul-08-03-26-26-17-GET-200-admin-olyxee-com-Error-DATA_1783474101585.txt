@@ -1,0 +1,111 @@
+
+Jul 08 03:26:26.17
+GET
+200
+admin.olyxee.com
+/
+Error: DATABASE_URL is not configured. Provision the built-in PostgreSQL database. at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__0vkr7ld._.js:21:12228) at c (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4791) at async d (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4819) at async o (.next/server/chunks/ssr/[root-of-the-server]__08moybb._.js:105:5759) { digest: '455032126' }
+Jul 08 03:26:18.86
+GET
+200
+admin.olyxee.com
+/
+Error: DATABASE_URL is not configured. Provision the built-in PostgreSQL database. at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__0vkr7ld._.js:21:12228) at c (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4791) at async d (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4819) at async o (.next/server/chunks/ssr/[root-of-the-server]__08moybb._.js:105:5759) { digest: '455032126' }
+Jul 08 03:26:11.65
+GET
+200
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/login
+Jul 08 03:26:11.63
+GET
+200
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/login
+Jul 08 03:26:11.53
+GET
+307
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/
+Jul 08 03:26:11.52
+GET
+307
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/
+Jul 08 03:25:54.04
+GET
+200
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/login
+Jul 08 03:25:54.00
+GET
+307
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/
+Jul 08 03:25:53.41
+GET
+200
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/login
+Jul 08 03:25:53.12
+GET
+307
+olyxee-admin-qxu7dnuqm-olyxee.vercel.app
+/
+Jul 08 03:25:43.48
+GET
+200
+admin.olyxee.com
+/
+Error: DATABASE_URL is not configured. Provision the built-in PostgreSQL database. at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__0vkr7ld._.js:21:12228) at c (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4791) at async d (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4819) at async o (.next/server/chunks/ssr/[root-of-the-server]__08moybb._.js:105:5759) { digest: '455032126' }
+Jul 08 03:25:40.34
+GET
+200
+admin.olyxee.com
+/
+Error: DATABASE_URL is not configured. Provision the built-in PostgreSQL database. at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__0vkr7ld._.js:21:12228) at c (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4791) at async d (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4819) at async o (.next/server/chunks/ssr/[root-of-the-server]__08moybb._.js:105:5759) { digest: '455032126' }
+Jul 08 03:25:34.77
+GET
+404
+admin.olyxee.com
+/favicon.ico
+Jul 08 03:25:34.74
+GET
+200
+admin.olyxee.com
+/credentials
+Jul 08 03:25:34.73
+GET
+200
+admin.olyxee.com
+/audit-logs
+Jul 08 03:25:34.73
+GET
+200
+admin.olyxee.com
+/compliance
+Jul 08 03:25:34.73
+GET
+200
+admin.olyxee.com
+/settings
+Jul 08 03:25:34.12
+GET
+200
+admin.olyxee.com
+/projects
+Error: DATABASE_URL is not configured. Provision the built-in PostgreSQL database. at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__0vkr7ld._.js:21:12228) at c (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:1:4791) at async e (.next/server/chunks/ssr/[root-of-the-server]__1cub3r1._.js:9:310) at async l (.next/server/chunks/ssr/[root-of-the-server]__0imvw-w._.js:105:5864) { digest: '30733593' }
+Jul 08 03:25:31.86
+GET
+200
+admin.olyxee.com
+/audit-logs
+Jul 08 03:25:31.86
+GET
+200
+admin.olyxee.com
+/compliance
+Jul 08 03:25:31.86
+GET
+200
+admin.olyxee.com
+/settings
