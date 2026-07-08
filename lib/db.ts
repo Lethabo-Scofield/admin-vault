@@ -9,9 +9,11 @@ const globalForDb = globalThis as unknown as {
 
 function getConnectionString(): string | undefined {
   // DATABASE_URL is the canonical name (Replit's built-in PostgreSQL).
-  // Vercel's Postgres/Neon integrations expose POSTGRES_URL variants instead.
+  // Vercel's Postgres/Neon integrations expose POSTGRES_URL variants, and the
+  // Vercel production project stores its Supabase URL as SUPABASE_DB_URL.
   return (
     process.env.DATABASE_URL ||
+    process.env.SUPABASE_DB_URL ||
     process.env.POSTGRES_URL ||
     process.env.POSTGRES_PRISMA_URL ||
     process.env.POSTGRES_URL_NON_POOLING

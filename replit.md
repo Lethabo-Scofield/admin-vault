@@ -64,9 +64,9 @@ created automatically on first DB access.
   automatically by Replit). The DB client uses `prepare:false`; SSL is
   conditional — disabled for the local `helium`/localhost proxy (which does not
   speak TLS), `"require"` for any external host. When `DATABASE_URL` is unset,
-  the client falls back to Vercel-style names (`POSTGRES_URL`,
-  `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`) so the same code runs on
-  Vercel. `ensureSchema()` skips request-time DDL only on Replit production
+  the client falls back to `SUPABASE_DB_URL` (the name used in the Vercel
+  project) and Vercel-style names (`POSTGRES_URL`, `POSTGRES_PRISMA_URL`,
+  `POSTGRES_URL_NON_POOLING`) so the same code runs on Vercel. `ensureSchema()` skips request-time DDL only on Replit production
   (detected via `REPLIT_DEPLOYMENT`/`REPL_ID`); on other hosts (e.g. Vercel) it
   runs the idempotent `CREATE TABLE IF NOT EXISTS` schema once per process.
 - `ADMIN_PASSWORD` — **required** for login. Also used as the session-signing
