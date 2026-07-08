@@ -9,7 +9,7 @@ immutable audit trail.
 - **Next.js (App Router) + React + TypeScript**
 - **Tailwind CSS v4** — iOS-inspired design (frosted glass, soft shadows,
   continuous-corner radii, skeleton shimmer loaders). Light + dark themes.
-- **postgres.js** — server-side data access to **Supabase Postgres**
+- **postgres.js** — server-side data access to **Replit's built-in PostgreSQL**
 - **lucide-react** — icons
 
 ## Architecture
@@ -27,7 +27,7 @@ immutable audit trail.
   (forms, `SecretCell`, search tables), `LoginForm`, `ThemeToggle`.
 - `lib/`
   - `db.ts` — lazy postgres.js client + `ensureSchema()` (runs `CREATE TABLE IF
-    NOT EXISTS` once per process). Reads `SUPABASE_DB_URL`.
+    NOT EXISTS` once per process). Reads `DATABASE_URL`.
   - `queries.ts` — read functions (snake_case columns aliased to camelCase).
   - `actions.ts` — server actions for create project / add credential / upload
     document, each writing an audit log entry attributed to the signed-in admin
@@ -57,13 +57,11 @@ created automatically on first DB access.
 
 ## Environment / Secrets
 
-- `SUPABASE_DB_URL` — Supabase **transaction pooler** connection string
-  (host `*.pooler.supabase.com`, port `6543`). The DB client uses `prepare:false`
-  (required by the pooler) and `ssl: "require"`. URL-encode special characters in
-  the password (e.g. `@` → `%40`).
+- `DATABASE_URL` — Replit's built-in PostgreSQL connection string (managed
+  automatically by Replit). The DB client uses `prepare:false` and
+  `ssl: "require"`.
 - `ADMIN_PASSWORD` — **required** for login. Also used as the session-signing
-  key when `SESSION_SECRET` is unset. Set this in Vercel → Project → Settings →
-  Environment Variables (and in Replit Secrets for the dev preview).
+  key when `SESSION_SECRET` is unset. Stored in Replit Secrets.
 - `ADMIN_EMAIL` — admin login email (defaults to `admin@olyxee.com`).
 - `SESSION_SECRET` — optional dedicated HMAC key for session cookies; falls back
   to `ADMIN_PASSWORD`. Changing the signing key invalidates existing sessions.
@@ -72,8 +70,6 @@ created automatically on first DB access.
 
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
 - Deployment: autoscale, `build = npm run build`, `run = npm run start`.
-- Deployed to **Vercel** (not Replit). `vercel.json` uses pnpm for install to
-  avoid an npm crash; `.vercelignore` excludes Replit-only files.
 
 ## Notes
 

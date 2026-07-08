@@ -8,15 +8,14 @@ const globalForDb = globalThis as unknown as {
 };
 
 export function getSql(): Sql {
-  const connectionString = process.env.SUPABASE_DB_URL;
+  const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error(
-      "SUPABASE_DB_URL is not configured. Add it in the Secrets pane to connect to Supabase."
+      "DATABASE_URL is not configured. Provision the built-in PostgreSQL database."
     );
   }
   if (!globalForDb.__sql) {
     globalForDb.__sql = postgres(connectionString, {
-      // Supabase transaction pooler (port 6543) does not support prepared statements.
       prepare: false,
       ssl: "require",
       max: 5,
