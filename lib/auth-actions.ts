@@ -8,6 +8,8 @@ import {
   createSessionToken,
   verifyCredentials,
   getAdminEmail,
+  isDemoCredentials,
+  hasSigningSecret,
 } from "@/lib/auth";
 
 export type LoginState = { error: string | null };
@@ -19,7 +21,9 @@ export async function login(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!process.env.ADMIN_PASSWORD) {
+  const isDemo = isDemoCredentials(email, password);
+
+  if (!isDemo && !process.env.ADMIN_PASSWORD) {
     return { error: "Admin login is not configured. Set ADMIN_PASSWORD." };
   }
 
@@ -28,7 +32,15 @@ export async function login(
     return { error: "Invalid email or password." };
   }
 
-  const token = await createSessionToken(getAdminEmail());
+  if (!hasSigningSecret()) {
+    return {
+      error: "Login is not configured. Set SESSION_SECRET or ADMIN_PASSWORD.",
+    };
+  }
+
+  const token = await createSessionToken(
+    isDemo ? "demo@olyxee.com" : getAdminEmail()
+  );
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

@@ -34,7 +34,7 @@ export default function LoginForm() {
       </label>
       <input
         name="email"
-        type="email"
+        type="text"
         autoComplete="username"
         required
         defaultValue="admin@olyxee.com"
@@ -69,6 +69,13 @@ export default function LoginForm() {
         {pending ? <Loader2 size={18} className="animate-spin" /> : null}
         {pending ? "Signing in…" : "Sign in"}
       </button>
+
+      {process.env.NODE_ENV !== "production" ? (
+        <p className="mt-4 text-center text-[12px] text-gray-400">
+          Preview access: use <span className="font-medium">demo</span> /{" "}
+          <span className="font-medium">demo</span>
+        </p>
+      ) : null}
     </form>
   );
 }

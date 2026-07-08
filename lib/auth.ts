@@ -16,6 +16,10 @@ function getSecret(): string {
   return process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD || "";
 }
 
+export function hasSigningSecret(): boolean {
+  return Boolean(getSecret());
+}
+
 function b64urlEncode(bytes: Uint8Array): string {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
@@ -53,10 +57,25 @@ async function sign(data: string): Promise<string> {
   return b64urlEncode(new Uint8Array(sig));
 }
 
+// Demo login (demo / demo) is only available outside production so the UI
+// can be previewed without configuring ADMIN_PASSWORD.
+export function isDemoLoginEnabled(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
+export function isDemoCredentials(email: string, password: string): boolean {
+  return (
+    isDemoLoginEnabled() &&
+    email.trim().toLowerCase() === "demo" &&
+    password === "demo"
+  );
+}
+
 export async function verifyCredentials(
   email: string,
   password: string
 ): Promise<boolean> {
+  if (isDemoCredentials(email, password)) return true;
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) return false;
   const emailOk = email.trim().toLowerCase() === getAdminEmail();

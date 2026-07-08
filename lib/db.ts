@@ -74,6 +74,11 @@ create index if not exists idx_audit_timestamp on audit_logs(timestamp desc);
 `;
 
 export function ensureSchema(): Promise<void> {
+  // In production the schema is managed by Replit's publish flow; never run
+  // DDL at request time there.
+  if (process.env.NODE_ENV === "production") {
+    return Promise.resolve();
+  }
   if (!globalForDb.__schemaReady) {
     const sql = getSql();
     globalForDb.__schemaReady = sql
