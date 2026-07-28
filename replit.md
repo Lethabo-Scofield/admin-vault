@@ -66,7 +66,7 @@ created automatically on first DB access.
   DB): the entered password decides the role.
   - `SUPERADMIN_PASSWORD_HASH` (bcrypt) or `SUPERADMIN_PASSWORD` -> `SUPER_ADMIN`
   - `ENGINEER_PASSWORD_HASH` (bcrypt) or `ENGINEER_PASSWORD` -> `FOUNDER_ENGINEER`
-  - Legacy `ADMIN_PASSWORD` (matching `ADMIN_EMAIL`) -> `SUPER_ADMIN`
+  - `ADMIN_PASSWORD` (engineering team's normal password; used on Vercel) -> `FOUNDER_ENGINEER`
   - `demo`/`demo` (non-production only) -> `SUPER_ADMIN`
 - Role is embedded in the signed session token; `proxy.ts` returns **403** for
   non-super-admin requests to `/interns`, `/credentials`, `/team-access`.
@@ -95,7 +95,9 @@ created automatically on first DB access.
 - `SUPERADMIN_PASSWORD_HASH` / `ENGINEER_PASSWORD_HASH` — bcrypt hashes for
   the two roles (preferred, esp. on Vercel). Plain `SUPERADMIN_PASSWORD` /
   `ENGINEER_PASSWORD` Replit Secrets are also accepted.
-- `ADMIN_PASSWORD` — legacy single-admin login (grants SUPER_ADMIN). Also used as the session-signing
+- `ADMIN_PASSWORD` — the engineering team's normal password (grants
+  FOUNDER_ENGINEER); this is the variable used on Vercel alongside
+  `SUPERADMIN_PASSWORD`. Also used as the session-signing
   key when `SESSION_SECRET` is unset. Stored in Replit Secrets.
 - `ADMIN_EMAIL` — admin login email (defaults to `admin@olyxee.com`).
 - `SESSION_SECRET` — optional dedicated HMAC key for session cookies; falls back

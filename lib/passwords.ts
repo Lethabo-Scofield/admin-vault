@@ -42,9 +42,10 @@ export function isLoginConfigured(): boolean {
 /**
  * Resolve the role for a login attempt, or null if the credentials are invalid.
  * Order matters: the super-admin secret is checked first so it always wins.
+ * Both roles may sign in with the same email — the password decides the role.
  * - SUPERADMIN_PASSWORD_HASH (bcrypt) or SUPERADMIN_PASSWORD  -> SUPER_ADMIN
  * - ENGINEER_PASSWORD_HASH (bcrypt) or ENGINEER_PASSWORD      -> FOUNDER_ENGINEER
- * - Legacy ADMIN_PASSWORD (plaintext env, existing behavior)  -> SUPER_ADMIN
+ * - ADMIN_PASSWORD (the engineering team's normal password)   -> FOUNDER_ENGINEER
  * - demo/demo outside production                              -> SUPER_ADMIN
  */
 export async function resolveLoginRole(
@@ -74,14 +75,11 @@ export async function resolveLoginRole(
   ) {
     return { role: "FOUNDER_ENGINEER", email: normalized || "engineer@olyxee.com" };
   }
-  // Legacy single-admin path.
-  const legacy = process.env.ADMIN_PASSWORD;
-  if (
-    legacy &&
-    normalized === getAdminEmail() &&
-    timingSafeEqualStr(password, legacy)
-  ) {
-    return { role: "SUPER_ADMIN", email: getAdminEmail() };
+  // ADMIN_PASSWORD is the engineering team's normal password (same email,
+  // different password than the super admin).
+  const admin = process.env.ADMIN_PASSWORD;
+  if (admin && timingSafeEqualStr(password, admin)) {
+    return { role: "FOUNDER_ENGINEER", email: normalized || getAdminEmail() };
   }
   return null;
 }
