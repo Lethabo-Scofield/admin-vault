@@ -4,6 +4,12 @@
 export const SESSION_COOKIE = "vault_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days, in seconds
 
+export type Role = "FOUNDER_ENGINEER" | "SUPER_ADMIN";
+
+export function roleLabel(role: Role): string {
+  return role === "SUPER_ADMIN" ? "Super Admin" : "Founder Engineer";
+}
+
 export function getAdminEmail(): string {
   return (process.env.ADMIN_EMAIL || "admin@olyxee.com").toLowerCase();
 }
@@ -83,13 +89,16 @@ export async function verifyCredentials(
   return emailOk && passOk;
 }
 
-export async function createSessionToken(email: string): Promise<string> {
+export async function createSessionToken(
+  email: string,
+  role: Role
+): Promise<string> {
   if (!getSecret()) {
     throw new Error(
       "Session signing secret is not configured. Set SESSION_SECRET or ADMIN_PASSWORD."
     );
   }
-  const payload = { sub: email, exp: Date.now() + SESSION_MAX_AGE * 1000 };
+  const payload = { sub: email, role, exp: Date.now() + SESSION_MAX_AGE * 1000 };
   const payloadB64 = b64urlEncode(
     new TextEncoder().encode(JSON.stringify(payload))
   );
@@ -99,7 +108,7 @@ export async function createSessionToken(email: string): Promise<string> {
 
 export async function verifySessionToken(
   token: string | undefined | null
-): Promise<{ email: string } | null> {
+): Promise<{ email: string; role: Role } | null> {
   if (!token) return null;
   // Never accept a token when no signing secret is configured: an empty key is
   // publicly known and would make forged cookies verifiable.
@@ -113,7 +122,9 @@ export async function verifySessionToken(
       new TextDecoder().decode(b64urlToBytes(payloadB64))
     );
     if (typeof payload.exp !== "number" || payload.exp < Date.now()) return null;
-    return { email: String(payload.sub ?? getAdminEmail()) };
+    const role: Role =
+      payload.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "FOUNDER_ENGINEER";
+    return { email: String(payload.sub ?? getAdminEmail()), role };
   } catch {
     return null;
   }

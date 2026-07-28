@@ -99,7 +99,7 @@ export default async function DashboardPage() {
               Recent Credentials
             </h2>
             <Link
-              href="/credentials"
+              href="/project-keys"
               className="tap flex items-center gap-1 text-[13px] font-medium text-gray-500 hover:text-gray-900"
             >
               View all <ArrowRight size={14} />

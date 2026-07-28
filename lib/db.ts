@@ -89,6 +89,55 @@ create table if not exists audit_logs (
   status       text not null default 'SUCCESS'
 );
 
+create table if not exists interns (
+  id                         serial primary key,
+  intern_number              text not null unique,
+  full_name                  text not null,
+  position                   text not null default '',
+  department                 text not null default '',
+  start_date                 date,
+  completion_date            date,
+  employment_status          text not null default 'Active',
+  projects_completed         text not null default '',
+  responsibilities           text not null default '',
+  skills_demonstrated        text not null default '',
+  supervisor_name            text not null default '',
+  supervisor_recommendation  text not null default '',
+  internal_notes             text not null default '',
+  created_at                 timestamptz not null default now(),
+  updated_at                 timestamptz not null default now(),
+  archived_at                timestamptz
+);
+
+create table if not exists intern_credentials (
+  id                     serial primary key,
+  intern_id              integer not null references interns(id) on delete restrict,
+  credential_number      text not null unique,
+  verification_token     text not null unique,
+  programme_title        text not null default '',
+  position               text not null default '',
+  start_date             date,
+  completion_date        date,
+  projects_completed     text not null default '',
+  skills_demonstrated    text not null default '',
+  public_recommendation  text not null default '',
+  issue_date             date,
+  status                 text not null default 'DRAFT',
+  published_at           timestamptz,
+  revoked_at             timestamptz,
+  revocation_reason      text not null default '',
+  created_by             text not null default '',
+  updated_by             text not null default '',
+  created_at             timestamptz not null default now(),
+  updated_at             timestamptz not null default now()
+);
+
+create table if not exists number_counters (
+  name   text primary key,
+  value  integer not null default 0
+);
+
+create index if not exists idx_intern_credentials_intern on intern_credentials(intern_id);
 create index if not exists idx_credentials_project on credentials(project_id);
 create index if not exists idx_documents_project on documents(project_id);
 create index if not exists idx_audit_timestamp on audit_logs(timestamp desc);

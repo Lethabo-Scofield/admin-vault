@@ -14,17 +14,37 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
+import { GraduationCap, BadgeCheck, Users } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
-type ShellUser = { email: string; role: string };
+type ShellUser = { email: string; role: string; roleKey?: string };
 
-const NAV = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Projects", icon: FolderLock },
-  { href: "/credentials", label: "Credentials", icon: KeyRound },
-  { href: "/compliance", label: "Compliance", icon: ShieldCheck },
-  { href: "/audit-logs", label: "Audit Trail", icon: ScrollText },
-  { href: "/settings", label: "Settings", icon: Settings },
+const NAV_GROUPS = [
+  {
+    title: "Vault",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/projects", label: "Projects", icon: FolderLock },
+      { href: "/project-keys", label: "Project Keys", icon: KeyRound },
+      { href: "/compliance", label: "Compliance", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "Internship Program",
+    superAdmin: true,
+    items: [
+      { href: "/interns", label: "Interns", icon: GraduationCap },
+      { href: "/credentials", label: "Credentials", icon: BadgeCheck },
+      { href: "/team-access", label: "Team Access", icon: Users },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { href: "/audit-logs", label: "Audit Trail", icon: ScrollText },
+      { href: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -50,37 +70,46 @@ export default function AppShell({
     return <>{children}</>;
   }
 
-  const current = NAV.find((n) => isActive(pathname, n.href));
+  const visibleGroups = NAV_GROUPS.filter(
+    (g) => !g.superAdmin || user?.roleKey === "SUPER_ADMIN"
+  );
+  const current = visibleGroups
+    .flatMap((g) => g.items)
+    .find((n) => isActive(pathname, n.href));
 
   const navList = (
     <nav className="px-3">
-      <p className="px-3 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
-        Menu
-      </p>
-      <div className="flex flex-col gap-0.5">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active = isActive(pathname, href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={active ? "page" : undefined}
-              className={`tap flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium ${
-                active
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon
-                size={19}
-                strokeWidth={2}
-                className={active ? "text-gray-900" : "text-gray-400"}
-              />
-              {label}
-            </Link>
-          );
-        })}
-      </div>
+      {visibleGroups.map((group) => (
+        <div key={group.title} className="mb-4 last:mb-0">
+          <p className="px-3 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+            {group.title}
+          </p>
+          <div className="flex flex-col gap-0.5">
+            {group.items.map(({ href, label, icon: Icon }) => {
+              const active = isActive(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`tap flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium ${
+                    active
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <Icon
+                    size={19}
+                    strokeWidth={2}
+                    className={active ? "text-gray-900" : "text-gray-400"}
+                  />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 

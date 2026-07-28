@@ -142,7 +142,7 @@ export async function deleteProject(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/projects");
-  revalidatePath("/credentials");
+  revalidatePath("/project-keys");
   revalidatePath("/compliance");
   revalidatePath("/audit-logs");
   revalidatePath("/");
@@ -173,7 +173,7 @@ export async function addCredential(formData: FormData): Promise<void> {
   });
 
   revalidatePath(`/projects/${projectId}`);
-  revalidatePath("/credentials");
+  revalidatePath("/project-keys");
   revalidatePath("/audit-logs");
   revalidatePath("/");
 }
@@ -222,7 +222,7 @@ export async function updateCredential(formData: FormData): Promise<void> {
   });
 
   if (projectId) revalidatePath(`/projects/${projectId}`);
-  revalidatePath("/credentials");
+  revalidatePath("/project-keys");
   revalidatePath("/audit-logs");
   revalidatePath("/");
 }
@@ -246,7 +246,7 @@ export async function deleteCredential(formData: FormData): Promise<void> {
   });
 
   if (projectId) revalidatePath(`/projects/${projectId}`);
-  revalidatePath("/credentials");
+  revalidatePath("/project-keys");
   revalidatePath("/audit-logs");
   revalidatePath("/");
 }

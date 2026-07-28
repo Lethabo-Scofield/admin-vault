@@ -1,0 +1,315 @@
+Update the existing admin.olyxee.com application. First inspect the current architecture, authentication, Vercel environment variables, database, routes, password management, and project-key management. Preserve all existing functionality and visual styling.
+
+GOAL
+
+Add a separate SUPER_ADMIN access level and build an internship credential management system. Founder engineers must continue seeing only the existing passwords and project keys. Only the super admin may access intern and credential information.
+
+AUTHENTICATION
+
+Keep the existing login page and authentication flow.
+
+Add these Vercel environment variables:
+
+ENGINEER_PASSWORD_HASH
+SUPERADMIN_PASSWORD_HASH
+SESSION_SECRET
+
+If the entered password matches ENGINEER_PASSWORD_HASH:
+
+- Create a signed FOUNDER_ENGINEER session.
+- Redirect to the existing dashboard.
+- Allow access only to existing password and project-key functionality.
+
+If the password matches SUPERADMIN_PASSWORD_HASH:
+
+- Create a signed SUPER_ADMIN session.
+- Redirect to the full dashboard.
+- Allow access to existing functionality plus Interns, Credentials, Team Access and Audit Log.
+
+Requirements:
+
+- Never store or compare plaintext passwords.
+- Use a strong password-hashing algorithm such as Argon2id or bcrypt.
+- Use secure, HTTP-only, SameSite cookies.
+- Enable Secure cookies in production.
+- Add session expiry and logout.
+- Do not expose password hashes or secrets to client-side code.
+- Enforce permissions inside every server API and server-rendered route.
+- Engineers manually visiting an intern or credential URL must receive 403 Forbidden.
+- Do not rely only on hiding navigation links.
+- Add rate limiting to login attempts.
+- Use constant-time password comparison where applicable.
+
+ROLE PERMISSIONS
+
+FOUNDER_ENGINEER:
+
+- View the existing dashboard.
+- Access existing password management.
+- Access existing project keys.
+- No access to interns.
+- No access to internship credentials.
+- No access to recommendations.
+- No access to certificate publishing or QR generation.
+- No access to super-admin settings or complete audit records.
+
+SUPER_ADMIN:
+
+- All existing engineer capabilities.
+- Full intern management.
+- Full credential management.
+- Publish and revoke credentials.
+- Generate and download QR codes.
+- Manage access.
+- View the complete audit log.
+
+NAVIGATION
+
+Founder engineers should see only the current navigation.
+
+Super admin should see:
+
+- Dashboard
+- Passwords
+- Project Keys
+- Interns
+- Credentials
+- Team Access
+- Audit Log
+- Settings
+
+Do not show super-admin-only navigation to founder engineers.
+
+INTERN MANAGEMENT
+
+Create a super-admin-only Interns section at:
+
+/interns
+/interns/new
+/interns/[id]
+
+Support:
+
+- Create an intern.
+- Edit an intern.
+- Archive an intern.
+- Search and filter interns.
+- View credentials issued to an intern.
+- Automatically assign the next readable intern number.
+
+Intern number format:
+
+OLX-INT-0001
+OLX-INT-0002
+OLX-INT-0003
+
+Never reuse an intern number, including after archival or deletion. Allocate numbers atomically to prevent duplicates.
+
+Intern fields:
+
+- Internal database ID
+- Intern number
+- Full name
+- Internship position
+- Department or programme
+- Start date
+- Completion date
+- Employment status
+- Projects completed
+- Responsibilities
+- Skills demonstrated
+- Supervisor name
+- Supervisor recommendation
+- Internal notes
+- Created date
+- Updated date
+- Archived date
+
+Internal notes and sensitive information must never appear publicly. Do not collect or display ID numbers, passport numbers or student numbers unless the existing system genuinely requires them.
+
+CREDENTIAL MANAGEMENT
+
+Create super-admin-only pages:
+
+/credentials
+/credentials/new
+/credentials/[id]
+/credentials/[id]/preview
+
+Credential fields:
+
+- Internal database ID
+- Intern ID
+- Human-readable credential number
+- Secure public verification token
+- Programme or internship title
+- Position
+- Start date
+- Completion date
+- Projects and responsibilities completed
+- Skills demonstrated
+- Public supervisor recommendation
+- Issue date
+- Status: DRAFT, PUBLISHED, REVOKED or EXPIRED
+- Published date
+- Revoked date
+- Revocation reason
+- Created by
+- Updated by
+- Created date
+- Updated date
+
+Credential number format:
+
+OLX-CERT-2026-0001
+
+Use the current year automatically. Allocate numbers atomically and never reuse them.
+
+The public verification token must be securely random and non-sequential. Do not derive it from an intern number, password, ID number, passport number or other personal information.
+
+WORKFLOW
+
+The credential workflow must be:
+
+1. Select or create an intern.
+2. Enter completion details and recommendation.
+3. Save as draft.
+4. Preview the public verification page.
+5. Publish.
+6. Generate the permanent verification URL.
+7. Generate the QR code.
+8. Allow the QR code to be downloaded.
+9. Optionally revoke the credential later.
+
+Publishing should produce a URL in this format:
+
+https://olyxee.com/verify/OLX-CERT-2026-0001-[secure-short-token]
+
+The QR code must contain only this URL.
+
+After publication, display:
+
+- Copy verification URL
+- Open public page
+- Download QR as PNG
+- Download QR as SVG
+- Print QR
+- Revoke credential
+
+Use a high-resolution QR code suitable for printed certificates. Include enough white “quiet zone” around it and verify that it remains scannable after downloading.
+
+The verification URL must remain unchanged after publication, including when editable public information is corrected.
+
+PUBLIC VERIFICATION API
+
+The public page will later live on olyxee.com, while management stays on admin.olyxee.com.
+
+Create a secure read-only public endpoint that olyxee.com can use to retrieve only published credential information by verification token.
+
+Example:
+
+GET /api/public/credentials/[verificationToken]
+
+For a valid published credential, return only:
+
+- Verification status
+- Credential number
+- Intern’s public full name
+- Programme or internship title
+- Position
+- Internship dates
+- Completed projects and responsibilities
+- Skills demonstrated
+- Public recommendation
+- Supervisor name
+- Issue date
+- Olyxee issuer information
+
+Never return:
+
+- Database IDs
+- Passwords
+- Password hashes
+- Project keys
+- Email addresses
+- Internal notes
+- Audit records
+- Session information
+- Private intern information
+
+Return a safe not-found response for unknown tokens. A revoked credential should return its credential number and REVOKED status without exposing unnecessary information.
+
+If olyxee.com and admin.olyxee.com use separate deployments, configure a narrowly scoped CORS policy for the public read-only endpoint. Do not allow cross-origin access to admin endpoints.
+
+DATABASE AND SECURITY
+
+Use the project’s existing database and ORM. Add migrations instead of replacing the current schema.
+
+Create suitable tables/models for:
+
+- Interns
+- Internship credentials
+- Audit events
+- Authentication/session records if required by the existing architecture
+
+Add unique database constraints for:
+
+- Intern number
+- Credential number
+- Verification token
+
+Validate and sanitize all input. Protect mutation endpoints against CSRF where applicable. Do not log passwords, password hashes, complete project keys, session tokens or other secrets.
+
+AUDIT LOG
+
+Record these actions:
+
+- Login success and failure
+- Logout
+- Intern created, edited or archived
+- Credential created or edited
+- Credential published
+- QR code generated or downloaded
+- Credential revoked
+- Role or access changes
+- Secret or project-key access where supported by the existing system
+
+Store:
+
+- Acting role/user
+- Action
+- Target type and identifier
+- Timestamp
+- Relevant non-sensitive metadata
+
+Do not place complete passwords, keys or private session data in audit records.
+
+DESIGN
+
+Match the existing admin.olyxee.com design. Keep it minimal and professional:
+
+- White background
+- Clear left sidebar
+- No unnecessary icon clutter
+- Responsive desktop and mobile layouts
+- Clear status badges
+- Confirmation dialog before publishing or revoking
+- Useful empty, loading and error states
+
+DELIVERY REQUIREMENTS
+
+Implement the complete feature rather than only generating placeholder pages.
+
+Before finishing:
+
+- Run existing tests.
+- Add authentication and authorization tests.
+- Test that FOUNDER_ENGINEER receives 403 for every intern and credential endpoint.
+- Test that SUPER_ADMIN can complete the full credential workflow.
+- Test unique number generation under concurrent requests.
+- Test publishing, QR generation and QR download.
+- Decode a generated QR image during testing and confirm it contains the correct URL.
+- Test revoked and unknown credentials.
+- Run linting, type checking and a production build.
+- Report all files changed, migrations added, required Vercel environment variables and deployment steps.
+- Do not modify unrelated existing functionality.

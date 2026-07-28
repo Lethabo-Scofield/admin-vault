@@ -192,6 +192,11 @@ export async function getDocumentsByProject(
 
 export async function getAuditLogs(limit = 200): Promise<AuditLog[]> {
   const sql = await db();
+  // Founder engineers see only operational entries: anything referencing
+  // interns or internship credentials is super-admin-only.
+  const { getCurrentUser } = await import("@/lib/session");
+  const user = await getCurrentUser();
+  const isSuperAdmin = user?.roleKey === "SUPER_ADMIN";
   return sql<AuditLog[]>`
     select
       id,
@@ -202,6 +207,7 @@ export async function getAuditLogs(limit = 200): Promise<AuditLog[]> {
       ip_address  as "ipAddress",
       status
     from audit_logs
+    where ${isSuperAdmin ? sql`true` : sql`action !~* '(intern|OLX-INT|OLX-CERT|QR code)'`}
     order by timestamp desc
     limit ${limit}
   `;

@@ -16,8 +16,15 @@ immutable audit trail.
 
 - `app/` — App Router pages. Each data page is `force-dynamic` and fetches via
   server components. Route-level `loading.tsx` files provide skeleton states.
-  - `/` dashboard, `/projects`, `/projects/[id]`, `/credentials`,
-    `/compliance`, `/audit-logs`, `/settings`, and a public `/login`.
+  - `/` dashboard, `/projects`, `/projects/[id]`, `/project-keys` (the
+    engineer-facing secrets vault, formerly `/credentials`), `/compliance`,
+    `/audit-logs`, `/settings`, and a public `/login`.
+  - Super-admin-only: `/interns` (+ `/new`, `/[id]`), `/credentials`
+    (internship credentials: list, `/new`, `/[id]`, `/[id]/preview`),
+    `/team-access`. Public read-only API:
+    `GET /api/public/credentials/[verificationToken]` (narrow CORS for
+    olyxee.com; returns only published-safe fields; revoked returns number +
+    status only).
 - `proxy.ts` — route protection (Next 16's renamed `middleware`). Redirects
   unauthenticated requests to `/login`, and signed-in users away from `/login`.
   Matches all routes except Next internals and static files. Imports only
@@ -46,13 +53,29 @@ immutable audit trail.
 
 ## Database
 
-Tables (snake_case): `projects`, `credentials`, `documents`, `audit_logs`.
+Tables (snake_case): `projects`, `credentials`, `documents`, `audit_logs`,
+`interns`, `intern_credentials`, `number_counters` (atomic, never-reused
+intern/credential number allocation via upsert-increment; unique constraints on
+intern_number, credential_number, verification_token).
 Credentials and documents cascade-delete with their project. The schema is
 created automatically on first DB access.
 
-## Authentication
+## Authentication & Roles
 
-- Admin-only. A single admin signs in with `ADMIN_EMAIL` + `ADMIN_PASSWORD`.
+- Two roles, both signing in on the same `/login` page (no usernames stored in
+  DB): the entered password decides the role.
+  - `SUPERADMIN_PASSWORD_HASH` (bcrypt) or `SUPERADMIN_PASSWORD` -> `SUPER_ADMIN`
+  - `ENGINEER_PASSWORD_HASH` (bcrypt) or `ENGINEER_PASSWORD` -> `FOUNDER_ENGINEER`
+  - Legacy `ADMIN_PASSWORD` (matching `ADMIN_EMAIL`) -> `SUPER_ADMIN`
+  - `demo`/`demo` (non-production only) -> `SUPER_ADMIN`
+- Role is embedded in the signed session token; `proxy.ts` returns **403** for
+  non-super-admin requests to `/interns`, `/credentials`, `/team-access`.
+  Every super-admin query/action also calls `requireSuperAdmin()` server-side
+  (`lib/session.ts`). Engineers see a redacted audit trail (intern/credential
+  entries filtered out in `getAuditLogs`).
+- Login is rate-limited in-memory (5 attempts / 15 min per IP) and audited
+  (success, failure, logout). Password checks use bcrypt (`lib/passwords.ts`,
+  Node-only — never imported from `proxy.ts`).
 - Session is a stateless HMAC-signed cookie (`vault_session`, `httpOnly`,
   `sameSite=lax`, `secure` in prod, 7-day expiry), verified in `proxy.ts`.
 - No empty-secret fallback: if no signing secret is configured, tokens are
@@ -69,7 +92,10 @@ created automatically on first DB access.
   `POSTGRES_URL_NON_POOLING`) so the same code runs on Vercel. `ensureSchema()` skips request-time DDL only on Replit production
   (detected via `REPLIT_DEPLOYMENT`/`REPL_ID`); on other hosts (e.g. Vercel) it
   runs the idempotent `CREATE TABLE IF NOT EXISTS` schema once per process.
-- `ADMIN_PASSWORD` — **required** for login. Also used as the session-signing
+- `SUPERADMIN_PASSWORD_HASH` / `ENGINEER_PASSWORD_HASH` — bcrypt hashes for
+  the two roles (preferred, esp. on Vercel). Plain `SUPERADMIN_PASSWORD` /
+  `ENGINEER_PASSWORD` Replit Secrets are also accepted.
+- `ADMIN_PASSWORD` — legacy single-admin login (grants SUPER_ADMIN). Also used as the session-signing
   key when `SESSION_SECRET` is unset. Stored in Replit Secrets.
 - `ADMIN_EMAIL` — admin login email (defaults to `admin@olyxee.com`).
 - `SESSION_SECRET` — optional dedicated HMAC key for session cookies; falls back
@@ -79,6 +105,16 @@ created automatically on first DB access.
 
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
 - Deployment: autoscale, `build = npm run build`, `run = npm run start`.
+
+## Internship Credentials
+
+- Workflow: create intern -> draft credential -> preview -> publish (assigns
+  issue date, permanent URL `https://olyxee.com/verify/OLX-CERT-YYYY-NNNN-<token>`)
+  -> QR panel (copy URL, open, PNG/SVG download, print) -> optional revoke.
+- Verification token: `crypto.randomBytes(9).toString("base64url")` — random,
+  non-sequential, never derived from personal data. URL never changes after
+  publication; editing public info updates content only.
+- QR codes generated server-side (`qrcode` pkg, 1024px PNG + SVG, margin 4).
 
 ## Notes
 
