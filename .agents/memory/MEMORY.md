@@ -1,3 +1,4 @@
+- [Vercel is production](vercel-production.md) — ship via git push to main, never Replit deploy; serverless Chromium fallback required for PDFs.
 - [Supabase pooler + postgres.js](supabase-pooler.md) — transaction pooler (6543) needs prepare:false + ssl require; "auth failed for user postgres" usually means wrong password, not username.
 - [Replit Postgres helium proxy](replit-postgres-helium.md) — local DATABASE_URL host "helium" has no TLS; ssl:"require" breaks every query. Make SSL conditional on host.
 - [Centralized dark-mode theming](theming-dark-mode.md) — dark mode = global `.dark` overrides in globals.css, NOT per-element `dark:` variants; edit globals.css to restyle.
