@@ -55,6 +55,27 @@ export default function InternForm({ intern }: { intern?: Intern }) {
             className="vault-input"
           />
         </Field>
+        <Field label="Email Address">
+          <input
+            name="email"
+            type="email"
+            defaultValue={intern?.email ?? ""}
+            placeholder="jane@example.com"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Pronouns (never inferred from the name)">
+          <select
+            name="pronouns"
+            defaultValue={intern?.pronouns ?? ""}
+            className="vault-input"
+          >
+            <option value="">Not specified</option>
+            <option value="SHE_HER">She / Her</option>
+            <option value="HE_HIM">He / Him</option>
+            <option value="THEY_THEM">They / Them</option>
+          </select>
+        </Field>
         <Field label="Internship Position">
           <input
             name="position"

@@ -4,14 +4,20 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
 // Routes only a SUPER_ADMIN session may reach. /credentials is the internship
 // credential manager; the engineer-facing key vault lives at /project-keys.
-const SUPER_ADMIN_PREFIXES = ["/interns", "/credentials", "/team-access"];
+const SUPER_ADMIN_PREFIXES = ["/interns", "/credentials"];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Public read-only verification API — no session, no redirects.
-  if (pathname.startsWith("/api/public/")) {
-    return NextResponse.next();
+  // Public read-only verification API and verification pages — no session.
+  if (
+    pathname.startsWith("/api/public/") ||
+    pathname === "/verify" ||
+    pathname.startsWith("/verify/")
+  ) {
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "no-store");
+    return res;
   }
 
   const token = req.cookies.get(SESSION_COOKIE)?.value;

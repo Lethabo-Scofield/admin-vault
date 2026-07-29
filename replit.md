@@ -21,7 +21,7 @@ immutable audit trail.
     `/audit-logs`, `/settings`, and a public `/login`.
   - Super-admin-only: `/interns` (+ `/new`, `/[id]`), `/credentials`
     (internship credentials: list, `/new`, `/[id]`, `/[id]/preview`),
-    `/team-access`. Public read-only API:
+    . Public read-only API:
     `GET /api/public/credentials/[verificationToken]` (narrow CORS for
     olyxee.com; returns only published-safe fields; revoked returns number +
     status only).
@@ -69,7 +69,7 @@ created automatically on first DB access.
   - `ADMIN_PASSWORD` (engineering team's normal password; used on Vercel) -> `FOUNDER_ENGINEER`
   - `demo`/`demo` (non-production only) -> `SUPER_ADMIN`
 - Role is embedded in the signed session token; `proxy.ts` returns **403** for
-  non-super-admin requests to `/interns`, `/credentials`, `/team-access`.
+  non-super-admin requests to `/interns`, `/credentials`.
   Every super-admin query/action also calls `requireSuperAdmin()` server-side
   (`lib/session.ts`). Engineers see a redacted audit trail (intern/credential
   entries filtered out in `getAuditLogs`).
@@ -107,6 +107,33 @@ created automatically on first DB access.
 
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
 - Deployment: autoscale, `build = npm run build`, `run = npm run start`.
+
+## Generated Documents (Certificate & Recommendation Letter)
+
+- `lib/documents/` — deterministic HTML/CSS templates (no LLMs): `certificate.ts`
+  (A4 landscape), `letter.ts` (A4 portrait), `fields.ts` (pronoun map, a/an
+  article, duration from dates, issue-date validation, file names, escaping),
+  `branding.ts` (official logo + seal PNGs from assets/branding embedded as data URLs; company name is always
+  "Olyxee (Pty) Ltd"), `qr.ts` (dynamic QR, error correction H), `pdf.ts`
+  (puppeteer-core + system chromium via `which chromium`; override with
+  `CHROMIUM_PATH`), `generate.ts` (render + PDF orchestration).
+- Pronouns (SHE_HER/HE_HIM/THEY_THEM) are selected explicitly on intern and
+  credential forms — never inferred from names; blank falls back to they/them.
+- Publish validates start/completion dates, generates both PDFs BEFORE
+  flipping status, and stores them as bytea on `intern_credentials`. Editing a
+  published credential regenerates the stored PDFs; the verification URL and
+  QR never change. Draft previews are generated live
+  (`/credentials/[id]/certificate|letter`, `?format=html` for HTML,
+  `?download=1` for attachment).
+- Public verify page `/verify/[code]` (no auth, Cache-Control: no-store);
+  the token is extracted by stripping the `OLX-CERT-YYYY-NNNN-` prefix
+  (base64url tokens can contain hyphens — never split on "-"). Revoked shows
+  number + revoked message only; unknown/service-error states have fixed copy.
+  Public PDF downloads: `/api/public/credentials/[token]/certificate|letter`
+  (PUBLISHED only, else 404).
+- Tests: `npm test` (vitest, `tests/documents.test.ts`) — pronouns (no mixed
+  pronouns), articles, duration, issue-date rules, file names, QR decodes to
+  the exact URL, credential-number format, template escaping.
 
 ## Internship Credentials
 

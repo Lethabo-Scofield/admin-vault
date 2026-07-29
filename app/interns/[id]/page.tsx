@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Plus, Archive, ArchiveRestore } from "lucide-react";
+import { Plus, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { getIntern, getInternCredentials } from "@/lib/intern-queries";
-import { archiveIntern } from "@/lib/intern-actions";
+import { archiveIntern, deleteIntern } from "@/lib/intern-actions";
 import { PageHeader, StatusBadge } from "@/components/ui";
 import InternForm from "@/components/InternForm";
 import ConfirmButton from "@/components/ConfirmButton";
@@ -12,10 +12,13 @@ export const dynamic = "force-dynamic";
 
 export default async function InternDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
   const internId = Number(id);
   if (!internId) notFound();
 
@@ -35,23 +38,40 @@ export default async function InternDetailPage({
           archived ? " · Archived" : ""
         }`}
         action={
-          <form action={archiveIntern}>
-            <input type="hidden" name="internId" value={intern.id} />
-            {archived && <input type="hidden" name="unarchive" value="on" />}
-            <ConfirmButton
-              message={
-                archived
-                  ? "Unarchive this intern?"
-                  : "Archive this intern? Their number is never reused."
-              }
-              className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-800 hover:bg-gray-200"
-            >
-              {archived ? <ArchiveRestore size={16} /> : <Archive size={16} />}
-              {archived ? "Unarchive" : "Archive"}
-            </ConfirmButton>
-          </form>
+          <div className="flex flex-wrap items-center gap-2">
+            <form action={archiveIntern}>
+              <input type="hidden" name="internId" value={intern.id} />
+              {archived && <input type="hidden" name="unarchive" value="on" />}
+              <ConfirmButton
+                message={
+                  archived
+                    ? "Unarchive this intern?"
+                    : "Archive this intern? Their number is never reused."
+                }
+                className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-800 hover:bg-gray-200"
+              >
+                {archived ? <ArchiveRestore size={16} /> : <Archive size={16} />}
+                {archived ? "Unarchive" : "Archive"}
+              </ConfirmButton>
+            </form>
+            <form action={deleteIntern}>
+              <input type="hidden" name="internId" value={intern.id} />
+              <ConfirmButton
+                message="Permanently delete this intern and their draft credentials? This cannot be undone. Interns with published or revoked credentials cannot be deleted."
+                className="tap inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2.5 text-[14px] font-medium text-red-600 hover:bg-red-100"
+              >
+                <Trash2 size={16} /> Delete
+              </ConfirmButton>
+            </form>
+          </div>
         }
       />
+
+      {error && (
+        <div className="rounded-ios bg-red-50 px-5 py-4 text-[14px] text-red-700 shadow-ios">
+          {error}
+        </div>
+      )}
 
       <section>
         <div className="mb-3 flex items-center justify-between">

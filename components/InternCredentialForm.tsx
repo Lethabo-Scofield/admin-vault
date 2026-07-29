@@ -34,14 +34,18 @@ function toDateInput(v: string | null | undefined): string {
 export default function InternCredentialForm({
   interns,
   credential,
+  defaults,
   defaultInternId,
 }: {
   interns?: Pick<Intern, "id" | "internNumber" | "fullName">[];
   credential?: InternCredential;
+  /** Prefill values (from the intern's record) when creating a new credential. */
+  defaults?: Partial<InternCredential>;
   defaultInternId?: number;
 }) {
   const [pending, startTransition] = useTransition();
   const isEdit = Boolean(credential);
+  const d = credential ?? defaults;
 
   function action(formData: FormData) {
     startTransition(async () => {
@@ -79,7 +83,7 @@ export default function InternCredentialForm({
           <input
             name="programmeTitle"
             required
-            defaultValue={credential?.programmeTitle ?? ""}
+            defaultValue={d?.programmeTitle ?? ""}
             placeholder="Olyxee Software Engineering Internship"
             className="vault-input"
           />
@@ -87,16 +91,36 @@ export default function InternCredentialForm({
         <Field label="Position">
           <input
             name="position"
-            defaultValue={credential?.position ?? ""}
+            defaultValue={d?.position ?? ""}
             placeholder="Software Engineering Intern"
             className="vault-input"
           />
+        </Field>
+        <Field label="Department">
+          <input
+            name="department"
+            defaultValue={d?.department ?? ""}
+            placeholder="Engineering Department"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Pronouns (never inferred from the name)">
+          <select
+            name="pronouns"
+            defaultValue={d?.pronouns ?? ""}
+            className="vault-input"
+          >
+            <option value="">Not specified (uses they/them)</option>
+            <option value="SHE_HER">She / Her</option>
+            <option value="HE_HIM">He / Him</option>
+            <option value="THEY_THEM">They / Them</option>
+          </select>
         </Field>
         <Field label="Start Date">
           <input
             name="startDate"
             type="date"
-            defaultValue={toDateInput(credential?.startDate)}
+            defaultValue={toDateInput(d?.startDate)}
             className="vault-input"
           />
         </Field>
@@ -104,7 +128,7 @@ export default function InternCredentialForm({
           <input
             name="completionDate"
             type="date"
-            defaultValue={toDateInput(credential?.completionDate)}
+            defaultValue={toDateInput(d?.completionDate)}
             className="vault-input"
           />
         </Field>
@@ -112,7 +136,7 @@ export default function InternCredentialForm({
           <textarea
             name="projectsCompleted"
             rows={4}
-            defaultValue={credential?.projectsCompleted ?? ""}
+            defaultValue={d?.projectsCompleted ?? ""}
             className="vault-input resize-none"
           />
         </Field>
@@ -120,7 +144,15 @@ export default function InternCredentialForm({
           <textarea
             name="skillsDemonstrated"
             rows={3}
-            defaultValue={credential?.skillsDemonstrated ?? ""}
+            defaultValue={d?.skillsDemonstrated ?? ""}
+            className="vault-input resize-none"
+          />
+        </Field>
+        <Field label="Responsibilities" full>
+          <textarea
+            name="responsibilities"
+            rows={3}
+            defaultValue={d?.responsibilities ?? ""}
             className="vault-input resize-none"
           />
         </Field>
@@ -128,7 +160,55 @@ export default function InternCredentialForm({
           <textarea
             name="publicRecommendation"
             rows={3}
-            defaultValue={credential?.publicRecommendation ?? ""}
+            defaultValue={d?.publicRecommendation ?? ""}
+            className="vault-input resize-none"
+          />
+        </Field>
+        <Field label="Founder Name">
+          <input
+            name="founderName"
+            defaultValue={d?.founderName ?? ""}
+            placeholder="Dzowa"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Founder Title">
+          <input
+            name="founderTitle"
+            defaultValue={d?.founderTitle ?? ""}
+            placeholder="Founder & CEO"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Founder Recommendation" full>
+          <textarea
+            name="founderRecommendation"
+            rows={3}
+            defaultValue={d?.founderRecommendation ?? ""}
+            className="vault-input resize-none"
+          />
+        </Field>
+        <Field label="Manager Name">
+          <input
+            name="managerName"
+            defaultValue={d?.managerName ?? ""}
+            placeholder="Laura"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Manager Title">
+          <input
+            name="managerTitle"
+            defaultValue={d?.managerTitle ?? ""}
+            placeholder="Department Manager"
+            className="vault-input"
+          />
+        </Field>
+        <Field label="Manager Recommendation" full>
+          <textarea
+            name="managerRecommendation"
+            rows={3}
+            defaultValue={d?.managerRecommendation ?? ""}
             className="vault-input resize-none"
           />
         </Field>

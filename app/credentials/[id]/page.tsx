@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
-import { Eye, Send, Ban } from "lucide-react";
+import { Eye, Send, Ban, FileText, ScrollText, Download, Trash2 } from "lucide-react";
 import { getInternCredential } from "@/lib/intern-queries";
 import {
   publishInternCredential,
   revokeInternCredential,
+  deleteInternCredential,
 } from "@/lib/intern-actions";
 import { verificationUrl } from "@/lib/verification";
 import { PageHeader } from "@/components/ui";
@@ -18,10 +19,13 @@ export const dynamic = "force-dynamic";
 
 export default async function InternCredentialDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
   const credentialId = Number(id);
   if (!credentialId) notFound();
 
@@ -74,9 +78,73 @@ export default async function InternCredentialDetailPage({
                 </ConfirmButton>
               </form>
             )}
+            {credential.status === "DRAFT" && (
+              <form action={deleteInternCredential}>
+                <input
+                  type="hidden"
+                  name="credentialId"
+                  value={credential.id}
+                />
+                <ConfirmButton
+                  message="Permanently delete this draft credential? This cannot be undone."
+                  className="tap inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2.5 text-[14px] font-medium text-red-600 hover:bg-red-100"
+                >
+                  <Trash2 size={16} /> Delete Draft
+                </ConfirmButton>
+              </form>
+            )}
           </div>
         }
       />
+
+      {error && (
+        <div className="rounded-ios bg-red-50 px-5 py-4 text-[14px] text-red-700 shadow-ios">
+          {error}
+        </div>
+      )}
+
+      <section className="rounded-ios bg-white p-6 shadow-ios">
+        <h3 className="mb-2 text-[16px] font-semibold text-gray-900">
+          Documents
+        </h3>
+        <p className="mb-4 text-[13px] text-gray-500">
+          {credential.status === "DRAFT"
+            ? "Previews are generated live from the saved draft. Final PDFs are created and stored when the credential is published."
+            : "Final PDFs were generated at publication and are regenerated whenever the public information is corrected. The QR code and verification URL never change."}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`/credentials/${credential.id}/certificate`}
+            target="_blank"
+            className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-800 hover:bg-gray-200"
+          >
+            <FileText size={15} /> Preview Certificate
+          </a>
+          <a
+            href={`/credentials/${credential.id}/letter`}
+            target="_blank"
+            className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-800 hover:bg-gray-200"
+          >
+            <ScrollText size={15} /> Preview Recommendation Letter
+          </a>
+          {credential.status === "PUBLISHED" && (
+            <>
+              <a
+                href={`/credentials/${credential.id}/certificate?download=1`}
+                className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-800 hover:bg-gray-200"
+              >
+                <Download size={15} /> Download Certificate
+              </a>
+              <a
+                href={`/credentials/${credential.id}/letter?download=1`}
+                className="tap inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-800 hover:bg-gray-200"
+              >
+                <Download size={15} /> Download Letter
+              </a>
+            </>
+          )}
+        </div>
+      </section>
 
       {credential.status === "PUBLISHED" && (
         <QrPanel

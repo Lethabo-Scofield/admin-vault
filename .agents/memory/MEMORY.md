@@ -2,3 +2,4 @@
 - [Replit Postgres helium proxy](replit-postgres-helium.md) — local DATABASE_URL host "helium" has no TLS; ssl:"require" breaks every query. Make SSL conditional on host.
 - [Centralized dark-mode theming](theming-dark-mode.md) — dark mode = global `.dark` overrides in globals.css, NOT per-element `dark:` variants; edit globals.css to restyle.
 - [Next 16 proxy](nextjs-16-proxy.md) — middleware renamed to `proxy.ts`/`export function proxy`; edge runtime, import only edge-safe code (no next/headers).
+- [postgres.js date columns](postgres-date-columns.md) — SQL `date` comes back as JS Date; select `::text` when code expects ISO strings, or date inputs/validators silently break.

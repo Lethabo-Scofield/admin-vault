@@ -11,10 +11,12 @@ const INTERN_COLUMNS = `
   i.id,
   i.intern_number             as "internNumber",
   i.full_name                 as "fullName",
+  i.email,
+  i.pronouns,
   i.position,
   i.department,
-  i.start_date                as "startDate",
-  i.completion_date           as "completionDate",
+  i.start_date::text          as "startDate",
+  i.completion_date::text     as "completionDate",
   i.employment_status         as "employmentStatus",
   i.projects_completed        as "projectsCompleted",
   i.responsibilities,
@@ -70,12 +72,26 @@ const CREDENTIAL_COLUMNS = `
   c.verification_token    as "verificationToken",
   c.programme_title       as "programmeTitle",
   c.position,
-  c.start_date            as "startDate",
-  c.completion_date       as "completionDate",
+  c.start_date::text      as "startDate",
+  c.completion_date::text as "completionDate",
   c.projects_completed    as "projectsCompleted",
   c.skills_demonstrated   as "skillsDemonstrated",
   c.public_recommendation as "publicRecommendation",
-  c.issue_date            as "issueDate",
+  i.email                 as "internEmail",
+  c.department,
+  c.pronouns,
+  c.responsibilities,
+  c.founder_name          as "founderName",
+  c.founder_title         as "founderTitle",
+  c.founder_recommendation as "founderRecommendation",
+  c.manager_name          as "managerName",
+  c.manager_title         as "managerTitle",
+  c.manager_recommendation as "managerRecommendation",
+  c.email_sent_at         as "emailSentAt",
+  c.email_sent_to         as "emailSentTo",
+  (c.certificate_pdf is not null) as "hasCertificatePdf",
+  (c.letter_pdf is not null)      as "hasLetterPdf",
+  c.issue_date::text      as "issueDate",
   c.status,
   c.published_at          as "publishedAt",
   c.revoked_at            as "revokedAt",
@@ -133,6 +149,16 @@ export async function getPublicCredentialByToken(token: string): Promise<{
   skillsDemonstrated?: string;
   publicRecommendation?: string;
   supervisorName?: string;
+  department?: string;
+  responsibilities?: string;
+  founderRecommendation?: string;
+  managerRecommendation?: string;
+  founderName?: string;
+  founderTitle?: string;
+  managerName?: string;
+  managerTitle?: string;
+  hasCertificatePdf?: boolean;
+  hasLetterPdf?: boolean;
   issueDate?: string | null;
 } | null> {
   if (!token || token.length > 128) return null;
@@ -150,6 +176,16 @@ export async function getPublicCredentialByToken(token: string): Promise<{
       skillsDemonstrated: string;
       publicRecommendation: string;
       supervisorName: string;
+      department: string;
+      responsibilities: string;
+      founderRecommendation: string;
+      managerRecommendation: string;
+      founderName: string;
+      founderTitle: string;
+      managerName: string;
+      managerTitle: string;
+      hasCertificatePdf: boolean;
+      hasLetterPdf: boolean;
       issueDate: string | null;
     }[]
   >`
@@ -159,13 +195,23 @@ export async function getPublicCredentialByToken(token: string): Promise<{
       i.full_name             as "fullName",
       c.programme_title       as "programmeTitle",
       c.position,
-      c.start_date            as "startDate",
-      c.completion_date       as "completionDate",
+      c.start_date::text      as "startDate",
+      c.completion_date::text as "completionDate",
       c.projects_completed    as "projectsCompleted",
       c.skills_demonstrated   as "skillsDemonstrated",
       c.public_recommendation as "publicRecommendation",
       i.supervisor_name       as "supervisorName",
-      c.issue_date            as "issueDate"
+      c.department,
+      c.responsibilities,
+      c.founder_recommendation as "founderRecommendation",
+      c.manager_recommendation as "managerRecommendation",
+      c.founder_name          as "founderName",
+      c.founder_title         as "founderTitle",
+      c.manager_name          as "managerName",
+      c.manager_title         as "managerTitle",
+      (c.certificate_pdf is not null) as "hasCertificatePdf",
+      (c.letter_pdf is not null)      as "hasLetterPdf",
+      c.issue_date::text      as "issueDate"
     from intern_credentials c
     join interns i on i.id = c.intern_id
     where c.verification_token = ${token}
@@ -178,4 +224,46 @@ export async function getPublicCredentialByToken(token: string): Promise<{
     return { status: row.status, credentialNumber: row.credentialNumber };
   }
   return row;
+}
+
+/** Stored PDFs for a credential (super-admin). */
+export async function getCredentialPdfs(id: number): Promise<{
+  certificatePdf: Buffer | null;
+  letterPdf: Buffer | null;
+} | null> {
+  await requireSuperAdmin();
+  const sql = await db();
+  const rows = await sql<
+    { certificatePdf: Buffer | null; letterPdf: Buffer | null }[]
+  >`
+    select certificate_pdf as "certificatePdf", letter_pdf as "letterPdf"
+    from intern_credentials where id = ${id}
+  `;
+  return rows[0] ?? null;
+}
+
+/** Stored PDFs for a PUBLISHED credential looked up by token — public. */
+export async function getPublicCredentialPdfsByToken(token: string): Promise<{
+  fullName: string;
+  position: string;
+  certificatePdf: Buffer | null;
+  letterPdf: Buffer | null;
+} | null> {
+  if (!token || token.length > 128) return null;
+  const sql = await db();
+  const rows = await sql<
+    {
+      fullName: string;
+      position: string;
+      certificatePdf: Buffer | null;
+      letterPdf: Buffer | null;
+    }[]
+  >`
+    select i.full_name as "fullName", c.position,
+           c.certificate_pdf as "certificatePdf", c.letter_pdf as "letterPdf"
+    from intern_credentials c
+    join interns i on i.id = c.intern_id
+    where c.verification_token = ${token} and c.status = 'PUBLISHED'
+  `;
+  return rows[0] ?? null;
 }

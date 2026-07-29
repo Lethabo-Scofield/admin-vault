@@ -1,0 +1,440 @@
+Update the existing Olyxee intern-management system to automatically generate internship certificates and recommendation letters.
+
+I have uploaded two reference images:
+
+1. Master Certificate.png
+2. Alisha-Fatima-AI-ML-Engineering-recommendation-letter.png
+
+Use these files as visual references only. Do not use either image directly as the final background because they contain old names, dates, text and QR codes. Recreate both layouts as editable HTML/CSS templates so every intern receives accurate documents.
+
+Preserve the existing intern-management system, authentication, database and current verification functionality. Inspect the project before implementing anything.
+
+GOAL
+
+From an existing intern profile, the super admin must be able to:
+
+1. Enter or review the intern’s details.
+2. Generate a public verification profile.
+3. Generate a unique credential number.
+4. Generate a secure verification URL.
+5. Generate a new QR code containing that URL.
+6. Preview an automatically generated certificate.
+7. Preview an automatically generated recommendation letter.
+8. Publish the credential.
+9. Download both documents as PDFs.
+10. Email both PDFs and the verification link to the intern.
+11. Revoke the credential if necessary.
+
+Do not use an LLM. This must use deterministic templates and database values.
+
+INTERN FIELDS
+
+Use the existing fields where available and add only missing ones:
+
+- Full name
+- Email address
+- Intern number
+- Internship title
+- Position or role
+- Department
+- Start date
+- Completion date
+- Issue date
+- Employment status
+- Projects and responsibilities
+- Skills demonstrated
+- Founder recommendation
+- Manager recommendation
+- Founder name and title
+- Manager name and title
+- Pronouns
+- Internal notes
+
+Pronouns must be selected explicitly:
+
+- SHE_HER
+- HE_HIM
+- THEY_THEM
+
+Never infer pronouns from the intern’s name.
+
+Use this mapping:
+
+SHE_HER:
+subject = she
+object = her
+possessive = her
+
+HE_HIM:
+subject = he
+object = him
+possessive = his
+
+THEY_THEM:
+subject = they
+object = them
+possessive = their
+
+Add tests to prevent mixed pronouns such as:
+
+“We wish her all the best in his future endeavours.”
+
+CREDENTIAL GENERATION
+
+Generate credential numbers in this format:
+
+OLX-CERT-{YEAR}-{INTERN_NUMBER}-{SECURE_RANDOM_TOKEN}
+
+Example:
+
+OLX-CERT-2026-0002-Z2yBcQa1hK5S
+
+Generate the token using a cryptographically secure random generator.
+
+Create the verification URL:
+
+https://www.olyxee.com/verify/{credentialNumber}
+
+Example:
+
+https://www.olyxee.com/verify/OLX-CERT-2026-0002-Z2yBcQa1hK5S
+
+Generate a completely new QR code for every credential.
+
+IMPORTANT QR REQUIREMENTS
+
+- Do not reuse the QR code visible in the uploaded master certificate.
+- Do not copy or preserve the old QR-code image.
+- Generate the QR code dynamically from the final verification URL.
+- Place the generated QR in the same approximate location shown in the certificate reference.
+- Use a white background and sufficient quiet space around the QR code.
+- Use high error correction.
+- Test the generated QR by decoding it automatically.
+- Confirm that the decoded value exactly matches the verification URL.
+- The QR code must remain unchanged when documents are regenerated because the verification URL must remain permanent.
+- If a credential is revoked, the QR still opens the same page, but the page must show REVOKED.
+
+CERTIFICATE TEMPLATE
+
+Recreate the uploaded Master Certificate design using HTML and CSS.
+
+Required layout:
+
+- A4 landscape
+- White background
+- Thin dark border
+- Olyxee logo and “CERTIFICATE” at the top-left
+- “Research and Infrastructure for Operational Intelligence” at the top-right
+- Faint Olyxee watermark in the centre
+- Founder and manager/department approval signatures on the right
+- Olyxee corporate seal at the bottom-right
+- Dynamic QR code beside the seal
+- Credential information at the bottom-left
+- Minimal footer
+
+Dynamic certificate fields:
+
+- Full name
+- Position or role
+- Department
+- Start date
+- Completion date
+- Issue date
+- Credential number
+- QR code
+- Founder name/title/signature
+- Manager name/title/signature
+
+Certificate wording:
+
+“This is to certify that
+
+{fullName}
+
+successfully completed {durationText} as {article} {position}
+within the {department} at Olyxee (Pty) Ltd,
+from {startDate} to {completionDate}.
+
+Issued on {issueDate} in Johannesburg, South Africa.”
+
+Generate the correct article:
+
+- an AI Engineer
+- an AI/ML Engineering Intern
+- a Software Engineer
+- a Data Engineering Intern
+
+Calculate the duration from the start and completion dates. Do not always write “three-month internship.”
+
+The issue date cannot be earlier than the completion date.
+
+Display the credential number only once. Do not repeat it in the footer.
+
+Do not place projects, skills or recommendations on the certificate. The certificate must remain short and formal.
+
+RECOMMENDATION-LETTER TEMPLATE
+
+Recreate the uploaded recommendation-letter design using HTML and CSS.
+
+Required layout:
+
+- A4 portrait
+- Olyxee letterhead at the top
+- Company address and contact information
+- Olyxee logo
+- Issue date
+- Centred and underlined “TO WHOM IT MAY CONCERN”
+- Formal body text
+- Founder and manager recommendations
+- Founder and manager signature areas
+- Company registration details at the bottom
+- Credential number and verification URL in a restrained footer
+
+Suggested body:
+
+“This letter confirms that {fullName} successfully completed the Olyxee {internshipTitle} as {article} {position} from {startDate} to {completionDate}.
+
+During {possessivePronoun} internship, {fullName} contributed to {projectsAndResponsibilities}.
+
+Founder’s Recommendation
+
+{founderRecommendation}
+
+Manager’s Recommendation
+
+{managerRecommendation}
+
+We wish {objectPronoun} continued success in {possessivePronoun} professional development and future endeavours.”
+
+Hide a recommendation section when it has not been provided. Never show blank headings or placeholders in final PDFs.
+
+Use the registered company name everywhere:
+
+Olyxee (Pty) Ltd
+
+Do not use:
+
+Olyxee (R&D) Pvt. Ltd.
+
+DOCUMENT GENERATION
+
+Use the project’s existing stack where possible.
+
+Recommended libraries:
+
+- React components or Handlebars for templates
+- Playwright or Puppeteer for PDF generation
+- `qrcode` for QR generation
+- Existing storage, Supabase Storage or Vercel Blob for PDF storage
+
+Generate:
+
+- A4 landscape certificate PDF
+- A4 portrait recommendation-letter PDF
+
+File names:
+
+{Full-Name}-{Position}-Internship-Certificate.pdf
+
+{Full-Name}-Internship-Recommendation-Letter.pdf
+
+Examples:
+
+Mosa-Maseko-AI-Engineer-Internship-Certificate.pdf
+
+Mosa-Maseko-Internship-Recommendation-Letter.pdf
+
+ADMIN WORKFLOW
+
+Add these actions to the existing intern profile:
+
+- Create credential
+- Preview verification profile
+- Preview certificate
+- Preview recommendation letter
+- Publish
+- Download certificate
+- Download recommendation letter
+- Send by email
+- Revoke credential
+
+Workflow:
+
+1. Super admin selects an intern.
+2. System loads the intern’s stored details.
+3. Super admin reviews dates, role, department, pronouns and recommendations.
+4. Super admin clicks “Generate preview.”
+5. System generates the credential number, permanent URL and QR code.
+6. Show previews of the verification profile, certificate and recommendation letter.
+7. Super admin corrects any problems.
+8. Super admin clicks “Publish.”
+9. Generate and store both final PDFs.
+10. Activate the public verification page.
+11. Enable email sending.
+
+Do not publish or send anything automatically when an intern is created.
+
+PUBLIC VERIFICATION PAGE
+
+At:
+
+/verify/[credentialNumber]
+
+For a valid published credential, display:
+
+- Credential verified
+- Credential number
+- Full name
+- Internship title
+- Position
+- Department
+- Start and completion dates
+- Issue date
+- Projects and responsibilities
+- Skills demonstrated
+- Founder recommendation
+- Manager recommendation
+- Issuer: Olyxee (Pty) Ltd
+
+Document buttons:
+
+- View certificate
+- Download certificate
+- View recommendation letter
+- Download recommendation letter
+- Copy verification link
+
+The verification page must be an official record, not another certificate design.
+
+Set:
+
+Cache-Control: no-store
+
+REVOKED CREDENTIAL
+
+For a revoked credential:
+
+- Show “This credential has been revoked and is no longer valid.”
+- Show the credential number only.
+- Do not show personal details.
+- Disable certificate and letter viewing/downloads.
+
+UNKNOWN CREDENTIAL
+
+Show:
+
+“No credential matches this verification code. Check the URL or contact Olyxee.”
+
+SERVICE ERROR
+
+Show:
+
+“Verification is temporarily unavailable. Please try again shortly.”
+
+Never show a raw API or database error.
+
+EMAIL DELIVERY
+
+Add a super-admin-only “Send credential email” action.
+
+Before sending, show a confirmation screen containing:
+
+- Intern name
+- Recipient email
+- Subject
+- Email body
+- Certificate attachment
+- Recommendation-letter attachment
+- Verification URL
+
+Suggested subject:
+
+“Olyxee Internship Certificate and Recommendation Letter — {fullName}”
+
+Suggested body:
+
+“Dear {fullName},
+
+Congratulations on completing the Olyxee {internshipTitle}.
+
+Attached are your official internship certificate and recommendation letter.
+
+Your credential can be independently verified here:
+
+{verificationUrl}
+
+Kind regards,
+Olyxee (Pty) Ltd”
+
+Attach both generated PDFs.
+
+Use the existing email provider if configured. Otherwise use server-side SMTP environment variables:
+
+SMTP_HOST
+SMTP_PORT
+SMTP_USER
+SMTP_PASSWORD
+SMTP_FROM_NAME
+SMTP_FROM_EMAIL
+
+Never expose email credentials to the browser.
+
+Require explicit confirmation before sending and prevent duplicate accidental sends.
+
+SECURITY
+
+Only SUPER_ADMIN may:
+
+- Create credentials
+- Generate documents
+- Publish credentials
+- Send emails
+- Revoke credentials
+- Manage signatures and templates
+
+FOUNDER_ENGINEER users must receive 403 Forbidden for all intern, credential, document and email-management routes.
+
+Do not expose:
+
+- Intern email on the public page
+- Internal notes
+- Storage paths
+- Database IDs
+- Private storage keys
+- Session details
+- SMTP credentials
+
+TESTING
+
+Add tests for:
+
+- Correct role permissions
+- Credential-number generation
+- Secure random tokens
+- Correct pronouns
+- No mixed pronouns
+- Correct “a” or “an”
+- Duration calculated from dates
+- Issue date validation
+- QR code decoding to the exact verification URL
+- Old template QR never appearing in generated documents
+- Certificate PDF generation
+- Recommendation-letter PDF generation
+- Long names and longer recommendations
+- Published, revoked and unknown credentials
+- Secure document downloads
+- Email preview and confirmation
+- Duplicate-email protection
+
+Before finishing:
+
+- Run existing tests
+- Run new tests
+- Run linting
+- Run type checking
+- Run the production build
+- Report files changed
+- Report database migrations
+- Report required environment variables
+- Report storage and email configuration
+- Do not modify unrelated features

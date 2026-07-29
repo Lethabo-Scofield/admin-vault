@@ -44,10 +44,14 @@ export interface AuditLog {
   status: string;
 }
 
+export type Pronouns = "SHE_HER" | "HE_HIM" | "THEY_THEM" | "";
+
 export interface Intern {
   id: number;
   internNumber: string;
   fullName: string;
+  email: string;
+  pronouns: Pronouns;
   position: string;
   department: string;
   startDate: string | null;
@@ -82,6 +86,20 @@ export interface InternCredential {
   skillsDemonstrated: string;
   publicRecommendation: string;
   supervisorName?: string | null;
+  internEmail?: string | null;
+  department: string;
+  pronouns: Pronouns;
+  responsibilities: string;
+  founderName: string;
+  founderTitle: string;
+  founderRecommendation: string;
+  managerName: string;
+  managerTitle: string;
+  managerRecommendation: string;
+  emailSentAt: string | null;
+  emailSentTo: string;
+  hasCertificatePdf?: boolean;
+  hasLetterPdf?: boolean;
   issueDate: string | null;
   status: InternCredentialStatus;
   publishedAt: string | null;

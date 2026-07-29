@@ -109,6 +109,9 @@ create table if not exists interns (
   archived_at                timestamptz
 );
 
+alter table interns add column if not exists email text not null default '';
+alter table interns add column if not exists pronouns text not null default '';
+
 create table if not exists intern_credentials (
   id                     serial primary key,
   intern_id              integer not null references interns(id) on delete restrict,
@@ -131,6 +134,20 @@ create table if not exists intern_credentials (
   created_at             timestamptz not null default now(),
   updated_at             timestamptz not null default now()
 );
+
+alter table intern_credentials add column if not exists department text not null default '';
+alter table intern_credentials add column if not exists pronouns text not null default '';
+alter table intern_credentials add column if not exists responsibilities text not null default '';
+alter table intern_credentials add column if not exists founder_name text not null default '';
+alter table intern_credentials add column if not exists founder_title text not null default '';
+alter table intern_credentials add column if not exists founder_recommendation text not null default '';
+alter table intern_credentials add column if not exists manager_name text not null default '';
+alter table intern_credentials add column if not exists manager_title text not null default '';
+alter table intern_credentials add column if not exists manager_recommendation text not null default '';
+alter table intern_credentials add column if not exists certificate_pdf bytea;
+alter table intern_credentials add column if not exists letter_pdf bytea;
+alter table intern_credentials add column if not exists email_sent_at timestamptz;
+alter table intern_credentials add column if not exists email_sent_to text not null default '';
 
 create table if not exists number_counters (
   name   text primary key,

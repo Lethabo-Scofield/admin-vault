@@ -14,7 +14,7 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
-import { GraduationCap, BadgeCheck, Users } from "lucide-react";
+import { GraduationCap, BadgeCheck } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
 type ShellUser = { email: string; role: string; roleKey?: string };
@@ -35,7 +35,6 @@ const NAV_GROUPS = [
     items: [
       { href: "/interns", label: "Interns", icon: GraduationCap },
       { href: "/credentials", label: "Credentials", icon: BadgeCheck },
-      { href: "/team-access", label: "Team Access", icon: Users },
     ],
   },
   {

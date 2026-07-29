@@ -7,7 +7,8 @@
     "dev": "next dev -H 0.0.0.0 -p 5000",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 5000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -26,18 +27,23 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.1",
     "@types/node": "^26.0.1",
+    "@types/pngjs": "^6.0.5",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "bcryptjs": "^3.0.3",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.21.0",
     "next": "^16.2.9",
+    "pngjs": "^7.0.0",
     "postcss": "^8.5.15",
     "postgres": "^3.4.9",
+    "puppeteer-core": "^24.43.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwindcss": "^4.3.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   }
 }
