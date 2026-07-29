@@ -182,6 +182,11 @@ export async function htmlToPdf(
       landscape: opts.landscape,
       printBackground: true,
       preferCSSPageSize: true,
+      // Puppeteer defaults `tagged: true`, which makes Chromium walk the
+      // accessibility tree during printToPDF. That step crashes the headless
+      // renderer ("Target closed") on serverless Chromium — we don't need an
+      // accessibility-tagged PDF, so turn it off.
+      tagged: false,
     });
     return Buffer.from(pdf);
   });
