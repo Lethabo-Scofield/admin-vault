@@ -499,27 +499,23 @@ export async function deleteIntern(formData: FormData): Promise<void> {
   `;
   if (!intern) return;
 
-  // Interns with published/revoked credentials cannot be deleted — those
-  // credentials back public verification pages that must stay intact.
-  const [{ count }] = await sql<{ count: number }[]>`
-    select count(*)::int as count from intern_credentials
+  // Deleting an intern removes ALL their credentials, including published
+  // ones — their public verification links stop resolving. The delete button
+  // carries an explicit warning about this.
+  const [{ publishedCount }] = await sql<{ publishedCount: number }[]>`
+    select count(*)::int as "publishedCount" from intern_credentials
     where intern_id = ${internId} and status <> 'DRAFT'
   `;
-  if (count > 0) {
-    redirect(
-      `/interns/${internId}?error=${encodeURIComponent(
-        "This intern has published or revoked credentials, which must stay verifiable. Revoke credentials if needed and use Archive instead of Delete."
-      )}`
-    );
-  }
 
   await sql.begin(async (tx) => {
-    await tx`delete from intern_credentials where intern_id = ${internId} and status = 'DRAFT'`;
+    await tx`delete from intern_credentials where intern_id = ${internId}`;
     await tx`delete from interns where id = ${internId}`;
     await writeAudit(
       tx,
       user,
-      `Deleted intern ${intern.internNumber} (and their draft credentials)`
+      publishedCount > 0
+        ? `Deleted intern ${intern.internNumber} and all their credentials (${publishedCount} published/revoked — public verification links removed)`
+        : `Deleted intern ${intern.internNumber} (and their draft credentials)`
     );
   });
 

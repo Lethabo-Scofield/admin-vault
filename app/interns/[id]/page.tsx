@@ -57,7 +57,7 @@ export default async function InternDetailPage({
             <form action={deleteIntern}>
               <input type="hidden" name="internId" value={intern.id} />
               <ConfirmButton
-                message="Permanently delete this intern and their draft credentials? This cannot be undone. Interns with published or revoked credentials cannot be deleted."
+                message="Permanently delete this intern and ALL their credentials — including published ones? Their public verification links will stop working. This cannot be undone."
                 className="tap inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2.5 text-[14px] font-medium text-red-600 hover:bg-red-100"
               >
                 <Trash2 size={16} /> Delete
