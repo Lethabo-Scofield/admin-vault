@@ -1,5 +1,6 @@
 import { execFileSync } from "child_process";
 import puppeteer, { type Browser } from "puppeteer-core";
+import serverlessChromium from "@sparticuz/chromium";
 
 const globalForPdf = globalThis as unknown as {
   __chromiumPath?: string;
@@ -39,14 +40,15 @@ async function launchOptions(): Promise<{
     return { executablePath: globalForPdf.__chromiumPath, args: baseArgs };
   }
   try {
-    const chromium = (await import("@sparticuz/chromium")).default;
     return {
-      executablePath: await chromium.executablePath(),
-      args: [...chromium.args, ...baseArgs],
+      executablePath: await serverlessChromium.executablePath(),
+      args: [...serverlessChromium.args, ...baseArgs],
     };
-  } catch {
+  } catch (err) {
     throw new Error(
-      "Chromium not found. Install it, set CHROMIUM_PATH, or add @sparticuz/chromium."
+      `No system Chromium found and the serverless Chromium fallback failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`
     );
   }
 }
