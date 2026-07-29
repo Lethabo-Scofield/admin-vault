@@ -1,5 +1,5 @@
 import { execFileSync } from "child_process";
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type Page } from "puppeteer-core";
 import serverlessChromium from "@sparticuz/chromium";
 
 const globalForPdf = globalThis as unknown as {
@@ -49,7 +49,7 @@ async function launchOptions(): Promise<{
     // download the official browser pack at runtime instead.
     const packUrl =
       process.env.CHROMIUM_PACK_URL ??
-      "https://github.com/Sparticuz/chromium/releases/download/v147.0.0/chromium-v147.0.0-pack.x64.tar";
+      "https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar";
     try {
       return {
         executablePath: await serverlessChromium.executablePath(packUrl),
@@ -108,6 +108,48 @@ async function releaseBrowser(browser: Browser): Promise<void> {
 }
 
 /**
+ * A crashed or frozen Chromium drops the CDP connection, surfacing as
+ * "Target closed" / "Protocol error" / "Session closed". These are the
+ * transient failures a fresh browser can recover from — unlike, say, a page
+ * timeout, which would just fail again.
+ */
+function isTargetClosed(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /Target closed|Protocol error|Connection closed|Session closed/i.test(
+    msg
+  );
+}
+
+/**
+ * Run a render against a fresh page, retrying once with a brand-new browser if
+ * Chromium's target dies mid-render (common on serverless, where the process is
+ * frozen/OOM-killed between and during requests).
+ */
+async function withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const browser = await getBrowser();
+    const page = await browser.newPage();
+    try {
+      return await fn(page);
+    } catch (err) {
+      lastErr = err;
+      if (isTargetClosed(err)) {
+        // Discard the dead browser so the next attempt relaunches a fresh one.
+        globalForPdf.__browser = undefined;
+        await browser.close().catch(() => undefined);
+        continue;
+      }
+      throw err;
+    } finally {
+      await page.close().catch(() => undefined);
+      await releaseBrowser(browser);
+    }
+  }
+  throw lastErr;
+}
+
+/**
  * Render an HTML document to a PNG screenshot buffer (A4 page at 2x scale).
  * Used for the public certificate preview image.
  */
@@ -115,9 +157,7 @@ export async function htmlToPng(
   html: string,
   opts: { landscape: boolean }
 ): Promise<Buffer> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
-  try {
+  return withPage(async (page) => {
     // A4 at 96dpi: 1123 x 794 px.
     const [w, h] = opts.landscape ? [1123, 794] : [794, 1123];
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 2 });
@@ -127,10 +167,7 @@ export async function htmlToPng(
       clip: { x: 0, y: 0, width: w, height: h },
     });
     return Buffer.from(png);
-  } finally {
-    await page.close().catch(() => undefined);
-    await releaseBrowser(browser);
-  }
+  });
 }
 
 /** Render an HTML document to a PDF buffer. */
@@ -138,9 +175,7 @@ export async function htmlToPdf(
   html: string,
   opts: { landscape: boolean }
 ): Promise<Buffer> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
-  try {
+  return withPage(async (page) => {
     await page.setContent(html, { waitUntil: "load", timeout: 30000 });
     const pdf = await page.pdf({
       format: "A4",
@@ -149,8 +184,5 @@ export async function htmlToPdf(
       preferCSSPageSize: true,
     });
     return Buffer.from(pdf);
-  } finally {
-    await page.close().catch(() => undefined);
-    await releaseBrowser(browser);
-  }
+  });
 }
