@@ -65,11 +65,31 @@ async function launchOptions(): Promise<{
   }
 }
 
+// On serverless hosts (Vercel/Lambda) the process is frozen between requests,
+// which silently kills a cached browser and causes "Target closed" protocol
+// errors. Launch a fresh browser per render there; reuse a cached one locally.
+const isServerless =
+  !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+async function launchBrowser(): Promise<Browser> {
+  const { executablePath, args } = await launchOptions();
+  if (isServerless) {
+    // Recommended settings for @sparticuz/chromium's headless shell.
+    serverlessChromium.setGraphicsMode = false;
+    return puppeteer.launch({
+      executablePath,
+      args,
+      headless: "shell",
+      defaultViewport: { width: 1280, height: 800 },
+    });
+  }
+  return puppeteer.launch({ executablePath, headless: true, args });
+}
+
 async function getBrowser(): Promise<Browser> {
+  if (isServerless) return launchBrowser();
   if (!globalForPdf.__browser) {
-    globalForPdf.__browser = launchOptions().then(({ executablePath, args }) =>
-      puppeteer.launch({ executablePath, headless: true, args })
-    );
+    globalForPdf.__browser = launchBrowser();
     globalForPdf.__browser.catch(() => {
       globalForPdf.__browser = undefined;
     });
@@ -80,6 +100,11 @@ async function getBrowser(): Promise<Browser> {
     return getBrowser();
   }
   return browser;
+}
+
+/** Close the browser after a render on serverless hosts (fresh per request). */
+async function releaseBrowser(browser: Browser): Promise<void> {
+  if (isServerless) await browser.close().catch(() => undefined);
 }
 
 /**
@@ -104,6 +129,7 @@ export async function htmlToPng(
     return Buffer.from(png);
   } finally {
     await page.close().catch(() => undefined);
+    await releaseBrowser(browser);
   }
 }
 
@@ -125,5 +151,6 @@ export async function htmlToPdf(
     return Buffer.from(pdf);
   } finally {
     await page.close().catch(() => undefined);
+    await releaseBrowser(browser);
   }
 }
