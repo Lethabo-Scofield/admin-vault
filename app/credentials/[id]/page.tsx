@@ -16,6 +16,8 @@ import ConfirmButton from "@/components/ConfirmButton";
 import QrPanel from "@/components/QrPanel";
 
 export const dynamic = "force-dynamic";
+// Document rendering uses headless Chromium — allow more than Vercel's 10s default.
+export const maxDuration = 60;
 
 export default async function InternCredentialDetailPage({
   params,

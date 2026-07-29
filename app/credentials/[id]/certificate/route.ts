@@ -10,6 +10,8 @@ import {
 import { certificateFileName } from "@/lib/documents/fields";
 
 export const dynamic = "force-dynamic";
+// Document rendering uses headless Chromium — allow more than Vercel's 10s default.
+export const maxDuration = 60;
 
 /**
  * Super-admin certificate preview/download.

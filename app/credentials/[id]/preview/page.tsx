@@ -5,6 +5,8 @@ import { getInternCredential } from "@/lib/intern-queries";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 
 export const dynamic = "force-dynamic";
+// Document rendering uses headless Chromium — allow more than Vercel's 10s default.
+export const maxDuration = 60;
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
