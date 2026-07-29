@@ -60,9 +60,22 @@ export function sealSvg(size = 92): string {
   return `<img src="${assetDataUrl("seal.png")}" width="${size}" height="${size}" style="display:block;border-radius:50%;" alt="Olyxee corporate seal"/>`;
 }
 
-/** Deterministic script-style signature rendered as styled text. */
+/** Real scanned signature images for the known signatories. */
+const SIGNATURE_IMAGES: Record<string, string> = {
+  dzowa: "sig-dzowa.png",
+  laura: "sig-laura.png",
+};
+
+/**
+ * Deterministic signature: real scanned image for known signatories,
+ * script-styled text fallback for anyone else.
+ */
 export function signatureHtml(name: string): string {
   const display = esc(name || "");
   if (!display) return "";
+  const image = SIGNATURE_IMAGES[(name || "").trim().toLowerCase()];
+  if (image) {
+    return `<img src="${assetDataUrl(image)}" alt="Signature of ${display}" style="height:15mm;width:auto;display:block;margin:0 auto;"/>`;
+  }
   return `<div style="font-family:'Signature Script','Brush Script MT',cursive;font-size:30px;color:#1c232c;line-height:1;padding:2px 0 4px;">${display}</div>`;
 }
