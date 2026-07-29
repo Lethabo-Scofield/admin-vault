@@ -6,34 +6,56 @@ const globalForPdf = globalThis as unknown as {
   __browser?: Promise<Browser>;
 };
 
-function chromiumPath(): string {
-  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
+/**
+ * Find a Chromium binary, in order of preference:
+ * 1. CHROMIUM_PATH env var (explicit override)
+ * 2. A system chromium on PATH (Replit / local dev)
+ * 3. @sparticuz/chromium's bundled binary (Vercel and other serverless hosts,
+ *    which ship no system browser)
+ */
+async function launchOptions(): Promise<{
+  executablePath: string;
+  args: string[];
+}> {
+  const baseArgs = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+  ];
+  if (process.env.CHROMIUM_PATH) {
+    return { executablePath: process.env.CHROMIUM_PATH, args: baseArgs };
+  }
   if (!globalForPdf.__chromiumPath) {
     try {
       globalForPdf.__chromiumPath = execFileSync("which", ["chromium"], {
         encoding: "utf8",
       }).trim();
     } catch {
-      throw new Error(
-        "Chromium not found. Install it or set CHROMIUM_PATH to a Chrome/Chromium binary."
-      );
+      // No system chromium — fall through to the serverless binary below.
     }
   }
-  return globalForPdf.__chromiumPath;
+  if (globalForPdf.__chromiumPath) {
+    return { executablePath: globalForPdf.__chromiumPath, args: baseArgs };
+  }
+  try {
+    const chromium = (await import("@sparticuz/chromium")).default;
+    return {
+      executablePath: await chromium.executablePath(),
+      args: [...chromium.args, ...baseArgs],
+    };
+  } catch {
+    throw new Error(
+      "Chromium not found. Install it, set CHROMIUM_PATH, or add @sparticuz/chromium."
+    );
+  }
 }
 
 async function getBrowser(): Promise<Browser> {
   if (!globalForPdf.__browser) {
-    globalForPdf.__browser = puppeteer.launch({
-      executablePath: chromiumPath(),
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-      ],
-    });
+    globalForPdf.__browser = launchOptions().then(({ executablePath, args }) =>
+      puppeteer.launch({ executablePath, headless: true, args })
+    );
     globalForPdf.__browser.catch(() => {
       globalForPdf.__browser = undefined;
     });
