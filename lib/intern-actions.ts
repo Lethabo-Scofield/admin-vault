@@ -170,11 +170,6 @@ export async function archiveIntern(formData: FormData): Promise<void> {
 function credentialFields(formData: FormData) {
   return {
     programmeTitle: text(formData, "programmeTitle", 300),
-    position: text(formData, "position", 200),
-    department: text(formData, "department", 200),
-    pronouns: pronounsOrEmpty(formData.get("pronouns")),
-    startDate: dateOrNull(formData.get("startDate")),
-    completionDate: dateOrNull(formData.get("completionDate")),
     projectsCompleted: text(formData, "projectsCompleted"),
     responsibilities: text(formData, "responsibilities"),
     skillsDemonstrated: text(formData, "skillsDemonstrated"),
@@ -188,11 +183,40 @@ function credentialFields(formData: FormData) {
   };
 }
 
+/**
+ * Position, department, pronouns, and dates always come from the intern's
+ * profile — the credential form never asks for them again.
+ */
+async function internProfileFields(internId: number) {
+  const sql = await db();
+  const [row] = await sql<
+    {
+      position: string;
+      department: string;
+      pronouns: string;
+      startDate: string | null;
+      completionDate: string | null;
+    }[]
+  >`
+    select
+      position,
+      department,
+      pronouns,
+      start_date::text      as "startDate",
+      completion_date::text as "completionDate"
+    from interns where id = ${internId}
+  `;
+  return row ?? null;
+}
+
 export async function createInternCredential(formData: FormData): Promise<void> {
   const user = await requireSuperAdmin();
   const internId = Number(formData.get("internId"));
   const f = credentialFields(formData);
   if (!internId || !f.programmeTitle) return;
+
+  const profile = await internProfileFields(internId);
+  if (!profile) return;
 
   const sql = await db();
   let credentialId = 0;
@@ -211,8 +235,8 @@ export async function createInternCredential(formData: FormData): Promise<void> 
          manager_name, manager_title, manager_recommendation,
          status, created_by, updated_by)
       values
-        (${internId}, ${credentialNumber}, ${token}, ${f.programmeTitle}, ${f.position},
-         ${f.department}, ${f.pronouns}, ${f.startDate}, ${f.completionDate},
+        (${internId}, ${credentialNumber}, ${token}, ${f.programmeTitle}, ${profile.position},
+         ${profile.department}, ${profile.pronouns}, ${profile.startDate}, ${profile.completionDate},
          ${f.projectsCompleted}, ${f.responsibilities}, ${f.skillsDemonstrated},
          ${f.publicRecommendation},
          ${f.founderName}, ${f.founderTitle}, ${f.founderRecommendation},
@@ -239,6 +263,10 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
   const existing = await getInternCredential(credentialId);
   if (!existing) return;
 
+  // Identity fields are always re-synced from the intern's profile.
+  const profile = await internProfileFields(existing.internId);
+  if (!profile) return;
+
   const isPublished = existing.status === "PUBLISHED";
 
   // Published records must keep the publish-time invariants: dates present
@@ -246,15 +274,15 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
   // completion date.
   let regenerated: { certificatePdf: Buffer; letterPdf: Buffer } | null = null;
   if (isPublished) {
-    if (!f.startDate || !f.completionDate) {
+    if (!profile.startDate || !profile.completionDate) {
       redirect(
-        `/credentials/${credentialId}?error=${encodeURIComponent("Start and completion dates are required on a published credential.")}`
+        `/credentials/${credentialId}?error=${encodeURIComponent("Start and completion dates are required on the intern profile for a published credential.")}`
       );
     }
-    const check = validateIssueDate(existing.issueDate, f.completionDate);
+    const check = validateIssueDate(existing.issueDate, profile.completionDate);
     if (!check.ok) {
       redirect(
-        `/credentials/${credentialId}?error=${encodeURIComponent(check.error ?? "Invalid completion date.")}`
+        `/credentials/${credentialId}?error=${encodeURIComponent(check.error ?? "Invalid completion date on the intern profile.")}`
       );
     }
     // Regenerate the stored PDFs from the edited values BEFORE writing
@@ -263,7 +291,8 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
     const merged = {
       ...existing,
       ...f,
-      pronouns: f.pronouns as InternCredential["pronouns"],
+      ...profile,
+      pronouns: profile.pronouns as InternCredential["pronouns"],
     };
     try {
       const [certificatePdf, letterPdf] = await Promise.all([
@@ -283,11 +312,11 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
     const rows = await tx<{ credentialNumber: string }[]>`
       update intern_credentials set
         programme_title = ${f.programmeTitle},
-        position = ${f.position},
-        department = ${f.department},
-        pronouns = ${f.pronouns},
-        start_date = ${f.startDate},
-        completion_date = ${f.completionDate},
+        position = ${profile.position},
+        department = ${profile.department},
+        pronouns = ${profile.pronouns},
+        start_date = ${profile.startDate},
+        completion_date = ${profile.completionDate},
         projects_completed = ${f.projectsCompleted},
         responsibilities = ${f.responsibilities},
         skills_demonstrated = ${f.skillsDemonstrated},

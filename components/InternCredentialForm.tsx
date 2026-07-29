@@ -88,50 +88,35 @@ export default function InternCredentialForm({
             className="vault-input"
           />
         </Field>
-        <Field label="Position">
-          <input
-            name="position"
-            defaultValue={d?.position ?? ""}
-            placeholder="Software Engineering Intern"
-            className="vault-input"
-          />
-        </Field>
-        <Field label="Department">
-          <input
-            name="department"
-            defaultValue={d?.department ?? ""}
-            placeholder="Engineering Department"
-            className="vault-input"
-          />
-        </Field>
-        <Field label="Pronouns (never inferred from the name)">
-          <select
-            name="pronouns"
-            defaultValue={d?.pronouns ?? ""}
-            className="vault-input"
-          >
-            <option value="">Not specified (uses they/them)</option>
-            <option value="SHE_HER">She / Her</option>
-            <option value="HE_HIM">He / Him</option>
-            <option value="THEY_THEM">They / Them</option>
-          </select>
-        </Field>
-        <Field label="Start Date">
-          <input
-            name="startDate"
-            type="date"
-            defaultValue={toDateInput(d?.startDate)}
-            className="vault-input"
-          />
-        </Field>
-        <Field label="Completion Date">
-          <input
-            name="completionDate"
-            type="date"
-            defaultValue={toDateInput(d?.completionDate)}
-            className="vault-input"
-          />
-        </Field>
+        <div className="sm:col-span-2 rounded-ios bg-gray-50 px-4 py-3 text-[13px] text-gray-600">
+          <div className="mb-1 font-medium text-gray-800">
+            From the intern profile (synced automatically on save)
+          </div>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
+            <div>Position: <b>{d?.position || "—"}</b></div>
+            <div>Department: <b>{d?.department || "—"}</b></div>
+            <div>
+              Pronouns:{" "}
+              <b>
+                {d?.pronouns === "SHE_HER"
+                  ? "She / Her"
+                  : d?.pronouns === "HE_HIM"
+                    ? "He / Him"
+                    : d?.pronouns === "THEY_THEM"
+                      ? "They / Them"
+                      : "Not specified (they/them)"}
+              </b>
+            </div>
+            <div>
+              Dates: <b>{toDateInput(d?.startDate) || "—"}</b> →{" "}
+              <b>{toDateInput(d?.completionDate) || "—"}</b>
+            </div>
+          </div>
+          <div className="mt-1.5 text-[12px] text-gray-500">
+            To change these, edit the intern's profile — they are copied from
+            there whenever this credential is saved.
+          </div>
+        </div>
         <Field label="Projects & Responsibilities Completed" full>
           <textarea
             name="projectsCompleted"

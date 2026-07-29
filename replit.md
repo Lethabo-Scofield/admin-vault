@@ -117,8 +117,12 @@ created automatically on first DB access.
   "Olyxee (Pty) Ltd"), `qr.ts` (dynamic QR, error correction H), `pdf.ts`
   (puppeteer-core + system chromium via `which chromium`; override with
   `CHROMIUM_PATH`), `generate.ts` (render + PDF orchestration).
-- Pronouns (SHE_HER/HE_HIM/THEY_THEM) are selected explicitly on intern and
-  credential forms — never inferred from names; blank falls back to they/them.
+- Pronouns (SHE_HER/HE_HIM/THEY_THEM) are selected explicitly on the intern
+  form — never inferred from names; blank falls back to they/them.
+- The credential form never re-asks intern-profile fields: position,
+  department, pronouns, and start/completion dates are shown read-only and
+  re-synced from the intern row on every credential save (create and update);
+  published saves re-validate dates and regenerate the stored PDFs.
 - Publish validates start/completion dates, generates both PDFs BEFORE
   flipping status, and stores them as bytea on `intern_credentials`. Editing a
   published credential regenerates the stored PDFs; the verification URL and
