@@ -11,7 +11,12 @@ import {
   COMPANY_CONTACT_LINES,
   COMPANY_NAME,
   COMPANY_REGISTRATION,
+  DEFAULT_FOUNDER_NAME,
+  DEFAULT_FOUNDER_TITLE,
+  DEFAULT_MANAGER_NAME,
+  DEFAULT_MANAGER_TITLE,
   logoSvg,
+  signatureFontCss,
   signatureHtml,
 } from "@/lib/documents/branding";
 
@@ -42,23 +47,24 @@ export function letterHtml(d: DocumentData): string {
     ? `<h3>Manager&rsquo;s Recommendation</h3><p>${escMultiline(managerRec)}</p>`
     : "";
 
-  const signatures: string[] = [];
-  if (d.founderName) {
-    signatures.push(`<div class="sig">
-      ${signatureHtml(d.founderName)}
-      <div class="sig-name">${esc(d.founderName)}</div>
-      <div class="sig-title">${esc(d.founderTitle)}</div>
+  // Signatures always appear, matching the reference: handwritten name above
+  // the line, title + company below it.
+  const founderName = d.founderName || DEFAULT_FOUNDER_NAME;
+  const founderTitle = d.founderTitle || DEFAULT_FOUNDER_TITLE;
+  const managerName = d.managerName || DEFAULT_MANAGER_NAME;
+  const managerTitle = d.managerTitle || DEFAULT_MANAGER_TITLE;
+  const signatures = [
+    `<div class="sig">
+      ${signatureHtml(founderName)}
+      <div class="sig-name">${esc(founderTitle)}</div>
       <div class="sig-title">${COMPANY_NAME}</div>
-    </div>`);
-  }
-  if (d.managerName) {
-    signatures.push(`<div class="sig">
-      ${signatureHtml(d.managerName)}
-      <div class="sig-name">${esc(d.managerName)}</div>
-      <div class="sig-title">${esc(d.managerTitle)}</div>
+    </div>`,
+    `<div class="sig">
+      ${signatureHtml(managerName)}
+      <div class="sig-name">${esc(managerTitle)}</div>
       <div class="sig-title">${COMPANY_NAME}</div>
-    </div>`);
-  }
+    </div>`,
+  ];
 
   return `<!doctype html>
 <html>
@@ -95,7 +101,8 @@ export function letterHtml(d: DocumentData): string {
   .closing { margin-top: 8mm; }
   .sig-row { display: flex; gap: 24mm; margin-top: 10mm; flex-wrap: wrap; }
   .sig { min-width: 55mm; }
-  .sig-name { font-weight: 700; border-top: 1px solid #6b7480; padding-top: 3px; font-size: 12.5px; }
+  ${signatureFontCss()}
+  .sig-name { font-weight: 600; border-top: 1px solid #6b7480; padding-top: 3px; font-size: 12.5px; }
   .sig-title { font-size: 12px; color: #5a6470; }
   .spacer { flex: 1; }
   .reg { font-size: 11px; color: #5a6470; margin-top: 12mm; }

@@ -21,13 +21,28 @@ import { join } from "path";
 
 const dataUrlCache = new Map<string, string>();
 
-function assetDataUrl(fileName: string): string {
+function assetDataUrl(fileName: string, mime = "image/png"): string {
   const cached = dataUrlCache.get(fileName);
   if (cached) return cached;
   const buf = readFileSync(join(process.cwd(), "assets", "branding", fileName));
-  const url = `data:image/png;base64,${buf.toString("base64")}`;
+  const url = `data:${mime};base64,${buf.toString("base64")}`;
   dataUrlCache.set(fileName, url);
   return url;
+}
+
+/** Default signatories, matching the master reference design. */
+export const DEFAULT_FOUNDER_NAME = "Dzowa";
+export const DEFAULT_FOUNDER_TITLE = "Founder & CEO";
+export const DEFAULT_MANAGER_NAME = "Laura";
+export const DEFAULT_MANAGER_TITLE = "Department Approval";
+
+/** Embedded handwriting font so signatures render identically in every PDF. */
+export function signatureFontCss(): string {
+  return `@font-face {
+    font-family: "Signature Script";
+    src: url("${assetDataUrl("GreatVibes-Regular.ttf", "font/ttf")}") format("truetype");
+    font-weight: normal; font-style: normal;
+  }`;
 }
 
 /** Official Olyxee logo (transparent PNG). */
@@ -49,5 +64,5 @@ export function sealSvg(size = 92): string {
 export function signatureHtml(name: string): string {
   const display = esc(name || "");
   if (!display) return "";
-  return `<div style="font-family:'Segoe Script','Brush Script MT','Comic Sans MS',cursive;font-size:22px;color:#2b3440;line-height:1;padding:2px 0 6px;">${display}</div>`;
+  return `<div style="font-family:'Signature Script','Brush Script MT',cursive;font-size:30px;color:#1c232c;line-height:1;padding:2px 0 4px;">${display}</div>`;
 }

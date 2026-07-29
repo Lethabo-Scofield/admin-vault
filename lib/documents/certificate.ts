@@ -7,8 +7,13 @@ import {
 } from "@/lib/documents/fields";
 import {
   COMPANY_NAME,
+  DEFAULT_FOUNDER_NAME,
+  DEFAULT_FOUNDER_TITLE,
+  DEFAULT_MANAGER_NAME,
+  DEFAULT_MANAGER_TITLE,
   logoSvg,
   sealSvg,
+  signatureFontCss,
   signatureHtml,
   watermarkSvg,
 } from "@/lib/documents/branding";
@@ -23,6 +28,13 @@ export function certificateHtml(d: DocumentData, qrDataUrl: string): string {
   const start = formatDisplayDate(d.startDate);
   const end = formatDisplayDate(d.completionDate);
   const issued = formatDisplayDate(d.issueDate);
+
+  // Signatures always appear, exactly as on the master reference:
+  // handwritten name above the line, title + company below it.
+  const founderName = d.founderName || DEFAULT_FOUNDER_NAME;
+  const founderTitle = d.founderTitle || DEFAULT_FOUNDER_TITLE;
+  const managerName = d.managerName || DEFAULT_MANAGER_NAME;
+  const managerTitle = d.managerTitle || DEFAULT_MANAGER_TITLE;
 
   return `<!doctype html>
 <html>
@@ -62,13 +74,13 @@ export function certificateHtml(d: DocumentData, qrDataUrl: string): string {
   .statement { font-size: 16.5px; line-height: 1.65; color: #232a33; }
   .statement b { font-weight: 700; }
   .issued { font-size: 16px; margin-top: 12mm; }
+  ${signatureFontCss()}
   .signatures {
-    position: absolute; top: 14mm; right: 0; width: 52mm; text-align: center;
+    position: absolute; top: 32mm; right: 14mm; width: 50mm; text-align: center;
   }
-  .sig-block { margin-bottom: 14mm; }
-  .sig-line { border-top: 1px solid #6b7480; margin-top: 2px; padding-top: 4px; }
-  .sig-name { font-size: 12px; font-weight: 600; color: #2b3440; }
-  .sig-title { font-size: 11px; color: #5a6470; }
+  .sig-block { margin-bottom: 16mm; }
+  .sig-line { border-top: 1px solid #6b7480; margin-top: 1px; padding-top: 4px; }
+  .sig-title { font-size: 11.5px; color: #4a545f; line-height: 1.5; }
   .bottom { display: flex; justify-content: space-between; align-items: flex-end; }
   .credinfo { font-size: 11.5px; color: #3c4550; line-height: 1.7; }
   .credinfo b { color: #1c232c; }
@@ -106,21 +118,19 @@ export function certificateHtml(d: DocumentData, qrDataUrl: string): string {
           from <b>${esc(start)}</b> to <b>${esc(end)}</b>.
         </div>
         <div class="issued">Issued on <b>${esc(issued)}</b> in Johannesburg, South Africa.</div>
+      </div>
 
-        <div class="signatures">
-          <div class="sig-block">
-            ${signatureHtml(d.founderName)}
-            <div class="sig-line">
-              <div class="sig-name">${esc(d.founderName)}</div>
-              <div class="sig-title">${esc(d.founderTitle)}<br/>${COMPANY_NAME}</div>
-            </div>
+      <div class="signatures">
+        <div class="sig-block">
+          ${signatureHtml(founderName)}
+          <div class="sig-line">
+            <div class="sig-title">${esc(founderTitle)}<br/>${COMPANY_NAME}</div>
           </div>
-          <div class="sig-block">
-            ${signatureHtml(d.managerName)}
-            <div class="sig-line">
-              <div class="sig-name">${esc(d.managerName)}</div>
-              <div class="sig-title">${esc(d.managerTitle)}<br/>${COMPANY_NAME}</div>
-            </div>
+        </div>
+        <div class="sig-block">
+          ${signatureHtml(managerName)}
+          <div class="sig-line">
+            <div class="sig-title">${esc(managerTitle)}<br/>${COMPANY_NAME}</div>
           </div>
         </div>
       </div>
