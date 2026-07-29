@@ -44,12 +44,24 @@ async function launchOptions(): Promise<{
       executablePath: await serverlessChromium.executablePath(),
       args: [...serverlessChromium.args, ...baseArgs],
     };
-  } catch (err) {
-    throw new Error(
-      `No system Chromium found and the serverless Chromium fallback failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
+  } catch (bundledErr) {
+    // Bundled binaries missing from the deployment (bundler/symlink issue) —
+    // download the official browser pack at runtime instead.
+    const packUrl =
+      process.env.CHROMIUM_PACK_URL ??
+      "https://github.com/Sparticuz/chromium/releases/download/v147.0.0/chromium-v147.0.0-pack.x64.tar";
+    try {
+      return {
+        executablePath: await serverlessChromium.executablePath(packUrl),
+        args: [...serverlessChromium.args, ...baseArgs],
+      };
+    } catch (downloadErr) {
+      throw new Error(
+        `No system Chromium found and the serverless Chromium fallback failed. ` +
+          `Bundled: ${bundledErr instanceof Error ? bundledErr.message : bundledErr}. ` +
+          `Downloaded pack: ${downloadErr instanceof Error ? downloadErr.message : downloadErr}`
+      );
+    }
   }
 }
 
