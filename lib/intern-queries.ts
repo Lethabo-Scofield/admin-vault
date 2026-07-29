@@ -159,6 +159,7 @@ export async function getPublicCredentialByToken(token: string): Promise<{
   managerTitle?: string;
   hasCertificatePdf?: boolean;
   hasLetterPdf?: boolean;
+  hasCertificatePreview?: boolean;
   issueDate?: string | null;
 } | null> {
   if (!token || token.length > 128) return null;
@@ -186,6 +187,7 @@ export async function getPublicCredentialByToken(token: string): Promise<{
       managerTitle: string;
       hasCertificatePdf: boolean;
       hasLetterPdf: boolean;
+      hasCertificatePreview: boolean;
       issueDate: string | null;
     }[]
   >`
@@ -211,6 +213,7 @@ export async function getPublicCredentialByToken(token: string): Promise<{
       c.manager_title         as "managerTitle",
       (c.certificate_pdf is not null) as "hasCertificatePdf",
       (c.letter_pdf is not null)      as "hasLetterPdf",
+      (c.certificate_preview_png is not null) as "hasCertificatePreview",
       c.issue_date::text      as "issueDate"
     from intern_credentials c
     join interns i on i.id = c.intern_id
@@ -240,6 +243,20 @@ export async function getCredentialPdfs(id: number): Promise<{
     from intern_credentials where id = ${id}
   `;
   return rows[0] ?? null;
+}
+
+/** Stored certificate preview PNG for a PUBLISHED credential — public. */
+export async function getPublicCertificatePreviewByToken(
+  token: string
+): Promise<Buffer | null> {
+  if (!token || token.length > 128) return null;
+  const sql = await db();
+  const rows = await sql<{ png: Buffer | null }[]>`
+    select certificate_preview_png as "png"
+    from intern_credentials
+    where verification_token = ${token} and status = 'PUBLISHED'
+  `;
+  return rows[0]?.png ?? null;
 }
 
 /** Stored PDFs for a PUBLISHED credential looked up by token — public. */

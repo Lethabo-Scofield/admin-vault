@@ -11,6 +11,7 @@ import { getInternCredential } from "@/lib/intern-queries";
 import { validateIssueDate } from "@/lib/documents/fields";
 import {
   generateCertificatePdf,
+  generateCertificatePng,
   generateLetterPdf,
 } from "@/lib/documents/generate";
 
@@ -272,7 +273,11 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
   // Published records must keep the publish-time invariants: dates present
   // and the fixed issue date never earlier than the (possibly edited)
   // completion date.
-  let regenerated: { certificatePdf: Buffer; letterPdf: Buffer } | null = null;
+  let regenerated: {
+    certificatePdf: Buffer;
+    letterPdf: Buffer;
+    certificatePng: Buffer;
+  } | null = null;
   if (isPublished) {
     if (!profile.startDate || !profile.completionDate) {
       redirect(
@@ -295,11 +300,12 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
       pronouns: profile.pronouns as InternCredential["pronouns"],
     };
     try {
-      const [certificatePdf, letterPdf] = await Promise.all([
+      const [certificatePdf, letterPdf, certificatePng] = await Promise.all([
         generateCertificatePdf(merged),
         generateLetterPdf(merged),
+        generateCertificatePng(merged),
       ]);
-      regenerated = { certificatePdf, letterPdf };
+      regenerated = { certificatePdf, letterPdf, certificatePng };
     } catch {
       redirect(
         `/credentials/${credentialId}?error=${encodeURIComponent("Document regeneration failed; no changes were saved. Please try again.")}`
@@ -329,6 +335,7 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
         manager_recommendation = ${f.managerRecommendation},
         certificate_pdf = ${regenerated ? regenerated.certificatePdf : sql`certificate_pdf`},
         letter_pdf = ${regenerated ? regenerated.letterPdf : sql`letter_pdf`},
+        certificate_preview_png = ${regenerated ? regenerated.certificatePng : sql`certificate_preview_png`},
         updated_by = ${user.email},
         updated_at = now()
       where id = ${credentialId}
@@ -370,17 +377,19 @@ export async function publishInternCredential(formData: FormData): Promise<void>
   // Generate the final PDFs before flipping the status so a failed render
   // never leaves a published credential without documents.
   const forDocs = { ...credential, issueDate };
-  const [certificatePdf, letterPdf] = await Promise.all([
+  const [certificatePdf, letterPdf, certificatePng] = await Promise.all([
     generateCertificatePdf(forDocs),
     generateLetterPdf(forDocs),
+    generateCertificatePng(forDocs),
   ]);
 
   const sql = await db();
   await sql.begin(async (tx) => {
     const rows = await tx<{ credentialNumber: string }[]>`
       update intern_credentials
-      set status = 'PUBLISHED', published_at = now(), issue_date = current_date,
+      set status = 'PUBLISHED', published_at = now(), issue_date = ${issueDate},
           certificate_pdf = ${certificatePdf}, letter_pdf = ${letterPdf},
+          certificate_preview_png = ${certificatePng},
           updated_by = ${user.email}, updated_at = now()
       where id = ${credentialId} and status = 'DRAFT'
       returning credential_number as "credentialNumber"

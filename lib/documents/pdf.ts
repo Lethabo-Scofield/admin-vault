@@ -46,6 +46,31 @@ async function getBrowser(): Promise<Browser> {
   return browser;
 }
 
+/**
+ * Render an HTML document to a PNG screenshot buffer (A4 page at 2x scale).
+ * Used for the public certificate preview image.
+ */
+export async function htmlToPng(
+  html: string,
+  opts: { landscape: boolean }
+): Promise<Buffer> {
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    // A4 at 96dpi: 1123 x 794 px.
+    const [w, h] = opts.landscape ? [1123, 794] : [794, 1123];
+    await page.setViewport({ width: w, height: h, deviceScaleFactor: 2 });
+    await page.setContent(html, { waitUntil: "load", timeout: 30000 });
+    const png = await page.screenshot({
+      type: "png",
+      clip: { x: 0, y: 0, width: w, height: h },
+    });
+    return Buffer.from(png);
+  } finally {
+    await page.close().catch(() => undefined);
+  }
+}
+
 /** Render an HTML document to a PDF buffer. */
 export async function htmlToPdf(
   html: string,

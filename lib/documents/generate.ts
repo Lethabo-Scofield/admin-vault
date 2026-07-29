@@ -3,7 +3,7 @@ import { documentDataFromCredential } from "@/lib/documents/data";
 import { certificateHtml } from "@/lib/documents/certificate";
 import { letterHtml } from "@/lib/documents/letter";
 import { qrPngDataUrl } from "@/lib/documents/qr";
-import { htmlToPdf } from "@/lib/documents/pdf";
+import { htmlToPdf, htmlToPng } from "@/lib/documents/pdf";
 
 export async function renderCertificateHtml(
   c: InternCredential
@@ -25,4 +25,11 @@ export async function generateCertificatePdf(
 
 export async function generateLetterPdf(c: InternCredential): Promise<Buffer> {
   return htmlToPdf(renderLetterHtml(c), { landscape: false });
+}
+
+/** PNG image of the certificate, shown inline on the public verify page. */
+export async function generateCertificatePng(
+  c: InternCredential
+): Promise<Buffer> {
+  return htmlToPng(await renderCertificateHtml(c), { landscape: true });
 }
