@@ -10,4 +10,5 @@ Production for this app is **Vercel** at admin.olyxee.com, deploying automatical
 **How to apply:**
 - Never suggest Replit deploy for this project; to ship, commit and `gitPush` to main.
 - Vercel serverless has no system Chromium — PDF/PNG generation uses the @sparticuz/chromium fallback in the pdf helper (`CHROMIUM_PATH` → `which chromium` → @sparticuz). Keep `serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium"]` in next.config.
-- Watch Vercel function limits: publish renders 3 documents; Hobby-plan 10s default duration may need raising.
+- Watch Vercel function limits: publish renders 3 documents; document routes/pages set `export const maxDuration = 60`.
+- Runtime-read files (assets/ branding images + font) must stay in `outputFileTracingIncludes` in next.config or Vercel omits them from the function bundle (ENOENT in prod only).
