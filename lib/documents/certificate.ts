@@ -138,7 +138,7 @@ export function certificateHtml(d: DocumentData, qrDataUrl: string): string {
       <div class="bottom">
         <div class="credinfo">
           <div><b>Certificate Number:</b> ${esc(d.credentialCode)}</div>
-          <div><b>Verify:</b> scan the QR code or visit admin.olyxee.com/verify</div>
+          <div><b>Verify:</b> scan the QR code or visit olyxee.com/verify</div>
         </div>
         <div class="verify-blocks">
           <div class="qr"><img src="${qrDataUrl}" alt="Verification QR code"/></div>
