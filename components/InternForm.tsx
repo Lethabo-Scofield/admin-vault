@@ -37,15 +37,25 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-export default function InternForm({ intern }: { intern?: Intern }) {
+export default function InternForm({
+  intern,
+  onSaved,
+}: {
+  intern?: Intern;
+  onSaved?: () => void;
+}) {
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<TabId>("personal");
   const isEdit = Boolean(intern);
 
   function action(formData: FormData) {
     startTransition(async () => {
-      if (isEdit) await updateIntern(formData);
-      else await createIntern(formData);
+      if (isEdit) {
+        await updateIntern(formData);
+        onSaved?.();
+      } else {
+        await createIntern(formData);
+      }
     });
   }
 

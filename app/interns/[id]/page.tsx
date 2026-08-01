@@ -6,7 +6,7 @@ import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { archiveIntern, deleteIntern } from "@/lib/intern-actions";
 import { PageHeader, StatusBadge } from "@/components/ui";
-import InternForm from "@/components/InternForm";
+import InternProfile from "@/components/InternProfile";
 import ConfirmButton from "@/components/ConfirmButton";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 
@@ -81,7 +81,7 @@ export default async function InternDetailPage({
       )}
 
       <section>
-        <InternForm intern={intern} />
+        <InternProfile intern={intern} />
       </section>
 
       <section>
