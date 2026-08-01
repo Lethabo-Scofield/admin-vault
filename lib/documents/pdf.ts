@@ -120,12 +120,29 @@ function isTargetClosed(err: unknown): boolean {
   );
 }
 
+// Serialize all renders: publish generates 3 documents via Promise.all, and
+// on serverless (fresh browser per render) that would launch 3 Chromiums
+// concurrently in one function — enough to OOM the function and kill the
+// renders with "Target closed". A simple promise-chain mutex keeps memory
+// flat everywhere at a negligible latency cost.
+let renderQueue: Promise<unknown> = Promise.resolve();
+
+function enqueueRender<T>(fn: () => Promise<T>): Promise<T> {
+  const run = renderQueue.then(fn, fn);
+  renderQueue = run.catch(() => undefined);
+  return run;
+}
+
 /**
  * Run a render against a fresh page, retrying once with a brand-new browser if
  * Chromium's target dies mid-render (common on serverless, where the process is
  * frozen/OOM-killed between and during requests).
  */
-async function withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
+function withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
+  return enqueueRender(() => withPageNow(fn));
+}
+
+async function withPageNow<T>(fn: (page: Page) => Promise<T>): Promise<T> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     const browser = await getBrowser();
