@@ -9,6 +9,7 @@ import { getSql, ensureSchema } from "@/lib/db";
 import { requireSuperAdmin, type CurrentUser } from "@/lib/session";
 import { getInternCredential } from "@/lib/intern-queries";
 import { validateIssueDate } from "@/lib/documents/fields";
+import { resequenceInternNumbers } from "@/lib/intern-numbering";
 import {
   generateCertificatePdf,
   generateCertificatePng,
@@ -66,31 +67,6 @@ function text(formData: FormData, key: string, max = 5000): string {
 // Interns
 // ---------------------------------------------------------------------------
 
-/**
- * Force intern numbers into a gapless 1..N sequence (ordered by creation) and
- * sync the counter. Runs on every create AND delete so numbering self-corrects
- * even if the data predates this rule. Callers must hold the
- * pg_advisory_xact_lock('counter:intern') lock first.
- */
-async function resequenceInternNumbers(tx: Tx): Promise<void> {
-  // Two-phase update to avoid unique-constraint collisions mid-update.
-  await tx`update interns set intern_number = 'TMP-' || id`;
-  await tx`
-    with ordered as (
-      select id, row_number() over (order by id) as rn from interns
-    )
-    update interns
-    set intern_number = 'OLX-INT-' || lpad(ordered.rn::text, 4, '0')
-    from ordered
-    where interns.id = ordered.id
-  `;
-  await tx`
-    insert into number_counters (name, value)
-    values ('intern', (select count(*)::int from interns))
-    on conflict (name) do update
-    set value = (select count(*)::int from interns)
-  `;
-}
 
 export async function createIntern(formData: FormData): Promise<void> {
   const user = await requireSuperAdmin();

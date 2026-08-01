@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { GraduationCap, Plus, Search } from "lucide-react";
 import { getInterns } from "@/lib/intern-queries";
+import { ensureSequentialInternNumbers } from "@/lib/intern-numbering";
+import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState, StatusBadge } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +13,9 @@ export default async function InternsPage({
   searchParams: Promise<{ q?: string; archived?: string }>;
 }) {
   const { q = "", archived } = await searchParams;
+  // Self-heal any stale (gappy) intern numbering before listing.
+  await ensureSchema();
+  await ensureSequentialInternNumbers(getSql());
   const interns = await getInterns({
     search: q,
     includeArchived: archived === "1",
