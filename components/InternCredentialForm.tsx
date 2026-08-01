@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   createInternCredential,
   updateInternCredential,
@@ -43,6 +44,7 @@ export default function InternCredentialForm({
   defaults?: Partial<InternCredential>;
   defaultInternId?: number;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const isEdit = Boolean(credential);
   const d = credential ?? defaults;
@@ -67,6 +69,12 @@ export default function InternCredentialForm({
               required
               defaultValue={defaultInternId ?? ""}
               className="vault-input"
+              onChange={(e) => {
+                // Reload the page with the chosen intern so every field below
+                // prefills from their profile — nothing has to be typed twice.
+                const id = e.target.value;
+                if (id) router.replace(`/credentials/new?internId=${id}`);
+              }}
             >
               <option value="" disabled>
                 Select an intern…

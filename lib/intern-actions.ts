@@ -36,6 +36,9 @@ async function writeAudit(
 
 /** Atomically allocate the next number for a named counter. Never reuses values. */
 async function nextCounter(tx: Tx, name: string): Promise<number> {
+  // Serialize all allocations for this counter against concurrent
+  // resequencing (see deleteIntern); held until the transaction commits.
+  await tx`select pg_advisory_xact_lock(hashtext('counter:' || ${name}))`;
   const [row] = await tx<{ value: number }[]>`
     insert into number_counters (name, value) values (${name}, 1)
     on conflict (name) do update set value = number_counters.value + 1
@@ -508,8 +511,33 @@ export async function deleteIntern(formData: FormData): Promise<void> {
   `;
 
   await sql.begin(async (tx) => {
+    // Take the same lock as nextCounter("intern") so a concurrent create
+    // cannot interleave with the resequence + counter reset below.
+    await tx`select pg_advisory_xact_lock(hashtext('counter:intern'))`;
+
     await tx`delete from intern_credentials where intern_id = ${internId}`;
-    await tx`delete from interns where id = ${internId}`;
+    const deleted = await tx`delete from interns where id = ${internId} returning id`;
+    if (deleted.length === 0) return;
+
+    // Resequence intern numbers so they always run 1..N with no gaps.
+    // Two-phase update to avoid unique-constraint collisions mid-update.
+    await tx`update interns set intern_number = 'TMP-' || id`;
+    await tx`
+      with ordered as (
+        select id, row_number() over (order by id) as rn from interns
+      )
+      update interns
+      set intern_number = 'OLX-INT-' || lpad(ordered.rn::text, 4, '0')
+      from ordered
+      where interns.id = ordered.id
+    `;
+    await tx`
+      insert into number_counters (name, value)
+      values ('intern', (select count(*)::int from interns))
+      on conflict (name) do update
+      set value = (select count(*)::int from interns)
+    `;
+
     await writeAudit(
       tx,
       user,

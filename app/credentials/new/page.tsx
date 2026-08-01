@@ -43,6 +43,9 @@ export default async function NewInternCredentialPage({
         }
       />
       <InternCredentialForm
+        // Remount when the intern changes so the prefilled values replace
+        // whatever was in the (uncontrolled) fields before.
+        key={internId ?? "none"}
         defaults={defaults}
         interns={interns.map((i) => ({
           id: i.id,

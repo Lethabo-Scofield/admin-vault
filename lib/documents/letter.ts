@@ -36,8 +36,15 @@ export function letterHtml(d: DocumentData): string {
   const founderRec = String(d.founderRecommendation ?? "").trim();
   const managerRec = String(d.managerRecommendation ?? "").trim();
 
-  const contributionSentence = projects
-    ? `<p>During ${p.possessive} internship, ${esc(d.fullName)} contributed to ${escMultiline(projects)}.</p>`
+  // Each non-empty line becomes its own bullet; leading "-", "*", "•" or
+  // "1." style numbering typed by the admin is stripped to avoid doubling up.
+  const projectItems = projects
+    .split(/\r?\n/)
+    .map((line) => line.trim().replace(/^(?:[-*•‣]|\d+[.)])\s*/, ""))
+    .filter(Boolean);
+  const contributionSentence = projectItems.length
+    ? `<p>During ${p.possessive} internship, ${esc(d.fullName)} contributed to the following projects and responsibilities:</p>
+       <ul class="projects">${projectItems.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`
     : "";
 
   const founderSection = founderRec
@@ -98,6 +105,8 @@ export function letterHtml(d: DocumentData): string {
   .body-copy p { margin-bottom: 5mm; }
   .body-copy b { font-weight: 700; }
   .body-copy h3 { font-size: 13.5px; margin: 6mm 0 2mm; color: #10161d; }
+  .body-copy ul.projects { margin: 0 0 5mm; padding-left: 7mm; }
+  .body-copy ul.projects li { margin-bottom: 1.5mm; }
   .closing { margin-top: 8mm; }
   .sig-row { display: flex; gap: 24mm; margin-top: 10mm; flex-wrap: wrap; }
   .sig { min-width: 55mm; }
