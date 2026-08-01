@@ -149,6 +149,7 @@ alter table intern_credentials add column if not exists letter_pdf bytea;
 alter table intern_credentials add column if not exists certificate_preview_png bytea;
 alter table intern_credentials add column if not exists email_sent_at timestamptz;
 alter table intern_credentials add column if not exists email_sent_to text not null default '';
+alter table intern_credentials add column if not exists docs_stale boolean not null default false;
 
 create table if not exists number_counters (
   name   text primary key,
