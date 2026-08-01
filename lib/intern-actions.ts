@@ -66,6 +66,32 @@ function text(formData: FormData, key: string, max = 5000): string {
 // Interns
 // ---------------------------------------------------------------------------
 
+/**
+ * Force intern numbers into a gapless 1..N sequence (ordered by creation) and
+ * sync the counter. Runs on every create AND delete so numbering self-corrects
+ * even if the data predates this rule. Callers must hold the
+ * pg_advisory_xact_lock('counter:intern') lock first.
+ */
+async function resequenceInternNumbers(tx: Tx): Promise<void> {
+  // Two-phase update to avoid unique-constraint collisions mid-update.
+  await tx`update interns set intern_number = 'TMP-' || id`;
+  await tx`
+    with ordered as (
+      select id, row_number() over (order by id) as rn from interns
+    )
+    update interns
+    set intern_number = 'OLX-INT-' || lpad(ordered.rn::text, 4, '0')
+    from ordered
+    where interns.id = ordered.id
+  `;
+  await tx`
+    insert into number_counters (name, value)
+    values ('intern', (select count(*)::int from interns))
+    on conflict (name) do update
+    set value = (select count(*)::int from interns)
+  `;
+}
+
 export async function createIntern(formData: FormData): Promise<void> {
   const user = await requireSuperAdmin();
   const fullName = text(formData, "fullName", 200);
@@ -73,16 +99,18 @@ export async function createIntern(formData: FormData): Promise<void> {
 
   const sql = await db();
   let internId = 0;
+  let internNumber = "";
   await sql.begin(async (tx) => {
-    const n = await nextCounter(tx, "intern");
-    const internNumber = `OLX-INT-${String(n).padStart(4, "0")}`;
+    // Lock, insert with a placeholder number, then resequence — the new intern
+    // (highest id) lands on N+1, and any stale gaps in older rows get fixed too.
+    await tx`select pg_advisory_xact_lock(hashtext('counter:intern'))`;
     const [row] = await tx<{ id: number }[]>`
       insert into interns
         (intern_number, full_name, email, pronouns, position, department, start_date,
          completion_date, employment_status, projects_completed, responsibilities,
          skills_demonstrated, supervisor_name, supervisor_recommendation, internal_notes)
       values
-        (${internNumber}, ${fullName}, ${text(formData, "email", 320)},
+        (${`TMP-NEW-${Math.random().toString(36).slice(2)}`}, ${fullName}, ${text(formData, "email", 320)},
          ${pronounsOrEmpty(formData.get("pronouns"))}, ${text(formData, "position", 200)},
          ${text(formData, "department", 200)}, ${dateOrNull(formData.get("startDate"))},
          ${dateOrNull(formData.get("completionDate"))},
@@ -93,6 +121,11 @@ export async function createIntern(formData: FormData): Promise<void> {
       returning id
     `;
     internId = row.id;
+    await resequenceInternNumbers(tx);
+    const [assigned] = await tx<{ internNumber: string }[]>`
+      select intern_number as "internNumber" from interns where id = ${internId}
+    `;
+    internNumber = assigned.internNumber;
     await writeAudit(tx, user, `Created intern ${internNumber} ("${fullName}")`);
   });
 
@@ -519,24 +552,7 @@ export async function deleteIntern(formData: FormData): Promise<void> {
     const deleted = await tx`delete from interns where id = ${internId} returning id`;
     if (deleted.length === 0) return;
 
-    // Resequence intern numbers so they always run 1..N with no gaps.
-    // Two-phase update to avoid unique-constraint collisions mid-update.
-    await tx`update interns set intern_number = 'TMP-' || id`;
-    await tx`
-      with ordered as (
-        select id, row_number() over (order by id) as rn from interns
-      )
-      update interns
-      set intern_number = 'OLX-INT-' || lpad(ordered.rn::text, 4, '0')
-      from ordered
-      where interns.id = ordered.id
-    `;
-    await tx`
-      insert into number_counters (name, value)
-      values ('intern', (select count(*)::int from interns))
-      on conflict (name) do update
-      set value = (select count(*)::int from interns)
-    `;
+    await resequenceInternNumbers(tx);
 
     await writeAudit(
       tx,
