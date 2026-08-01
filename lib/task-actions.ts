@@ -103,7 +103,7 @@ export async function reviewInternTask(formData: FormData): Promise<void> {
     const [row] = await tx<{ internId: number; title: string }[]>`
       update intern_tasks
       set status = ${decision}, review_note = ${reviewNote}, updated_at = now()
-      where id = ${taskId}
+      where id = ${taskId} and status = 'SUBMITTED'
       returning intern_id as "internId", title
     `;
     if (!row) return;
