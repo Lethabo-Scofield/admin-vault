@@ -74,6 +74,10 @@ export default async function InternDetailPage({
       )}
 
       <section>
+        <InternForm intern={intern} />
+      </section>
+
+      <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[18px] font-semibold text-gray-900">
             Credentials Issued
@@ -129,13 +133,6 @@ export default async function InternDetailPage({
             </table>
           </div>
         )}
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-[18px] font-semibold text-gray-900">
-          Intern Details
-        </h2>
-        <InternForm intern={intern} />
       </section>
 
       <section className="text-[13px] text-gray-400">
