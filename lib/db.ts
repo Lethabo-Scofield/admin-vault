@@ -173,6 +173,17 @@ create table if not exists number_counters (
 );
 
 create index if not exists idx_intern_credentials_intern on intern_credentials(intern_id);
+
+-- One-time flag: QR base URL moved to admin.olyxee.com/verify. Marks existing
+-- published/revoked documents stale so the self-heal regenerates their QR
+-- codes. The counter row makes this idempotent across restarts.
+with flag as (
+  insert into number_counters (name, value) values ('qr-admin-verify-v1', 1)
+  on conflict (name) do nothing
+  returning 1
+)
+update intern_credentials set docs_stale = true
+where status <> 'DRAFT' and exists (select 1 from flag);
 create index if not exists idx_credentials_project on credentials(project_id);
 create index if not exists idx_documents_project on documents(project_id);
 create index if not exists idx_audit_timestamp on audit_logs(timestamp desc);
