@@ -9,7 +9,11 @@ import { getSql, ensureSchema } from "@/lib/db";
 import { requireSuperAdmin, type CurrentUser } from "@/lib/session";
 import { getInternCredential } from "@/lib/intern-queries";
 import { validateIssueDate } from "@/lib/documents/fields";
-import { resequenceInternNumbers } from "@/lib/intern-numbering";
+import {
+  resequenceInternNumbers,
+  resequenceCredentialNumbers,
+  regenerateCredentialDocuments,
+} from "@/lib/intern-numbering";
 import {
   generateCertificatePdf,
   generateCertificatePng,
@@ -233,10 +237,12 @@ export async function createInternCredential(formData: FormData): Promise<void> 
 
   const sql = await db();
   let credentialId = 0;
+  let changedDocs: number[] = [];
   await sql.begin(async (tx) => {
-    const year = new Date().getFullYear();
-    const n = await nextCounter(tx, `cert-${year}`);
-    const credentialNumber = `OLX-CERT-${year}-${String(n).padStart(4, "0")}`;
+    // Lock, insert with a placeholder, then resequence — the new credential
+    // lands on the next gapless number for its year.
+    await tx`select pg_advisory_xact_lock(hashtext('counter:credential'))`;
+    const credentialNumber = `TMP-NEW-${randomBytes(6).toString("base64url")}`;
     // Secure random, non-sequential, not derived from any personal data.
     const token = randomBytes(9).toString("base64url");
     const [row] = await tx<{ id: number }[]>`
@@ -258,8 +264,20 @@ export async function createInternCredential(formData: FormData): Promise<void> 
       returning id
     `;
     credentialId = row.id;
-    await writeAudit(tx, user, `Created credential ${credentialNumber} (draft)`);
+    changedDocs = await resequenceCredentialNumbers(tx);
+    const [assigned] = await tx<{ credentialNumber: string }[]>`
+      select credential_number as "credentialNumber"
+      from intern_credentials where id = ${credentialId}
+    `;
+    await writeAudit(
+      tx,
+      user,
+      `Created credential ${assigned.credentialNumber} (draft)`
+    );
   });
+  // Rare: published credentials renumbered by the resequence need their
+  // stored PDFs to print the new number.
+  await regenerateCredentialDocuments(sql, changedDocs);
 
   revalidatePath("/credentials");
   revalidatePath(`/interns/${internId}`);
@@ -485,14 +503,18 @@ export async function deleteInternCredential(formData: FormData): Promise<void> 
   }
 
   const sql = await db();
+  let changedDocs: number[] = [];
   await sql.begin(async (tx) => {
+    await tx`select pg_advisory_xact_lock(hashtext('counter:credential'))`;
     await tx`delete from intern_credentials where id = ${credentialId}`;
+    changedDocs = await resequenceCredentialNumbers(tx);
     await writeAudit(
       tx,
       user,
       `Deleted draft credential ${existing.credentialNumber}`
     );
   });
+  await regenerateCredentialDocuments(sql, changedDocs);
 
   revalidatePath("/credentials");
   revalidatePath(`/interns/${existing.internId}`);
@@ -519,16 +541,19 @@ export async function deleteIntern(formData: FormData): Promise<void> {
     where intern_id = ${internId} and status <> 'DRAFT'
   `;
 
+  let changedCredentialDocs: number[] = [];
   await sql.begin(async (tx) => {
-    // Take the same lock as nextCounter("intern") so a concurrent create
-    // cannot interleave with the resequence + counter reset below.
+    // Take the same locks as the create paths so concurrent creates cannot
+    // interleave with the resequence + counter resets below.
     await tx`select pg_advisory_xact_lock(hashtext('counter:intern'))`;
+    await tx`select pg_advisory_xact_lock(hashtext('counter:credential'))`;
 
     await tx`delete from intern_credentials where intern_id = ${internId}`;
     const deleted = await tx`delete from interns where id = ${internId} returning id`;
     if (deleted.length === 0) return;
 
     await resequenceInternNumbers(tx);
+    changedCredentialDocs = await resequenceCredentialNumbers(tx);
 
     await writeAudit(
       tx,
@@ -538,6 +563,8 @@ export async function deleteIntern(formData: FormData): Promise<void> {
         : `Deleted intern ${intern.internNumber} (and their draft credentials)`
     );
   });
+
+  await regenerateCredentialDocuments(sql, changedCredentialDocs);
 
   revalidatePath("/interns");
   revalidatePath("/credentials");

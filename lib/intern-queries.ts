@@ -119,6 +119,27 @@ export async function getInternCredentials(opts?: {
   );
 }
 
+/**
+ * INTERNAL — no auth check. Only for server-side maintenance paths (e.g.
+ * regenerating documents after credential renumbering). Never expose to
+ * request-controlled input without an auth check upstream.
+ */
+export async function getInternCredentialInternal(
+  id: number
+): Promise<InternCredential | null> {
+  const sql = await db();
+  const rows = await sql.unsafe<InternCredential[]>(
+    `
+    select ${CREDENTIAL_COLUMNS}
+    from intern_credentials c
+    join interns i on i.id = c.intern_id
+    where c.id = $1
+    `,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+
 export async function getInternCredential(
   id: number
 ): Promise<InternCredential | null> {

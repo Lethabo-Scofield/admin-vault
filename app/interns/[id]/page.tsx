@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Plus, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { getIntern, getInternCredentials } from "@/lib/intern-queries";
+import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
+import { getSql, ensureSchema } from "@/lib/db";
 import { archiveIntern, deleteIntern } from "@/lib/intern-actions";
 import { PageHeader, StatusBadge } from "@/components/ui";
 import InternForm from "@/components/InternForm";
@@ -9,6 +11,8 @@ import ConfirmButton from "@/components/ConfirmButton";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 
 export const dynamic = "force-dynamic";
+// Self-healing may regenerate documents via headless Chromium.
+export const maxDuration = 60;
 
 export default async function InternDetailPage({
   params,
@@ -22,6 +26,9 @@ export default async function InternDetailPage({
   const internId = Number(id);
   if (!internId) notFound();
 
+  // Self-heal any stale (gappy) credential numbering before listing.
+  await ensureSchema();
+  await ensureSequentialCredentialNumbers(getSql());
   const [intern, credentials] = await Promise.all([
     getIntern(internId),
     getInternCredentials({ internId }),

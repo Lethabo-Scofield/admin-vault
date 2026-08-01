@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { BadgeCheck, Plus } from "lucide-react";
 import { getInternCredentials } from "@/lib/intern-queries";
+import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
+import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState } from "@/components/ui";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 
 export const dynamic = "force-dynamic";
+// Self-healing may regenerate documents via headless Chromium.
+export const maxDuration = 60;
 
 export default async function InternCredentialsPage() {
+  // Self-heal any stale (gappy) credential numbering before listing.
+  await ensureSchema();
+  await ensureSequentialCredentialNumbers(getSql());
   const credentials = await getInternCredentials();
 
   return (
