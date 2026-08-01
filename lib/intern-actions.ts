@@ -120,17 +120,57 @@ export async function updateIntern(formData: FormData): Promise<void> {
   const fullName = text(formData, "fullName", 200);
   if (!internId || !fullName) return;
 
+  const pronouns = pronounsOrEmpty(formData.get("pronouns"));
+  const position = text(formData, "position", 200);
+  const department = text(formData, "department", 200);
+  const startDate = dateOrNull(formData.get("startDate"));
+  const completionDate = dateOrNull(formData.get("completionDate"));
+
   const sql = await db();
+
+  // Published credentials snapshot the intern's identity fields and embed
+  // them in their stored PDFs, so profile edits must keep the publish-time
+  // invariants: dates present and never a completion date later than the
+  // fixed issue date.
+  const published = await sql<{ issueDate: string | null }[]>`
+    select issue_date::text as "issueDate"
+    from intern_credentials
+    where intern_id = ${internId} and status = 'PUBLISHED'
+  `;
+  if (published.length > 0) {
+    if (!startDate || !completionDate) {
+      redirect(
+        `/interns/${internId}?error=${encodeURIComponent("Start and completion dates are required — this intern has published credentials.")}`
+      );
+    }
+    for (const cred of published) {
+      const check = validateIssueDate(cred.issueDate, completionDate);
+      if (!check.ok) {
+        redirect(
+          `/interns/${internId}?error=${encodeURIComponent(check.error ?? "Invalid completion date for a published credential.")}`
+        );
+      }
+    }
+  }
+
+  let staleDocs: number[] = [];
   await sql.begin(async (tx) => {
+    // Lock the row and capture the pre-update name: the credential sync below
+    // runs after the profile update, so it can't observe the old value itself.
+    const [before] = await tx<{ fullName: string }[]>`
+      select full_name as "fullName" from interns where id = ${internId} for update
+    `;
+    if (!before) return;
+    const nameChanged = before.fullName !== fullName;
     const rows = await tx<{ internNumber: string }[]>`
       update interns set
         full_name = ${fullName},
         email = ${text(formData, "email", 320)},
-        pronouns = ${pronounsOrEmpty(formData.get("pronouns"))},
-        position = ${text(formData, "position", 200)},
-        department = ${text(formData, "department", 200)},
-        start_date = ${dateOrNull(formData.get("startDate"))},
-        completion_date = ${dateOrNull(formData.get("completionDate"))},
+        pronouns = ${pronouns},
+        position = ${position},
+        department = ${department},
+        start_date = ${startDate},
+        completion_date = ${completionDate},
         employment_status = ${text(formData, "employmentStatus", 50) || "Active"},
         projects_completed = ${text(formData, "projectsCompleted")},
         responsibilities = ${text(formData, "responsibilities")},
@@ -142,13 +182,43 @@ export async function updateIntern(formData: FormData): Promise<void> {
       where id = ${internId}
       returning intern_number as "internNumber"
     `;
-    if (rows.length > 0) {
-      await writeAudit(tx, user, `Updated intern ${rows[0].internNumber}`);
-    }
+    if (rows.length === 0) return;
+    await writeAudit(tx, user, `Updated intern ${rows[0].internNumber}`);
+
+    // Sync the identity snapshot on every credential of this intern so the
+    // public verification page shows the edited values. Non-draft credentials
+    // whose documents embed changed values (name comes live via join at
+    // render time, the rest from these columns) are flagged docs_stale so a
+    // failed regeneration is retried by the next self-heal.
+    const changed = await tx<{ id: number; status: string }[]>`
+      update intern_credentials c set
+        position = ${position},
+        department = ${department},
+        pronouns = ${pronouns},
+        start_date = ${startDate},
+        completion_date = ${completionDate},
+        docs_stale = (c.docs_stale or c.status <> 'DRAFT'),
+        updated_at = now()
+      where c.intern_id = ${internId}
+        and (c.position is distinct from ${position}
+          or c.department is distinct from ${department}
+          or c.pronouns is distinct from ${pronouns}
+          or c.start_date is distinct from ${startDate}::date
+          or c.completion_date is distinct from ${completionDate}::date
+          or ${nameChanged})
+      returning c.id, c.status
+    `;
+    staleDocs = changed.filter((r) => r.status !== "DRAFT").map((r) => r.id);
   });
+
+  // Regenerate the stored PDFs of published/revoked credentials so the
+  // certificate and letter print the edited details. Verification links and
+  // QR codes are unaffected (lookup is by token).
+  await regenerateCredentialDocuments(sql, staleDocs);
 
   revalidatePath("/interns");
   revalidatePath(`/interns/${internId}`);
+  revalidatePath("/credentials");
   revalidatePath("/audit-logs");
 }
 
