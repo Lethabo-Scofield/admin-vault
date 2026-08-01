@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Plus, Archive, ArchiveRestore, Trash2 } from "lucide-react";
-import { getIntern, getInternCredentials } from "@/lib/intern-queries";
+import { getIntern, getInternCredentials, getInternTasks } from "@/lib/intern-queries";
 import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { archiveIntern, deleteIntern } from "@/lib/intern-actions";
@@ -29,9 +29,10 @@ export default async function InternDetailPage({
   // Self-heal any stale (gappy) credential numbering before listing.
   await ensureSchema();
   await ensureSequentialCredentialNumbers(getSql());
-  const [intern, credentials] = await Promise.all([
+  const [intern, credentials, tasks] = await Promise.all([
     getIntern(internId),
     getInternCredentials({ internId }),
+    getInternTasks(internId),
   ]);
   if (!intern) notFound();
 
@@ -81,7 +82,7 @@ export default async function InternDetailPage({
       )}
 
       <section>
-        <InternProfile intern={intern} />
+        <InternProfile intern={intern} tasks={tasks} />
       </section>
 
       <section>

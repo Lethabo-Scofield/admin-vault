@@ -151,6 +151,22 @@ alter table intern_credentials add column if not exists email_sent_at timestampt
 alter table intern_credentials add column if not exists email_sent_to text not null default '';
 alter table intern_credentials add column if not exists docs_stale boolean not null default false;
 
+create table if not exists intern_tasks (
+  id          serial primary key,
+  intern_id   integer not null references interns(id) on delete cascade,
+  title       text not null,
+  description text not null default '',
+  status      text not null default 'ASSIGNED',
+  pr_link     text not null default '',
+  review_note text not null default '',
+  assigned_by text not null default '',
+  due_date    date,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists idx_intern_tasks_intern on intern_tasks(intern_id);
+
 create table if not exists number_counters (
   name   text primary key,
   value  integer not null default 0

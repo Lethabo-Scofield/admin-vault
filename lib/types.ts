@@ -69,6 +69,26 @@ export interface Intern {
   credentialCount?: number;
 }
 
+export type InternTaskStatus =
+  | "ASSIGNED"
+  | "SUBMITTED"
+  | "CHANGES_REQUESTED"
+  | "APPROVED";
+
+export interface InternTask {
+  id: number;
+  internId: number;
+  title: string;
+  description: string;
+  status: InternTaskStatus;
+  prLink: string;
+  reviewNote: string;
+  assignedBy: string;
+  dueDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type InternCredentialStatus = "DRAFT" | "PUBLISHED" | "REVOKED" | "EXPIRED";
 
 export interface InternCredential {

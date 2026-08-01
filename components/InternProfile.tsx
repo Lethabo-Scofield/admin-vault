@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, X, User, Briefcase, FileText } from "lucide-react";
+import { Pencil, X, User, Briefcase, FileText, ListChecks } from "lucide-react";
 import InternForm from "@/components/InternForm";
-import type { Intern } from "@/lib/types";
+import InternTasks from "@/components/InternTasks";
+import type { Intern, InternTask } from "@/lib/types";
 
 const PRONOUNS: Record<string, string> = {
   SHE_HER: "She / Her",
@@ -32,11 +33,18 @@ const TABS = [
   { id: "personal", label: "Personal", icon: User },
   { id: "internship", label: "Internship", icon: Briefcase },
   { id: "writeups", label: "Write-ups & Notes", icon: FileText },
+  { id: "tasks", label: "Tasks & PRs", icon: ListChecks },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
-export default function InternProfile({ intern }: { intern: Intern }) {
+export default function InternProfile({
+  intern,
+  tasks,
+}: {
+  intern: Intern;
+  tasks: InternTask[];
+}) {
   const [editing, setEditing] = useState(false);
   const [tab, setTab] = useState<TabId>("personal");
 
@@ -85,7 +93,19 @@ export default function InternProfile({ intern }: { intern: Intern }) {
         </button>
       </div>
 
-      <dl className="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
+      {tab === "tasks" && (
+        <div className="p-6">
+          <InternTasks
+            internId={intern.id}
+            tasks={tasks}
+            defaultAssignedBy={intern.supervisorName}
+          />
+        </div>
+      )}
+
+      <dl
+        className={`grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 ${tab === "tasks" ? "hidden" : ""}`}
+      >
         {tab === "personal" && (
           <>
             <Item label="Full Name" value={intern.fullName} />
