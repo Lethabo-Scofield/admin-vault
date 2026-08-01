@@ -9,7 +9,6 @@ import {
   Download,
   FileText,
   Quote,
-  ScrollText,
   SearchX,
   Sparkles,
 } from "lucide-react";
@@ -196,10 +195,9 @@ export default async function VerifyPage({
         {/* Certificate preview */}
         {cred.hasCertificatePreview && (
           <a
-            href={docBase + "/certificate"}
-            target="_blank"
+            href={docBase + "/certificate?download=1"}
             className="tap mt-6 block overflow-hidden rounded-xl border border-gray-200 shadow-sm transition hover:shadow-md"
-            title="Open the certificate PDF"
+            title="Download the certificate PDF"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -218,9 +216,6 @@ export default async function VerifyPage({
           )}
           {cred.hasLetterPdf && (
             <>
-              <a href={docBase + "/letter"} target="_blank" className={btn}>
-                <ScrollText size={15} /> Recommendation letter
-              </a>
               <a href={docBase + "/letter?download=1"} className={btn}>
                 <Download size={15} /> Letter PDF
               </a>
