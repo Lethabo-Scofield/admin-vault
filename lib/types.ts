@@ -19,6 +19,7 @@ export interface AnalyticsUser {
   email: string;
   role: string;
   businessName: string | null;
+  businessId: string | null;
   createdAt: string | null;
   lastActiveAt: string | null;
   lastSignInAt: string | null;
@@ -28,6 +29,23 @@ export interface AnalyticsUser {
   actionsTotal: number;
   lastDevice: string | null;
   lastIp: string | null;
+}
+
+export interface AnalyticsBusiness {
+  id: string;
+  name: string;
+  /** Bare domain (e.g. "acme.co.za") derived from website_url or user emails; used for the company icon. */
+  domain: string | null;
+  logoUrl: string | null;
+  plan: string | null;
+  subscriptionStatus: string | null;
+  industry: string | null;
+  location: string | null;
+  createdAt: string | null;
+  userCount: number;
+  orderCount: number | null;
+  orders30d: number | null;
+  lastActiveAt: string | null;
 }
 
 export interface AnalyticsActivity {
@@ -73,6 +91,7 @@ export type ProjectAnalytics =
       notes: string[];
       summary: AnalyticsSummary;
       users: AnalyticsUser[];
+      businesses: AnalyticsBusiness[];
       recentActivity: AnalyticsActivity[];
       dailyActivity: AnalyticsDailyPoint[];
       topActions: AnalyticsActionCount[];

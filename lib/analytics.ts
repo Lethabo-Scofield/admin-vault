@@ -7,6 +7,7 @@ import type {
   AnalyticsActivity,
   AnalyticsDailyPoint,
   AnalyticsActionCount,
+  AnalyticsBusiness,
 } from "@/lib/types";
 
 /**
@@ -309,6 +310,7 @@ export async function getProjectAnalytics(
         select
           u.id, u.name, u.email, u.role, u.created_at, u.last_active_at,
           ${hasBusinesses ? sql`b.name` : sql`null::text`} as business_name,
+          ${hasBusinesses ? sql`b.id::text` : sql`null::text`} as business_id,
           ${
             hasAudit
               ? sql`
@@ -349,6 +351,7 @@ export async function getProjectAnalytics(
         email: String(r.email ?? ""),
         role: String(r.role ?? ""),
         businessName: r.business_name == null ? null : String(r.business_name),
+        businessId: r.business_id == null ? null : String(r.business_id),
         createdAt: iso(r.created_at),
         lastActiveAt: iso(r.last_active_at),
         lastSignInAt: iso(r.last_sign_in_at),
@@ -359,6 +362,70 @@ export async function getProjectAnalytics(
         lastDevice: describeUserAgent(r.last_user_agent == null ? null : String(r.last_user_agent)),
         lastIp: r.last_ip == null ? null : String(r.last_ip),
       }));
+    });
+
+    // ---- Businesses (customers) -----------------------------------------------
+    let businesses: AnalyticsBusiness[] = [];
+    if (hasBusinesses) businesses = await section("Businesses", notes, [], async () => {
+      const cols = new Set(
+        (
+          await sql<{ column_name: string }[]>`
+            select column_name from information_schema.columns
+            where table_schema = 'public' and table_name = 'businesses'
+          `
+        ).map((c) => c.column_name)
+      );
+      const col = (name: string) => (cols.has(name) ? sql(name) : sql`null::text`);
+      const hasOrders = tables.has("public.orders");
+      const rows = await sql<Record<string, unknown>[]>`
+        select b.id::text as id, b.name,
+               ${col("website_url")} as website_url,
+               ${col("logo_url")} as logo_url,
+               ${col("plan")} as plan,
+               ${col("subscription_status")} as subscription_status,
+               ${col("industry")} as industry,
+               ${col("location")} as location,
+               ${cols.has("created_at") ? sql`b.created_at` : sql`null::timestamptz`} as created_at,
+               ${hasUsers
+                 ? sql`(select count(*) from public.users u where u.business_id = b.id)`
+                 : sql`0`} as user_count,
+               ${hasUsers
+                 ? sql`(select max(u.last_active_at) from public.users u where u.business_id = b.id)`
+                 : sql`null::timestamptz`} as last_active_at,
+               ${hasUsers
+                 ? sql`(select min(split_part(u.email, '@', 2)) from public.users u
+                         where u.business_id = b.id and split_part(u.email, '@', 2) <> '')`
+                 : sql`null::text`} as email_domain,
+               ${hasOrders
+                 ? sql`(select count(*) from public.orders o where o.business_id = b.id)`
+                 : sql`null::bigint`} as order_count,
+               ${hasOrders
+                 ? sql`(select count(*) from public.orders o where o.business_id = b.id
+                         and o.created_at >= now() - interval '30 days')`
+                 : sql`null::bigint`} as orders_30d
+        from public.businesses b
+        order by last_active_at desc nulls last, b.name
+        limit 100
+      `;
+      return rows.map((r) => {
+        const website = r.website_url == null ? null : String(r.website_url);
+        const emailDomain = r.email_domain == null ? null : String(r.email_domain);
+        return {
+          id: String(r.id),
+          name: String(r.name ?? "Unnamed business"),
+          domain: companyDomain(website, emailDomain),
+          logoUrl: r.logo_url == null || String(r.logo_url) === "" ? null : String(r.logo_url),
+          plan: r.plan == null ? null : String(r.plan),
+          subscriptionStatus: r.subscription_status == null ? null : String(r.subscription_status),
+          industry: r.industry == null || String(r.industry) === "" ? null : String(r.industry),
+          location: r.location == null || String(r.location) === "" ? null : String(r.location),
+          createdAt: iso(r.created_at),
+          userCount: num(r.user_count),
+          orderCount: r.order_count == null ? null : num(r.order_count),
+          orders30d: r.orders_30d == null ? null : num(r.orders_30d),
+          lastActiveAt: iso(r.last_active_at),
+        };
+      });
     });
 
     // ---- Activity feed --------------------------------------------------------
@@ -430,6 +497,7 @@ export async function getProjectAnalytics(
       notes,
       summary,
       users,
+      businesses,
       recentActivity,
       dailyActivity,
       topActions,
@@ -487,6 +555,33 @@ export async function getProjectUsageSnapshot(
   } finally {
     clearTimeout(timer);
   }
+}
+
+const FREE_MAIL = new Set([
+  "gmail.com", "googlemail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com",
+  "icloud.com", "me.com", "protonmail.com", "proton.me", "aol.com", "mail.com", "webmail.co.za",
+]);
+
+/** Pick the best domain for a company icon: website first, else a non-free-mail email domain. */
+export function companyDomain(website: string | null, emailDomain: string | null): string | null {
+  if (website) {
+    const raw = website.trim();
+    if (raw) {
+      try {
+        const host = new URL(raw.includes("://") ? raw : `https://${raw}`).hostname
+          .toLowerCase()
+          .replace(/^www\./, "");
+        if (host.includes(".")) return host;
+      } catch {
+        /* fall through */
+      }
+    }
+  }
+  if (emailDomain) {
+    const d = emailDomain.toLowerCase().trim();
+    if (d.includes(".") && !FREE_MAIL.has(d)) return d;
+  }
+  return null;
 }
 
 function describeUserAgent(ua: string | null): string | null {
