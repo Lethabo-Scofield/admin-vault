@@ -1,34 +1,13 @@
 ---
 name: Supabase pooler + postgres.js
-description: How to connect postgres.js to a Supabase transaction pooler and interpret auth errors.
+description: Connection settings for the Supabase transaction pooler and how to read its error messages.
 ---
 
-# Supabase transaction pooler + postgres.js
+- Transaction pooler (port 6543) needs `prepare: false` and `ssl: "require"` in postgres.js.
+- Error triage from Vercel function logs:
+  - "password authentication failed for user postgres" → wrong password in the URL (not the username).
+  - "Tenant or user not found" (`XX000`, FATAL, from Supavisor) → the pooler doesn't know the project: project is **paused** (free tier auto-pauses after ~7 days idle), deleted/re-created with a new ref, or the URL points at the wrong region pooler host. Not a code bug; restore the project in the Supabase dashboard or update `SUPABASE_DB_URL` in Vercel.
+- Quick production probe without logs: `GET /api/public/credentials/<bogus-token>` should return 404; a 500 there means DB access itself is broken, while `/login` rendering fine rules out the session secret.
 
-When connecting `postgres.js` to a Supabase **transaction pooler** connection
-string (host `*.pooler.supabase.com`, port `6543`):
-
-- Pass `{ prepare: false }` — the transaction pooler does not support prepared
-  statements; without this you get failures under load / on parameterized queries.
-- Pass `{ ssl: "require" }` — Supabase requires TLS.
-- The pooler username is `postgres.<project-ref>` (tenant routing), not plain
-  `postgres`.
-
-**Why:** These are non-obvious pooler constraints; missing `prepare:false` causes
-intermittent errors that don't show up in a simple `select 1`.
-
-## Interpreting "password authentication failed for user \"postgres\""
-This error reports the **role** as `postgres` even when the connection string
-username is `postgres.<ref>` — the `.ref` is only tenant routing, the underlying
-role is `postgres`. So this error almost always means the **password is wrong**,
-not the username/format.
-
-**How to apply:** To isolate an encoding vs. credential problem, test the raw
-connection string AND a version with `decodeURIComponent(password)` via explicit
-`postgres({ host, port, username, password, database })` options. If BOTH fail
-identically, postgres.js is decoding `%xx` fine and the password value itself is
-incorrect — ask the user to verify / reset the Supabase database password rather
-than fiddling with encoding.
-
-`postgres.js` decodes percent-encoding in the URL itself, so `@` → `%40` in the
-URL is correct and you should not double-decode.
+**Why:** Production hides Server Component error messages; these fingerprints let us diagnose from the digest log line alone (incident on 2026-09-06 was a paused/unknown tenant).
+**How to apply:** Whenever admin.olyxee.com shows the generic "error in Server Components render", probe the public API first, then read the Vercel log line.
