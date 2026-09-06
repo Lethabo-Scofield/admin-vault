@@ -55,6 +55,8 @@ create table if not exists projects (
 );
 
 alter table projects add column if not exists logo_url text not null default '';
+alter table projects add column if not exists analytics_db_url_enc text not null default '';
+alter table projects add column if not exists analytics_db_host text not null default '';
 
 create table if not exists credentials (
   id            serial primary key,
@@ -166,6 +168,44 @@ create table if not exists intern_tasks (
 );
 
 create index if not exists idx_intern_tasks_intern on intern_tasks(intern_id);
+
+-- Internship programme goal tracking: 3 projects in 3 months by default.
+alter table interns add column if not exists planned_end_date date;
+alter table interns add column if not exists project_goal integer not null default 3;
+
+create table if not exists intern_projects (
+  id           serial primary key,
+  intern_id    integer not null references interns(id) on delete cascade,
+  title        text not null,
+  description  text not null default '',
+  link         text not null default '',
+  status       text not null default 'IN_PROGRESS',
+  started_at   date,
+  completed_at date,
+  created_by   text not null default '',
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+create index if not exists idx_intern_projects_intern on intern_projects(intern_id);
+
+-- Uploaded paperwork (NDA, acceptance letter, ...). Bytes live in the database
+-- so the same record works on Replit and Vercel without object storage.
+create table if not exists intern_documents (
+  id          serial primary key,
+  intern_id   integer not null references interns(id) on delete cascade,
+  kind        text not null default 'OTHER',
+  file_name   text not null,
+  mime_type   text not null default 'application/octet-stream',
+  size_bytes  integer not null default 0,
+  sha256      text not null default '',
+  content     bytea not null,
+  note        text not null default '',
+  uploaded_by text not null default '',
+  uploaded_at timestamptz not null default now()
+);
+
+create index if not exists idx_intern_documents_intern on intern_documents(intern_id);
 
 create table if not exists number_counters (
   name   text primary key,

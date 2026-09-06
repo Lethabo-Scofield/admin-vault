@@ -24,6 +24,9 @@ import AddCredentialForm from "@/components/AddCredentialForm";
 import UploadDocumentForm from "@/components/UploadDocumentForm";
 import EditProjectForm from "@/components/EditProjectForm";
 import EditCredentialForm from "@/components/EditCredentialForm";
+import ProjectAnalyticsSection from "@/components/ProjectAnalytics";
+import { getProjectAnalytics } from "@/lib/analytics";
+import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +42,13 @@ export default async function ProjectDetailPage({
   const project = await getProject(projectId);
   if (!project) notFound();
 
-  const [credentials, documents] = await Promise.all([
+  const [credentials, documents, analytics, currentUser] = await Promise.all([
     getCredentialsByProject(projectId),
     getDocumentsByProject(projectId),
+    project.hasAnalyticsDb ? getProjectAnalytics(projectId) : Promise.resolve(null),
+    getCurrentUser(),
   ]);
+  const canManageAnalytics = currentUser?.roleKey === "SUPER_ADMIN";
 
   const tint = accentColor(project.name);
 
@@ -90,6 +96,13 @@ export default async function ProjectDetailPage({
           )}
         </div>
       </div>
+
+      <ProjectAnalyticsSection
+        projectId={projectId}
+        analytics={analytics}
+        connectedHost={project.analyticsDbHost}
+        canManage={canManageAnalytics}
+      />
 
       {/* Credentials */}
       <section className="mb-8">

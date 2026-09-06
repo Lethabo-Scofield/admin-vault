@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, X, User, Briefcase, FileText, ListChecks } from "lucide-react";
+import { Pencil, X, User, Briefcase, FileText, ListChecks, FolderKanban, Paperclip } from "lucide-react";
 import InternForm from "@/components/InternForm";
 import InternTasks from "@/components/InternTasks";
-import type { Intern, InternTask } from "@/lib/types";
+import InternProjects from "@/components/InternProjects";
+import InternDocuments from "@/components/InternDocuments";
+import type { Intern, InternDocument, InternProject, InternTask } from "@/lib/types";
 
 const PRONOUNS: Record<string, string> = {
   SHE_HER: "She / Her",
@@ -32,21 +34,31 @@ function Item({ label, value, full }: { label: string; value?: string | null; fu
 const TABS = [
   { id: "personal", label: "Personal", icon: User },
   { id: "internship", label: "Internship", icon: Briefcase },
-  { id: "writeups", label: "Write-ups & Notes", icon: FileText },
+  { id: "projects", label: "Projects", icon: FolderKanban },
+  { id: "documents", label: "Documents", icon: Paperclip },
   { id: "tasks", label: "Tasks & PRs", icon: ListChecks },
+  { id: "writeups", label: "Write-ups & Notes", icon: FileText },
 ] as const;
+
+const PANEL_TABS: ReadonlyArray<TabId> = ["projects", "documents", "tasks"];
 
 type TabId = (typeof TABS)[number]["id"];
 
 export default function InternProfile({
   intern,
   tasks,
+  projects,
+  documents,
+  initialTab = "projects",
 }: {
   intern: Intern;
   tasks: InternTask[];
+  projects: InternProject[];
+  documents: InternDocument[];
+  initialTab?: TabId;
 }) {
   const [editing, setEditing] = useState(false);
-  const [tab, setTab] = useState<TabId>("personal");
+  const [tab, setTab] = useState<TabId>(initialTab);
 
   if (editing) {
     return (
@@ -93,6 +105,16 @@ export default function InternProfile({
         </button>
       </div>
 
+      {tab === "projects" && (
+        <div className="p-6">
+          <InternProjects internId={intern.id} projects={projects} goal={intern.projectGoal} />
+        </div>
+      )}
+      {tab === "documents" && (
+        <div className="p-6">
+          <InternDocuments internId={intern.id} documents={documents} />
+        </div>
+      )}
       {tab === "tasks" && (
         <div className="p-6">
           <InternTasks
@@ -104,7 +126,7 @@ export default function InternProfile({
       )}
 
       <dl
-        className={`grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 ${tab === "tasks" ? "hidden" : ""}`}
+        className={`grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 ${PANEL_TABS.includes(tab) ? "hidden" : ""}`}
       >
         {tab === "personal" && (
           <>
@@ -121,7 +143,9 @@ export default function InternProfile({
             <Item label="Employment Status" value={intern.employmentStatus} />
             <Item label="Supervisor Name" value={intern.supervisorName} />
             <Item label="Start Date" value={date(intern.startDate)} />
-            <Item label="Completion Date" value={date(intern.completionDate)} />
+            <Item label="Planned End (3-month window)" value={date(intern.plannedEndDate)} />
+            <Item label="Completion Date (actual)" value={date(intern.completionDate)} />
+            <Item label="Project Goal" value={`${intern.projectsDone} of ${intern.projectGoal} completed`} />
           </>
         )}
         {tab === "writeups" && (

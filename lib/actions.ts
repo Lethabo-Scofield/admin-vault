@@ -5,7 +5,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { TransactionSql } from "postgres";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireUser, type CurrentUser } from "@/lib/session";
+import { requireUser, requireSuperAdmin, type CurrentUser } from "@/lib/session";
+import { encryptString, decryptString } from "@/lib/crypto";
+import {
+  assertPostgresUrl,
+  assertAllowedAnalyticsHost,
+  connectionHost,
+  describeDbError,
+  dropPool,
+  testConnection,
+} from "@/lib/analytics";
 
 const MAX_LOGO_BYTES = 1024 * 1024; // 1 MB
 const ALLOWED_LOGO_TYPES = new Set([
@@ -147,6 +156,97 @@ export async function deleteProject(formData: FormData): Promise<void> {
   revalidatePath("/audit-logs");
   revalidatePath("/");
   redirect("/projects");
+}
+
+export type AnalyticsDbResult = { error?: string; tables?: number };
+
+/**
+ * Connects a project to its application database for the Traffic & Users view.
+ * The URL is verified with a live query first, then stored encrypted; only the
+ * hostname is kept in clear text for display.
+ */
+export async function setProjectAnalyticsDb(
+  formData: FormData
+): Promise<AnalyticsDbResult> {
+  const projectId = Number(formData.get("projectId"));
+  const url = String(formData.get("databaseUrl") ?? "").trim();
+  if (!projectId) return { error: "Missing project." };
+  if (!url) return { error: "Paste the database connection string." };
+
+  // Connecting an outbound database is a privileged capability: it makes the
+  // server open network connections and surfaces third-party data.
+  const user = await requireSuperAdmin();
+
+  try {
+    assertPostgresUrl(url);
+    assertAllowedAnalyticsHost(url);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+
+  let tables: string[];
+  try {
+    ({ tables } = await testConnection(url));
+  } catch (err) {
+    console.error("[analytics] connection test failed for", connectionHost(url), err);
+    return { error: "Could not connect: " + describeDbError(err) };
+  }
+
+  const host = connectionHost(url);
+  const enc = encryptString(url);
+  const sql = await db();
+  await sql.begin(async (tx) => {
+    const rows = await tx<{ name: string }[]>`
+      update projects
+      set analytics_db_url_enc = ${enc}, analytics_db_host = ${host}
+      where id = ${projectId}
+      returning name
+    `;
+    if (rows.length > 0) {
+      await writeAudit(
+        tx,
+        user,
+        `Connected analytics database (${host}) to project "${rows[0].name}"`
+      );
+    }
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/audit-logs");
+  return { tables: tables.length };
+}
+
+export async function clearProjectAnalyticsDb(formData: FormData): Promise<void> {
+  const projectId = Number(formData.get("projectId"));
+  if (!projectId) return;
+
+  const user = await requireSuperAdmin();
+  const sql = await db();
+  await sql.begin(async (tx) => {
+    const rows = await tx<{ name: string; enc: string; host: string }[]>`
+      select name, analytics_db_url_enc as enc, analytics_db_host as host
+      from projects where id = ${projectId} for update
+    `;
+    if (rows.length === 0 || !rows[0].enc) return;
+    await tx`
+      update projects
+      set analytics_db_url_enc = '', analytics_db_host = ''
+      where id = ${projectId}
+    `;
+    try {
+      dropPool(decryptString(rows[0].enc));
+    } catch {
+      // Undecryptable (e.g. rotated secret) — nothing pooled to drop.
+    }
+    await writeAudit(
+      tx,
+      user,
+      `Disconnected analytics database (${rows[0].host}) from project "${rows[0].name}"`
+    );
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/audit-logs");
 }
 
 export async function addCredential(formData: FormData): Promise<void> {

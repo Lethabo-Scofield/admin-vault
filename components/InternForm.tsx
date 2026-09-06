@@ -163,7 +163,25 @@ export default function InternForm({
               className="vault-input"
             />
           </Field>
-          <Field label="Completion Date">
+          <Field label="Planned End Date (defaults to start + 3 months)">
+            <input
+              name="plannedEndDate"
+              type="date"
+              defaultValue={toDateInput(intern?.plannedEndDate)}
+              className="vault-input"
+            />
+          </Field>
+          <Field label="Project Goal (programme standard: 3)">
+            <input
+              name="projectGoal"
+              type="number"
+              min={1}
+              max={20}
+              defaultValue={intern?.projectGoal ?? 3}
+              className="vault-input"
+            />
+          </Field>
+          <Field label="Actual Completion Date (leave empty while active)">
             <input
               name="completionDate"
               type="date"
@@ -176,7 +194,7 @@ export default function InternForm({
         <div
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${tab === "writeups" ? "" : "hidden"}`}
         >
-          <Field label="Projects Completed (one per line — shown as bullets)" full>
+          <Field label="Projects Completed — write-up for certificates (one per line). Tracked projects live in the Projects tab." full>
             <textarea
               name="projectsCompleted"
               rows={3}

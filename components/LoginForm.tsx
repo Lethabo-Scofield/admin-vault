@@ -22,7 +22,7 @@ export default function LoginForm() {
           className="mb-4 h-14 w-14 rounded-2xl object-cover shadow-ios"
         />
         <h1 className="text-[22px] font-semibold tracking-tight text-gray-900">
-          Olyxee Vault
+          Olyxee Admin
         </h1>
         <p className="mt-1 text-[14px] text-gray-400">
           Admin sign in

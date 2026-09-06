@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/session";
 import { logout } from "@/lib/auth-actions";
 
 export const metadata: Metadata = {
-  title: "Settings · Olyxee Vault",
+  title: "Settings · Olyxee Admin",
 };
 
 export const dynamic = "force-dynamic";

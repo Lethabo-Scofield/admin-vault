@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { TransactionSql } from "postgres";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireSuperAdmin, type CurrentUser } from "@/lib/session";
+import { requireUser, type CurrentUser } from "@/lib/session";
 
 type Tx = TransactionSql<Record<string, never>>;
 
@@ -44,7 +44,7 @@ function safeUrl(v: string): string {
 }
 
 export async function createInternTask(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const internId = Number(formData.get("internId"));
   const title = text(formData, "title", 300);
   if (!internId || !title) return;
@@ -65,7 +65,7 @@ export async function createInternTask(formData: FormData): Promise<void> {
 }
 
 export async function submitInternTaskPr(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const taskId = Number(formData.get("taskId"));
   const prLink = safeUrl(text(formData, "prLink", 1000));
   if (!taskId || !prLink) return;
@@ -90,7 +90,7 @@ export async function submitInternTaskPr(formData: FormData): Promise<void> {
 }
 
 export async function reviewInternTask(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const taskId = Number(formData.get("taskId"));
   const decision = text(formData, "decision", 30);
   const reviewNote = text(formData, "reviewNote", 2000);
@@ -123,7 +123,7 @@ export async function reviewInternTask(formData: FormData): Promise<void> {
 }
 
 export async function deleteInternTask(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const taskId = Number(formData.get("taskId"));
   if (!taskId) return;
 

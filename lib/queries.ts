@@ -54,6 +54,8 @@ export async function getProjects(): Promise<Project[]> {
       createdAt: string;
       keyCount: string;
       docCount: string;
+      hasAnalyticsDb: boolean;
+      analyticsDbHost: string;
     }[]
   >`
     select
@@ -63,6 +65,8 @@ export async function getProjects(): Promise<Project[]> {
       p.description,
       p.logo_url   as "logoUrl",
       p.created_at as "createdAt",
+      (p.analytics_db_url_enc <> '') as "hasAnalyticsDb",
+      p.analytics_db_host as "analyticsDbHost",
       (select count(*) from credentials c where c.project_id = p.id) as "keyCount",
       (select count(*) from documents d where d.project_id = p.id)   as "docCount"
     from projects p
@@ -87,6 +91,8 @@ export async function getProject(id: number): Promise<Project | null> {
       createdAt: string;
       keyCount: string;
       docCount: string;
+      hasAnalyticsDb: boolean;
+      analyticsDbHost: string;
     }[]
   >`
     select
@@ -96,6 +102,8 @@ export async function getProject(id: number): Promise<Project | null> {
       p.description,
       p.logo_url   as "logoUrl",
       p.created_at as "createdAt",
+      (p.analytics_db_url_enc <> '') as "hasAnalyticsDb",
+      p.analytics_db_host as "analyticsDbHost",
       (select count(*) from credentials c where c.project_id = p.id) as "keyCount",
       (select count(*) from documents d where d.project_id = p.id)   as "docCount"
     from projects p

@@ -19,9 +19,9 @@ import { logout } from "@/lib/auth-actions";
 
 type ShellUser = { email: string; role: string; roleKey?: string };
 
-const NAV_GROUPS = [
+const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; label: string; icon: typeof GraduationCap }[] }[] = [
   {
-    title: "Vault",
+    title: "Platform",
     items: [
       { href: "/", label: "Dashboard", icon: LayoutDashboard },
       { href: "/projects", label: "Projects", icon: FolderLock },
@@ -31,7 +31,6 @@ const NAV_GROUPS = [
   },
   {
     title: "Internship Program",
-    superAdmin: true,
     items: [
       { href: "/interns", label: "Interns", icon: GraduationCap },
     ],
@@ -39,8 +38,8 @@ const NAV_GROUPS = [
   {
     title: "System",
     items: [
-      { href: "/audit-logs", label: "Audit Trail", icon: ScrollText },
       { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/audit-logs", label: "Audit Trail", icon: ScrollText },
     ],
   },
 ];
@@ -123,9 +122,9 @@ export default function AppShell({
       </div>
       <div className="leading-tight">
         <p className="text-[15px] font-semibold tracking-tight text-gray-900">
-          Olyxee Vault
+          Olyxee Admin
         </p>
-        <p className="text-[12px] text-gray-400">Secure Admin</p>
+        <p className="text-[12px] text-gray-400">Control centre</p>
       </div>
     </div>
   );
@@ -211,7 +210,7 @@ export default function AppShell({
             <Menu size={20} />
           </button>
           <span className="text-[15px] font-semibold text-gray-900">
-            {current?.label ?? "Olyxee Vault"}
+            {current?.label ?? "Olyxee Admin"}
           </span>
         </header>
 

@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   // Keep the headless-browser packages out of the bundler so the
   // serverless Chromium binary works on Vercel.
   serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium"],
+  // Intern document uploads (NDA, acceptance letter) go through a Server
+  // Action; the default 1 MB body limit would reject them. Keep this a little
+  // above the 10 MB per-file cap enforced in uploadInternDocument.
+  experimental: {
+    serverActions: { bodySizeLimit: "12mb" },
+  },
   // Branding assets (logo, seal, signatures, font) are read from disk at
   // runtime; make sure Vercel bundles them into every serverless function.
   outputFileTracingIncludes: {

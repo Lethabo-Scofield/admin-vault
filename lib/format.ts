@@ -67,3 +67,36 @@ export function formatDate(value: string | Date): string {
     day: "numeric",
   });
 }
+
+/** "3 minutes ago", "2 days ago", or "just now". Returns "never" for null. */
+export function timeAgo(value: string | Date | null | undefined, now: Date = new Date()): string {
+  if (!value) return "never";
+  const d = typeof value === "string" ? new Date(value) : value;
+  const diff = Math.max(0, now.getTime() - d.getTime());
+  const s = Math.floor(diff / 1000);
+  if (s < 45) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
+  const days = Math.floor(h / 24);
+  if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years === 1 ? "" : "s"} ago`;
+}
+
+/** Activity status bucket used for user "presence" pills. */
+export function activityBucket(
+  value: string | Date | null | undefined,
+  now: Date = new Date()
+): "active" | "recent" | "idle" | "inactive" | "never" {
+  if (!value) return "never";
+  const d = typeof value === "string" ? new Date(value) : value;
+  const days = (now.getTime() - d.getTime()) / 86_400_000;
+  if (days <= 1) return "active";
+  if (days <= 7) return "recent";
+  if (days <= 30) return "idle";
+  return "inactive";
+}

@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Plus, Archive, ArchiveRestore, Trash2 } from "lucide-react";
-import { getIntern, getInternCredentials, getInternTasks } from "@/lib/intern-queries";
+import {
+  getIntern,
+  getInternCredentials,
+  getInternTasks,
+  getInternProjects,
+  getInternDocuments,
+} from "@/lib/intern-queries";
+import { getCurrentUser } from "@/lib/session";
+import InternProgressCard from "@/components/InternProgressCard";
 import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { archiveIntern, deleteIntern } from "@/lib/intern-actions";
@@ -19,24 +27,34 @@ export default async function InternDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; tab?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, tab } = await searchParams;
   const internId = Number(id);
   if (!internId) notFound();
 
   // Self-heal any stale (gappy) credential numbering before listing.
   await ensureSchema();
-  await ensureSequentialCredentialNumbers(getSql());
-  const [intern, credentials, tasks] = await Promise.all([
+  const currentUser = await getCurrentUser();
+  const isSuperAdmin = currentUser?.roleKey === "SUPER_ADMIN";
+  // Official credentials are super-admin only; everyone else still manages the
+  // intern's profile, projects, documents and tasks.
+  if (isSuperAdmin) await ensureSequentialCredentialNumbers(getSql());
+  const [intern, credentials, tasks, projects, documents] = await Promise.all([
     getIntern(internId),
-    getInternCredentials({ internId }),
+    isSuperAdmin ? getInternCredentials({ internId }) : Promise.resolve([]),
     getInternTasks(internId),
+    getInternProjects(internId),
+    getInternDocuments(internId),
   ]);
   if (!intern) notFound();
 
   const archived = Boolean(intern.archivedAt);
+  const initialTab =
+    tab === "documents" || tab === "tasks" || tab === "personal" || tab === "internship" || tab === "writeups"
+      ? tab
+      : "projects";
 
   return (
     <div className="animate-ios-in space-y-8">
@@ -62,15 +80,17 @@ export default async function InternDetailPage({
                 {archived ? "Unarchive" : "Archive"}
               </ConfirmButton>
             </form>
-            <form action={deleteIntern}>
-              <input type="hidden" name="internId" value={intern.id} />
-              <ConfirmButton
-                message="Permanently delete this intern and ALL their credentials — including published ones? Their public verification links will stop working. This cannot be undone."
-                className="tap inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2.5 text-[14px] font-medium text-red-600 hover:bg-red-100"
-              >
-                <Trash2 size={16} /> Delete
-              </ConfirmButton>
-            </form>
+            {isSuperAdmin && (
+              <form action={deleteIntern}>
+                <input type="hidden" name="internId" value={intern.id} />
+                <ConfirmButton
+                  message="Permanently delete this intern and ALL their credentials — including published ones? Their public verification links will stop working. This cannot be undone."
+                  className="tap inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2.5 text-[14px] font-medium text-red-600 hover:bg-red-100"
+                >
+                  <Trash2 size={16} /> Delete
+                </ConfirmButton>
+              </form>
+            )}
           </div>
         }
       />
@@ -82,9 +102,20 @@ export default async function InternDetailPage({
       )}
 
       <section>
-        <InternProfile intern={intern} tasks={tasks} />
+        <InternProgressCard intern={intern} now={new Date()} />
       </section>
 
+      <section>
+        <InternProfile
+          intern={intern}
+          tasks={tasks}
+          projects={projects}
+          documents={documents}
+          initialTab={initialTab}
+        />
+      </section>
+
+      {isSuperAdmin && (
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[18px] font-semibold text-gray-900">
@@ -142,6 +173,7 @@ export default async function InternDetailPage({
           </div>
         )}
       </section>
+      )}
 
       <section className="text-[13px] text-gray-400">
         <StatusBadge status={intern.employmentStatus} /> · Created{" "}

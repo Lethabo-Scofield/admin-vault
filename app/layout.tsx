@@ -5,8 +5,8 @@ import AppShell from "@/components/AppShell";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
-  title: "Olyxee Vault",
-  description: "Secure credentials & compliance vault for Olyxee.",
+  title: "Olyxee Admin",
+  description: "Olyxee admin: platform usage, credentials & compliance.",
 };
 
 export default async function RootLayout({

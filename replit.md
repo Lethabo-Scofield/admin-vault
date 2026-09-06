@@ -1,8 +1,37 @@
-# Olyxee Vault
+# Olyxee Admin
 
-A secure credentials & compliance vault admin app. Manage projects, store API
-keys/secrets, track compliance documents (with SHA-256 checksums), and view an
-immutable audit trail.
+Olyxee's internal admin website (formerly "Olyxee Vault"). Manage projects, see
+each product's real usage (users, last activity, what they did) from its own
+database, store API keys/secrets, track compliance documents (with SHA-256
+checksums), run the internship programme, and view an immutable audit trail.
+
+## Project analytics ("Traffic & Users")
+
+- Each project can be connected to its application's PostgreSQL database via the
+  **Database** button on `/projects/[id]` (`components/AnalyticsDbForm.tsx`).
+  The URL is verified with a live query (`testConnection`), then stored
+  AES-256-GCM encrypted in `projects.analytics_db_url_enc` (`lib/crypto.ts`,
+  key derived from `SESSION_SECRET`; rotating it invalidates stored URLs). Only
+  the hostname (`analytics_db_host`) is shown back. Connect/disconnect writes
+  audit entries.
+- `lib/analytics.ts` reads (never writes) the standard Olyxee app schema:
+  `public.users` (`last_active_at`), `public.audit_logs` (action/entity/
+  metadata per user), `public.businesses`, `public.orders`, and optionally
+  Supabase `auth.users`/`auth.sessions` for device/IP (matched by email). Each
+  section degrades independently when a table is missing and surfaces a note
+  rather than fabricating numbers. Connection failures render an explicit error
+  card with the DB message. Pools are cached per URL (max 2 conns).
+- UI: `components/ProjectAnalytics.tsx` — stat cards, users list with presence
+  buckets (active today / this week / this month / inactive), 14-day activity
+  bars, top actions (30 d), recent activity feed. Action names are humanised via
+  `humanizeAction` ("UPDATE_ORDER_STATUS" → "Updated order status").
+- First connected product: **Olyxee Logistics** (Supabase, transaction pooler
+  URL). Its users authenticate with the app's own password hashes, not Supabase
+  Auth, so device/IP data is unavailable for them.
+- Dev: the Logistics URL is also available as the Replit secret
+  `OLYXEE_LOGISTICS_DATABASE_URL` for inspection; the app itself reads only the
+  per-project stored URL. On Vercel nothing extra is needed — the URL lives in
+  the admin database.
 
 ## Tech Stack
 
@@ -106,6 +135,8 @@ created automatically on first DB access.
 ## Development
 
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
+- Replit's package firewall blocks `next` < 16.3.3; the lockfile pins 16.3.4.
+- Local login: `demo` / `demo` (both fields) outside production.
 - Deployment: autoscale, `build = npm run build`, `run = npm run start`.
 
 ## Generated Documents (Certificate & Recommendation Letter)
@@ -138,6 +169,39 @@ created automatically on first DB access.
 - Tests: `npm test` (vitest, `tests/documents.test.ts`) — pronouns (no mixed
   pronouns), articles, duration, issue-date rules, file names, QR decodes to
   the exact URL, credential-number format, template escaping.
+
+## Internship Programme (interns, projects, documents)
+
+- **Access**: `/interns` (list, create, edit, archive, projects, documents,
+  tasks) is open to every signed-in admin — super admins *and* founder
+  engineers (`requireUser`). Issuing/managing official credentials
+  (`/credentials`, the "Credentials Issued" section) and permanently deleting an
+  intern stay `requireSuperAdmin`; the detail page hides those controls for
+  engineers and `proxy.ts` 403s `/credentials` for them.
+- **Programme goal**: 3 projects in 3 months. `interns.planned_end_date`
+  defaults to `start_date + 3 months` (month-end clamped) when left blank;
+  `interns.project_goal` defaults to 3 (1–20). `lib/intern-progress.ts`
+  (pure, unit-tested) computes days left, time %, projects done vs goal, and a
+  state: not_started / on_track / behind (fewer done than the steady-pace
+  expectation) / overdue / completed / withdrawn / unscheduled. Shown in
+  `InternProgressCard` on the detail page and as columns on the list.
+- **Projects**: `intern_projects` (title, description, link, status
+  IN_PROGRESS|COMPLETED, started_at, completed_at). Full CRUD in
+  `components/InternProjects.tsx` via `lib/intern-project-actions.ts`.
+  `projectsDone` = count of COMPLETED rows. The older free-text
+  `projects_completed` field remains the certificate write-up.
+- **Documents**: `intern_documents` stores uploaded NDA / acceptance letter /
+  ID / CV / other files as `bytea` (PDF, doc/docx, png/jpg/webp; ≤10 MB;
+  sha256 recorded). Upload via `uploadInternDocument` (`useActionState`);
+  download/preview only through the authenticated route
+  `/interns/[id]/documents/[docId]` (`?inline=1` for PDF/images, otherwise
+  attachment, nosniff). `next.config.ts` raises the Server Action body limit
+  to 12 MB for this.
+- **Roster**: list filters Active / Completed / All (+ include archived);
+  "Completed" means employment_status = Completed; Withdrawn shows under All.
+- Schema additions are in `SCHEMA_SQL` and auto-apply on Vercel via
+  `ensureSchema()` (they are idempotent `add column if not exists` /
+  `create table if not exists`).
 
 ## Internship Credentials
 

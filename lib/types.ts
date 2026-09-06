@@ -7,7 +7,77 @@ export interface Project {
   createdAt: string;
   keyCount: number;
   docCount: number;
+  /** True when an analytics database URL is stored for this project. */
+  hasAnalyticsDb: boolean;
+  /** Hostname of the connected analytics database (never the full URL). */
+  analyticsDbHost: string;
 }
+
+export interface AnalyticsUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  businessName: string | null;
+  createdAt: string | null;
+  lastActiveAt: string | null;
+  lastSignInAt: string | null;
+  lastAction: string | null;
+  lastActionAt: string | null;
+  actions30d: number;
+  actionsTotal: number;
+  lastDevice: string | null;
+  lastIp: string | null;
+}
+
+export interface AnalyticsActivity {
+  id: string;
+  at: string;
+  userName: string | null;
+  userEmail: string | null;
+  businessName: string | null;
+  action: string;
+  entityType: string;
+  detail: string;
+}
+
+export interface AnalyticsDailyPoint {
+  day: string;
+  actions: number;
+  users: number;
+}
+
+export interface AnalyticsActionCount {
+  action: string;
+  count: number;
+}
+
+export interface AnalyticsSummary {
+  totalUsers: number;
+  activeUsers7d: number;
+  activeUsers30d: number;
+  newUsers30d: number;
+  businesses: number | null;
+  totalOrders: number | null;
+  orders30d: number | null;
+  actions7d: number | null;
+  actions30d: number | null;
+  lastActivityAt: string | null;
+}
+
+export type ProjectAnalytics =
+  | {
+      ok: true;
+      host: string;
+      generatedAt: string;
+      notes: string[];
+      summary: AnalyticsSummary;
+      users: AnalyticsUser[];
+      recentActivity: AnalyticsActivity[];
+      dailyActivity: AnalyticsDailyPoint[];
+      topActions: AnalyticsActionCount[];
+    }
+  | { ok: false; host: string; generatedAt: string; error: string };
 
 export interface VaultCredential {
   id: number;
@@ -66,7 +136,59 @@ export interface Intern {
   createdAt: string;
   updatedAt: string;
   archivedAt: string | null;
+  /** Target end of the internship; defaults to 3 months after startDate. */
+  plannedEndDate: string | null;
+  /** Number of projects the intern should complete (programme default: 3). */
+  projectGoal: number;
+  /** Count of intern_projects rows with status COMPLETED. */
+  projectsDone: number;
   credentialCount?: number;
+  documentCount?: number;
+}
+
+export type InternProjectStatus = "IN_PROGRESS" | "COMPLETED";
+
+export interface InternProject {
+  id: number;
+  internId: number;
+  title: string;
+  description: string;
+  link: string;
+  status: InternProjectStatus;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InternDocumentKind =
+  | "NDA"
+  | "ACCEPTANCE_LETTER"
+  | "ID_DOCUMENT"
+  | "CV"
+  | "OTHER";
+
+export const INTERN_DOCUMENT_KINDS: Record<InternDocumentKind, string> = {
+  NDA: "NDA",
+  ACCEPTANCE_LETTER: "Acceptance letter",
+  ID_DOCUMENT: "ID document",
+  CV: "CV / Résumé",
+  OTHER: "Other",
+};
+
+/** Metadata only — file bytes are streamed by the download route. */
+export interface InternDocument {
+  id: number;
+  internId: number;
+  kind: InternDocumentKind;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  sha256: string;
+  note: string;
+  uploadedBy: string;
+  uploadedAt: string;
 }
 
 export type InternTaskStatus =

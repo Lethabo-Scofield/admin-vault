@@ -3,8 +3,9 @@ import type { NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
 // Routes only a SUPER_ADMIN session may reach. /credentials is the internship
-// credential manager; the engineer-facing key vault lives at /project-keys.
-const SUPER_ADMIN_PREFIXES = ["/interns", "/credentials"];
+// credential manager (official documents). /interns itself is open to every
+// signed-in admin; the engineer-facing key vault lives at /project-keys.
+const SUPER_ADMIN_PREFIXES = ["/credentials"];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

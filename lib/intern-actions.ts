@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import type { TransactionSql } from "postgres";
 import type { InternCredential } from "@/lib/types";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireSuperAdmin, type CurrentUser } from "@/lib/session";
+import { requireSuperAdmin, requireUser, type CurrentUser } from "@/lib/session";
+import { defaultPlannedEnd, DEFAULT_PROJECT_GOAL } from "@/lib/intern-progress";
 import { getInternCredential } from "@/lib/intern-queries";
 import { validateIssueDate } from "@/lib/documents/fields";
 import {
@@ -67,15 +68,29 @@ function text(formData: FormData, key: string, max = 5000): string {
   return String(formData.get(key) ?? "").trim().slice(0, max);
 }
 
+/** Planned end falls back to start + 3 months; goal to 3 projects (1–20). */
+function programmeFields(formData: FormData, startDate: string | null) {
+  const plannedEndDate =
+    dateOrNull(formData.get("plannedEndDate")) ?? defaultPlannedEnd(startDate);
+  const rawGoal = Number(formData.get("projectGoal"));
+  const projectGoal =
+    Number.isInteger(rawGoal) && rawGoal >= 1 && rawGoal <= 20
+      ? rawGoal
+      : DEFAULT_PROJECT_GOAL;
+  return { plannedEndDate, projectGoal };
+}
+
 // ---------------------------------------------------------------------------
 // Interns
 // ---------------------------------------------------------------------------
 
 
 export async function createIntern(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const fullName = text(formData, "fullName", 200);
   if (!fullName) return;
+  const startDate = dateOrNull(formData.get("startDate"));
+  const { plannedEndDate, projectGoal } = programmeFields(formData, startDate);
 
   const sql = await db();
   let internId = 0;
@@ -88,16 +103,18 @@ export async function createIntern(formData: FormData): Promise<void> {
       insert into interns
         (intern_number, full_name, email, pronouns, position, department, start_date,
          completion_date, employment_status, projects_completed, responsibilities,
-         skills_demonstrated, supervisor_name, supervisor_recommendation, internal_notes)
+         skills_demonstrated, supervisor_name, supervisor_recommendation, internal_notes,
+         planned_end_date, project_goal)
       values
         (${`TMP-NEW-${Math.random().toString(36).slice(2)}`}, ${fullName}, ${text(formData, "email", 320)},
          ${pronounsOrEmpty(formData.get("pronouns"))}, ${text(formData, "position", 200)},
-         ${text(formData, "department", 200)}, ${dateOrNull(formData.get("startDate"))},
+         ${text(formData, "department", 200)}, ${startDate},
          ${dateOrNull(formData.get("completionDate"))},
          ${text(formData, "employmentStatus", 50) || "Active"},
          ${text(formData, "projectsCompleted")}, ${text(formData, "responsibilities")},
          ${text(formData, "skillsDemonstrated")}, ${text(formData, "supervisorName", 200)},
-         ${text(formData, "supervisorRecommendation")}, ${text(formData, "internalNotes")})
+         ${text(formData, "supervisorRecommendation")}, ${text(formData, "internalNotes")},
+         ${plannedEndDate}, ${projectGoal})
       returning id
     `;
     internId = row.id;
@@ -115,7 +132,7 @@ export async function createIntern(formData: FormData): Promise<void> {
 }
 
 export async function updateIntern(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const internId = Number(formData.get("internId"));
   const fullName = text(formData, "fullName", 200);
   if (!internId || !fullName) return;
@@ -125,6 +142,7 @@ export async function updateIntern(formData: FormData): Promise<void> {
   const department = text(formData, "department", 200);
   const startDate = dateOrNull(formData.get("startDate"));
   const completionDate = dateOrNull(formData.get("completionDate"));
+  const { plannedEndDate, projectGoal } = programmeFields(formData, startDate);
 
   const sql = await db();
 
@@ -171,6 +189,8 @@ export async function updateIntern(formData: FormData): Promise<void> {
         department = ${department},
         start_date = ${startDate},
         completion_date = ${completionDate},
+        planned_end_date = ${plannedEndDate},
+        project_goal = ${projectGoal},
         employment_status = ${text(formData, "employmentStatus", 50) || "Active"},
         projects_completed = ${text(formData, "projectsCompleted")},
         responsibilities = ${text(formData, "responsibilities")},
@@ -223,7 +243,7 @@ export async function updateIntern(formData: FormData): Promise<void> {
 }
 
 export async function archiveIntern(formData: FormData): Promise<void> {
-  const user = await requireSuperAdmin();
+  const user = await requireUser();
   const internId = Number(formData.get("internId"));
   const unarchive = formData.get("unarchive") === "on";
   if (!internId) return;
