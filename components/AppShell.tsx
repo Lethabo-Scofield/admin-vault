@@ -8,7 +8,6 @@ import {
   FolderLock,
   KeyRound,
   ShieldCheck,
-  ScrollText,
   Menu,
   X,
   LogOut,
@@ -39,13 +38,14 @@ const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; 
     title: "System",
     items: [
       { href: "/settings", label: "Settings", icon: Settings },
-      { href: "/audit-logs", label: "Audit Trail", icon: ScrollText },
     ],
   },
 ];
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
+  // Audit Trail lives under Settings.
+  if (href === "/settings" && pathname.startsWith("/audit-logs")) return true;
   return pathname === href || pathname.startsWith(href + "/");
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Palette, ShieldCheck, LogOut } from "lucide-react";
+import { Palette, ShieldCheck, LogOut, ScrollText, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getCurrentUser } from "@/lib/session";
@@ -20,7 +21,7 @@ export default async function SettingsPage() {
     <div className="animate-ios-in">
       <PageHeader
         title="Settings"
-        subtitle="Manage appearance and your admin session."
+        subtitle="Appearance, system records and your admin session."
       />
 
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -40,6 +41,25 @@ export default async function SettingsPage() {
             </div>
             <ThemeToggle />
           </div>
+        </section>
+
+        <section className="rounded-ios bg-white p-5 shadow-ios sm:p-6">
+          <div className="mb-4 flex items-center gap-2.5">
+            <ScrollText size={18} className="text-gray-400" />
+            <h2 className="text-[17px] font-semibold text-gray-900">System</h2>
+          </div>
+          <Link
+            href="/audit-logs"
+            className="tap group flex items-center justify-between gap-4 rounded-2xl bg-gray-50 px-4 py-3.5 hover:bg-gray-100"
+          >
+            <div className="min-w-0">
+              <p className="text-[15px] font-medium text-gray-900">Audit Trail</p>
+              <p className="text-[13px] text-gray-500">
+                Every admin action — logins, credentials, interns, uploads and key access.
+              </p>
+            </div>
+            <ChevronRight size={18} className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </section>
 
         <section className="rounded-ios bg-white p-5 shadow-ios sm:p-6">

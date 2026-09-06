@@ -1,4 +1,5 @@
-import { ScrollText } from "lucide-react";
+import Link from "next/link";
+import { ScrollText, ArrowLeft } from "lucide-react";
 import { getAuditLogs } from "@/lib/queries";
 import { formatDateTime } from "@/lib/format";
 import { PageHeader, StatusBadge, EmptyState } from "@/components/ui";
@@ -10,9 +11,15 @@ export default async function AuditLogsPage() {
 
   return (
     <div className="animate-ios-in">
+      <Link
+        href="/settings"
+        className="mb-3 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-gray-500 hover:text-gray-900"
+      >
+        <ArrowLeft size={15} /> Settings
+      </Link>
       <PageHeader
         title="Audit Trail"
-        subtitle="Immutable ledger of vault activity"
+        subtitle="Immutable ledger of admin activity"
       />
 
       {logs.length === 0 ? (
