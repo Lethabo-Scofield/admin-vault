@@ -5,3 +5,4 @@
 - [Next 16 proxy](nextjs-16-proxy.md) — middleware renamed to `proxy.ts`/`export function proxy`; edge runtime, import only edge-safe code (no next/headers).
 - [Gapless numbering](gapless-numbering.md) — intern/credential numbers resequence + self-heal; PDFs embed the number, so renumber sets docs_stale and regenerates.
 - [postgres.js date columns](postgres-date-columns.md) — SQL `date` comes back as JS Date; select `::text` when code expects ISO strings, or date inputs/validators silently break.
+- [Replit npm firewall](replit-npm-firewall.md) — package firewall 403s `next` < 16.3.3; on "next: command not found" after import, install with an allowed patch instead of retrying npm ci.
