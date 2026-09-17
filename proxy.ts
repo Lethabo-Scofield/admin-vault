@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-// Routes only a SUPER_ADMIN session may reach. /credentials is the internship
-// credential manager (official documents). /interns itself is open to every
-// signed-in admin; the engineer-facing key vault lives at /project-keys.
-const SUPER_ADMIN_PREFIXES = ["/credentials", "/compliance"];
+// Routes only a SUPER_ADMIN session may reach. Database-backed permission
+// checks for projects and interns happen in server queries/actions so account
+// suspension and permission edits take effect without waiting for a new token.
+const SUPER_ADMIN_PREFIXES = ["/credentials", "/compliance", "/audit-logs"];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

@@ -7,3 +7,4 @@
 - [postgres.js date columns](postgres-date-columns.md) — SQL `date` comes back as JS Date; select `::text` when code expects ISO strings, or date inputs/validators silently break.
 - [Replit npm firewall](replit-npm-firewall.md) — package firewall 403s `next` < 16.3.3; on "next: command not found" after import, install with an allowed patch instead of retrying npm ci.
 - [Server Action uploads](server-action-uploads.md) — body limit 12mb in next.config; oversized files must be refused client-side; never export constants from "use server" files.
+- [Workspace account authorization](workspace-account-authorization.md) — default admin email is Super Admin-only; invited accounts use live database permissions and the shared workspace password.

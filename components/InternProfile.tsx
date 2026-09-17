@@ -74,11 +74,13 @@ export default function InternProfile({
   intern,
   projects,
   documents,
+  supervisors,
   initialTab = "projects",
 }: {
   intern: Intern;
   projects: InternProject[];
   documents: InternDocument[];
+  supervisors: { email: string; label: string }[];
   initialTab?: TabId;
 }) {
   const [editing, setEditing] = useState(false);
@@ -96,7 +98,11 @@ export default function InternProfile({
             <X size={15} /> Cancel Editing
           </button>
         </div>
-        <InternForm intern={intern} onSaved={() => setEditing(false)} />
+        <InternForm
+          intern={intern}
+          supervisors={supervisors}
+          onSaved={() => setEditing(false)}
+        />
       </div>
     );
   }

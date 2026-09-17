@@ -1,5 +1,5 @@
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireSuperAdmin, requireUser } from "@/lib/session";
+import { requirePermission, requireSuperAdmin } from "@/lib/session";
 import type {
   Intern,
   InternCredential,
@@ -27,6 +27,7 @@ const INTERN_COLUMNS = `
   i.responsibilities,
   i.skills_demonstrated       as "skillsDemonstrated",
   i.supervisor_name           as "supervisorName",
+  i.supervisor_email          as "supervisorEmail",
   i.supervisor_recommendation as "supervisorRecommendation",
   i.internal_notes            as "internalNotes",
   i.created_at                as "createdAt",
@@ -45,7 +46,7 @@ export async function getInterns(opts?: {
   includeArchived?: boolean;
   status?: InternStatusFilter;
 }): Promise<Intern[]> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   const search = (opts?.search ?? "").trim();
   const like = `%${search}%`;
@@ -81,7 +82,7 @@ export async function getInternCounts(): Promise<{
   completed: number;
   all: number;
 }> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   const [row] = await sql<{ active: number; completed: number; all: number }[]>`
     select
@@ -94,7 +95,7 @@ export async function getInternCounts(): Promise<{
 }
 
 export async function getIntern(id: number): Promise<Intern | null> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   const rows = await sql.unsafe<Intern[]>(
     `select ${INTERN_COLUMNS} from interns i where i.id = $1`,
@@ -348,7 +349,7 @@ export async function getPublicCredentialPdfsByToken(token: string): Promise<{
 }
 
 export async function getInternProjects(internId: number): Promise<InternProject[]> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   return sql<InternProject[]>`
     select id,
@@ -369,7 +370,7 @@ export async function getInternProjects(internId: number): Promise<InternProject
 }
 
 export async function getInternDocuments(internId: number): Promise<InternDocument[]> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   return sql<InternDocument[]>`
     select id,
@@ -393,7 +394,7 @@ export async function getInternDocumentContent(
   internId: number,
   documentId: number
 ): Promise<(InternDocument & { content: Uint8Array }) | null> {
-  await requireUser();
+  await requirePermission("MANAGE_INTERNS");
   const sql = await db();
   const rows = await sql<(InternDocument & { content: Uint8Array })[]>`
     select id,

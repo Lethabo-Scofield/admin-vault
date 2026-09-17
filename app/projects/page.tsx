@@ -11,14 +11,15 @@ export const dynamic = "force-dynamic";
 export default async function ProjectsPage() {
   const projects = await getProjects();
   const currentUser = await getCurrentUser();
-  const isSuperAdmin = currentUser?.roleKey === "SUPER_ADMIN";
+  const canManageProjects =
+    currentUser?.permissions.includes("MANAGE_PROJECTS") ?? false;
 
   return (
     <div className="animate-ios-in">
       <PageHeader
         title="Projects"
         subtitle="Every Olyxee product — usage, credentials and compliance in one place"
-        action={isSuperAdmin ? <CreateProjectForm /> : undefined}
+        action={canManageProjects ? <CreateProjectForm /> : undefined}
       />
 
       {projects.length === 0 ? (

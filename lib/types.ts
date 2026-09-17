@@ -155,6 +155,7 @@ export interface Intern {
   responsibilities: string;
   skillsDemonstrated: string;
   supervisorName: string;
+  supervisorEmail: string;
   supervisorRecommendation: string;
   internalNotes: string;
   createdAt: string;

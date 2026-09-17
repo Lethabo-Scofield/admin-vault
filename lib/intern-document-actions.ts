@@ -4,7 +4,7 @@ import { createHash } from "crypto";
 import { revalidatePath } from "next/cache";
 import type { TransactionSql } from "postgres";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireUser, type CurrentUser } from "@/lib/session";
+import { requirePermission, type CurrentUser } from "@/lib/session";
 import { INTERN_DOCUMENT_KINDS, type InternDocumentKind } from "@/lib/types";
 
 type Tx = TransactionSql<Record<string, never>>;
@@ -62,7 +62,7 @@ export async function uploadInternDocument(
   _prev: UploadResult | null,
   formData: FormData
 ): Promise<UploadResult> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const internId = Number(formData.get("internId"));
   const file = formData.get("file");
   if (!internId) return { error: "Missing intern." };
@@ -108,7 +108,7 @@ export async function uploadInternDocument(
 }
 
 export async function deleteInternDocument(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const documentId = Number(formData.get("documentId"));
   const internId = Number(formData.get("internId"));
   if (!documentId || !internId) return;

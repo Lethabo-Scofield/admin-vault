@@ -95,6 +95,20 @@ create table if not exists audit_logs (
   status       text not null default 'SUCCESS'
 );
 
+create table if not exists workspace_accounts (
+  id                  serial primary key,
+  email               text not null unique,
+  display_name        text not null default '',
+  manage_interns      boolean not null default false,
+  manage_projects     boolean not null default false,
+  active              boolean not null default true,
+  created_by          text not null default '',
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now()
+);
+create unique index if not exists idx_workspace_accounts_email_lower
+  on workspace_accounts (lower(email));
+
 create table if not exists interns (
   id                         serial primary key,
   intern_number              text not null unique,
@@ -117,6 +131,7 @@ create table if not exists interns (
 
 alter table interns add column if not exists email text not null default '';
 alter table interns add column if not exists pronouns text not null default '';
+alter table interns add column if not exists supervisor_email text not null default '';
 
 create table if not exists intern_credentials (
   id                     serial primary key,

@@ -1,7 +1,8 @@
 // Node-only password verification (bcrypt). Never import from edge code (proxy.ts).
 import bcrypt from "bcryptjs";
-import type { Role } from "@/lib/auth";
+import type { Permission, Role } from "@/lib/auth";
 import { isDemoCredentials, getAdminEmail } from "@/lib/auth";
+import { findActiveWorkspaceAccount } from "@/lib/workspace-accounts";
 
 function timingSafeEqualStr(a: string, b: string): boolean {
   const enc = new TextEncoder();
@@ -33,53 +34,44 @@ export function isLoginConfigured(): boolean {
   return Boolean(
     process.env.SUPERADMIN_PASSWORD_HASH ||
       process.env.SUPERADMIN_PASSWORD ||
-      process.env.ENGINEER_PASSWORD_HASH ||
-      process.env.ENGINEER_PASSWORD ||
       process.env.ADMIN_PASSWORD
   );
 }
 
 /**
  * Resolve the role for a login attempt, or null if the credentials are invalid.
- * Order matters: the super-admin secret is checked first so it always wins.
- * Both roles may sign in with the same email — the password decides the role.
+ * The configured admin email is reserved for Super Admin. Workspace accounts
+ * must be active and use their own invited email with ADMIN_PASSWORD.
  * - SUPERADMIN_PASSWORD_HASH (bcrypt) or SUPERADMIN_PASSWORD  -> SUPER_ADMIN
- * - ENGINEER_PASSWORD_HASH (bcrypt) or ENGINEER_PASSWORD      -> FOUNDER_ENGINEER
- * - ADMIN_PASSWORD (the engineering team's normal password)   -> FOUNDER_ENGINEER
+ * - ADMIN_PASSWORD + active invited email                      -> workspace account
  * - demo/demo outside production                              -> SUPER_ADMIN
  */
 export async function resolveLoginRole(
   email: string,
   password: string
-): Promise<{ role: Role; email: string } | null> {
+): Promise<{ role: Role; email: string; permissions: Permission[] } | null> {
   if (isDemoCredentials(email, password)) {
-    return { role: "SUPER_ADMIN", email: "demo@olyxee.com" };
+    return { role: "SUPER_ADMIN", email: "demo@olyxee.com", permissions: [] };
   }
   const normalized = email.trim().toLowerCase();
 
   if (
+    normalized === getAdminEmail() &&
     await matches(
       password,
       process.env.SUPERADMIN_PASSWORD_HASH,
       process.env.SUPERADMIN_PASSWORD
     )
   ) {
-    return { role: "SUPER_ADMIN", email: normalized || getAdminEmail() };
+    return { role: "SUPER_ADMIN", email: getAdminEmail(), permissions: [] };
   }
-  if (
-    await matches(
-      password,
-      process.env.ENGINEER_PASSWORD_HASH,
-      process.env.ENGINEER_PASSWORD
-    )
-  ) {
-    return { role: "FOUNDER_ENGINEER", email: normalized || "engineer@olyxee.com" };
-  }
-  // ADMIN_PASSWORD is the engineering team's normal password (same email,
-  // different password than the super admin).
+  if (!normalized || normalized === getAdminEmail()) return null;
   const admin = process.env.ADMIN_PASSWORD;
   if (admin && timingSafeEqualStr(password, admin)) {
-    return { role: "FOUNDER_ENGINEER", email: normalized || getAdminEmail() };
+    const account = await findActiveWorkspaceAccount(normalized);
+    if (account) {
+      return { role: "FOUNDER_ENGINEER", ...account };
+    }
   }
   return null;
 }

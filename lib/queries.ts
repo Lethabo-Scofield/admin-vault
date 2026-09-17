@@ -6,7 +6,7 @@ import type {
   Project,
   VaultCredential,
 } from "@/lib/types";
-import { requireSuperAdmin } from "@/lib/session";
+import { requirePermission, requireSuperAdmin, requireUser } from "@/lib/session";
 
 async function db() {
   await ensureSchema();
@@ -14,6 +14,7 @@ async function db() {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+  const user = await requireUser();
   const sql = await db();
   const [row] = await sql<
     {
@@ -26,12 +27,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }[]
   >`
     select
-      (select count(*) from projects)                                          as "totalProjects",
-      (select count(*) from credentials)                                       as "totalCredentials",
-      (select count(*) from credentials where status = 'Active')               as "activeApiKeys",
-      (select count(*) from documents)                                         as "complianceDocuments",
-      (select count(*) from audit_logs where timestamp >= now() - interval '24 hours')                          as "auditTriggers24h",
-      (select count(*) from audit_logs where timestamp >= now() - interval '24 hours' and status <> 'SUCCESS')  as "unauthorizedAttempts24h"
+      case when ${user.permissions.includes("MANAGE_PROJECTS")} then (select count(*) from projects) else 0 end as "totalProjects",
+      case when ${user.permissions.includes("MANAGE_PROJECTS")} then (select count(*) from credentials) else 0 end as "totalCredentials",
+      case when ${user.permissions.includes("MANAGE_PROJECTS")} then (select count(*) from credentials where status = 'Active') else 0 end as "activeApiKeys",
+      case when ${user.roleKey === "SUPER_ADMIN"} then (select count(*) from documents) else 0 end as "complianceDocuments",
+      case when ${user.roleKey === "SUPER_ADMIN"} then (select count(*) from audit_logs where timestamp >= now() - interval '24 hours') else 0 end as "auditTriggers24h",
+      case when ${user.roleKey === "SUPER_ADMIN"} then (select count(*) from audit_logs where timestamp >= now() - interval '24 hours' and status <> 'SUCCESS') else 0 end as "unauthorizedAttempts24h"
   `;
   return {
     totalProjects: Number(row.totalProjects),
@@ -44,6 +45,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 }
 
 export async function getProjects(): Promise<Project[]> {
+  await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   const rows = await sql<
     {
@@ -85,6 +87,7 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function getProject(id: number): Promise<Project | null> {
+  await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   const rows = await sql<
     {
@@ -124,6 +127,7 @@ export async function getProject(id: number): Promise<Project | null> {
 }
 
 export async function getCredentials(): Promise<VaultCredential[]> {
+  await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   return sql<VaultCredential[]>`
     select
@@ -147,6 +151,7 @@ export async function getCredentials(): Promise<VaultCredential[]> {
 export async function getCredentialsByProject(
   projectId: number
 ): Promise<VaultCredential[]> {
+  await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   return sql<VaultCredential[]>`
     select
@@ -231,12 +236,8 @@ export async function getDocumentContent(id: number): Promise<{
 }
 
 export async function getAuditLogs(limit = 200): Promise<AuditLog[]> {
+  await requireSuperAdmin();
   const sql = await db();
-  // Founder engineers see only operational entries: anything referencing
-  // interns or internship credentials is super-admin-only.
-  const { getCurrentUser } = await import("@/lib/session");
-  const user = await getCurrentUser();
-  const isSuperAdmin = user?.roleKey === "SUPER_ADMIN";
   return sql<AuditLog[]>`
     select
       id,
@@ -247,7 +248,6 @@ export async function getAuditLogs(limit = 200): Promise<AuditLog[]> {
       ip_address  as "ipAddress",
       status
     from audit_logs
-    where ${isSuperAdmin ? sql`true` : sql`action !~* '(intern|OLX-INT|OLX-CERT|QR code)'`}
     order by timestamp desc
     limit ${limit}
   `;

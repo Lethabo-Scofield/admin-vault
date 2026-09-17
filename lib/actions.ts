@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { TransactionSql } from "postgres";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireUser, requireSuperAdmin, type CurrentUser } from "@/lib/session";
+import { requirePermission, requireSuperAdmin, type CurrentUser } from "@/lib/session";
 import { encryptString, decryptString } from "@/lib/crypto";
 import {
   assertPostgresUrl,
@@ -77,7 +77,7 @@ export async function createProject(formData: FormData): Promise<void> {
 
   const logoUrl = (await logoToDataUrl(formData.get("logo"))) ?? "";
 
-  const user = await requireSuperAdmin();
+  const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   await sql.begin(async (tx) => {
     await tx`
@@ -103,7 +103,7 @@ export async function updateProject(formData: FormData): Promise<void> {
 
   const newLogo = await logoToDataUrl(formData.get("logo"));
 
-  const user = await requireSuperAdmin();
+  const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   await sql.begin(async (tx) => {
     let rows: { id: number }[];
@@ -303,7 +303,7 @@ export async function addCredential(formData: FormData): Promise<void> {
 
   if (!projectId || !serviceName || !secretValue) return;
 
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   await requireActiveProject(sql, projectId);
   await sql.begin(async (tx) => {
@@ -333,7 +333,7 @@ export async function updateCredential(formData: FormData): Promise<void> {
 
   if (!credentialId || !serviceName) return;
 
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   const [credentialProject] = await sql<{ projectId: number }[]>`
     select project_id as "projectId" from credentials where id = ${credentialId}
@@ -380,7 +380,7 @@ export async function deleteCredential(formData: FormData): Promise<void> {
   const credentialId = Number(formData.get("credentialId"));
   if (!credentialId) return;
 
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
   const [credentialProject] = await sql<{ projectId: number }[]>`
     select project_id as "projectId" from credentials where id = ${credentialId}

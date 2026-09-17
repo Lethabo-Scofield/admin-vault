@@ -63,7 +63,7 @@ export async function login(
   if (!isLoginConfigured() && !(await resolveLoginRole(email, password))) {
     return {
       error:
-        "Login is not configured. Set SUPERADMIN_PASSWORD_HASH / ENGINEER_PASSWORD_HASH.",
+        "Login is not configured. Set the Super Admin and workspace passwords.",
     };
   }
 
@@ -78,7 +78,11 @@ export async function login(
   }
 
   clearRateLimit(ip);
-  const token = await createSessionToken(resolved.email, resolved.role);
+  const token = await createSessionToken(
+    resolved.email,
+    resolved.role,
+    resolved.permissions
+  );
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

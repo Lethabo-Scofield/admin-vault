@@ -2,6 +2,7 @@ import { getIntern, getInternProjects, getInterns } from "@/lib/intern-queries";
 import { PageHeader } from "@/components/ui";
 import InternCredentialForm from "@/components/InternCredentialForm";
 import type { InternCredential } from "@/lib/types";
+import { requireSuperAdmin } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function NewInternCredentialPage({
 }: {
   searchParams: Promise<{ internId?: string }>;
 }) {
+  await requireSuperAdmin();
   const { internId } = await searchParams;
   const interns = await getInterns({});
 

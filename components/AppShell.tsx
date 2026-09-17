@@ -16,7 +16,12 @@ import {
 import { GraduationCap } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
-type ShellUser = { email: string; role: string; roleKey?: string };
+type ShellUser = {
+  email: string;
+  role: string;
+  roleKey?: string;
+  permissions: string[];
+};
 
 const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; label: string; icon: typeof GraduationCap }[] }[] = [
   {
@@ -38,12 +43,6 @@ const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; 
     title: "Internship Program",
     items: [
       { href: "/interns", label: "Interns", icon: GraduationCap },
-    ],
-  },
-  {
-    title: "System",
-    items: [
-      { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -73,12 +72,19 @@ export default function AppShell({
     return <>{children}</>;
   }
 
-  const visibleGroups = NAV_GROUPS.filter(
-    (g) => !g.superAdmin || user?.roleKey === "SUPER_ADMIN"
-  );
+  const canProjects = user?.permissions.includes("MANAGE_PROJECTS");
+  const canInterns = user?.permissions.includes("MANAGE_INTERNS");
+  const visibleGroups = NAV_GROUPS.filter((g) => {
+    if (g.superAdmin) return user?.roleKey === "SUPER_ADMIN";
+    if (g.title === "Platform") return canProjects;
+    if (g.title === "Internship Program") return canInterns;
+    return true;
+  });
   const current = visibleGroups
     .flatMap((g) => g.items)
     .find((n) => isActive(pathname, n.href));
+  const settingsActive =
+    pathname === "/settings" || pathname.startsWith("/audit-logs");
 
   const navList = (
     <nav className="px-3">
@@ -136,16 +142,31 @@ export default function AppShell({
   );
 
   const userCard = (
-    <div className="mx-3 mb-4 mt-2 flex items-center gap-3 rounded-2xl bg-gray-50 px-3 py-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gray-500 to-gray-700 text-[13px] font-semibold text-white">
-        {(user?.email ?? "?").slice(0, 2).toUpperCase()}
-      </div>
-      <div className="min-w-0 flex-1 leading-tight">
-        <p className="truncate text-[13px] font-medium text-gray-900">
-          {user?.email ?? "Unknown"}
-        </p>
-        <p className="truncate text-[12px] text-gray-400">{user?.role ?? ""}</p>
-      </div>
+    <div
+      className={`mx-3 mb-4 mt-2 flex items-center gap-1 rounded-2xl p-1.5 ${
+        settingsActive ? "bg-gray-100 ring-1 ring-gray-200" : "bg-gray-50"
+      }`}
+    >
+      <Link
+        href="/settings"
+        aria-current={settingsActive ? "page" : undefined}
+        title="Account settings"
+        className="tap flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1.5 py-1.5 hover:bg-white"
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gray-500 to-gray-700 text-[13px] font-semibold text-white">
+          {(user?.email ?? "?").slice(0, 2).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-[13px] font-medium text-gray-900">
+            {user?.email ?? "Unknown"}
+          </p>
+          <p className="truncate text-[12px] text-gray-400">{user?.role ?? ""}</p>
+        </div>
+        <Settings
+          size={16}
+          className={settingsActive ? "text-gray-700" : "text-gray-400"}
+        />
+      </Link>
       <form action={logout}>
         <button
           type="submit"
@@ -216,7 +237,7 @@ export default function AppShell({
             <Menu size={20} />
           </button>
           <span className="text-[15px] font-semibold text-gray-900">
-            {current?.label ?? "Olyxee Admin"}
+            {settingsActive ? "Settings" : current?.label ?? "Olyxee Admin"}
           </span>
         </header>
 

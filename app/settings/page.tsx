@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getCurrentUser } from "@/lib/session";
 import { logout } from "@/lib/auth-actions";
+import WorkspaceAccounts from "@/components/WorkspaceAccounts";
+import { getWorkspaceAccounts } from "@/lib/workspace-accounts";
 
 export const metadata: Metadata = {
   title: "Settings · Olyxee Admin",
@@ -16,6 +18,8 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  const isSuperAdmin = user.roleKey === "SUPER_ADMIN";
+  const accounts = isSuperAdmin ? await getWorkspaceAccounts() : [];
 
   return (
     <div className="animate-ios-in">
@@ -25,7 +29,8 @@ export default async function SettingsPage() {
       />
 
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
-        <section className="rounded-ios bg-white p-5 shadow-ios sm:p-6">
+        {isSuperAdmin && <WorkspaceAccounts accounts={accounts} />}
+        {isSuperAdmin && <section className="rounded-ios bg-white p-5 shadow-ios sm:p-6">
           <div className="mb-4 flex items-center gap-2.5">
             <Palette size={18} className="text-gray-400" />
             <h2 className="text-[17px] font-semibold text-gray-900">
@@ -41,7 +46,7 @@ export default async function SettingsPage() {
             </div>
             <ThemeToggle />
           </div>
-        </section>
+        </section>}
 
         <section className="rounded-ios bg-white p-5 shadow-ios sm:p-6">
           <div className="mb-4 flex items-center gap-2.5">

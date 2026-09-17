@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { TransactionSql } from "postgres";
 import { getSql, ensureSchema } from "@/lib/db";
-import { requireUser, type CurrentUser } from "@/lib/session";
+import { requirePermission, type CurrentUser } from "@/lib/session";
 
 type Tx = TransactionSql<Record<string, never>>;
 
@@ -50,7 +50,7 @@ async function internLabel(tx: Tx, internId: number): Promise<string> {
 }
 
 export async function createInternProject(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const internId = Number(formData.get("internId"));
   const title = text(formData, "title", 300);
   if (!internId || !title) return;
@@ -76,7 +76,7 @@ export async function createInternProject(formData: FormData): Promise<void> {
 }
 
 export async function updateInternProject(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const projectId = Number(formData.get("projectId"));
   const internId = Number(formData.get("internId"));
   const title = text(formData, "title", 300);
@@ -105,7 +105,7 @@ export async function updateInternProject(formData: FormData): Promise<void> {
 
 /** Toggle between IN_PROGRESS and COMPLETED (stamps completed_at with today). */
 export async function setInternProjectStatus(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const projectId = Number(formData.get("projectId"));
   const internId = Number(formData.get("internId"));
   const completed = formData.get("status") === "COMPLETED";
@@ -134,7 +134,7 @@ export async function setInternProjectStatus(formData: FormData): Promise<void> 
 }
 
 export async function deleteInternProject(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requirePermission("MANAGE_INTERNS");
   const projectId = Number(formData.get("projectId"));
   const internId = Number(formData.get("internId"));
   if (!projectId || !internId) return;

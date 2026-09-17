@@ -1,4 +1,4 @@
-import { CalendarDays, Target, Flag, Clock } from "lucide-react";
+import { CalendarRange, Clock3, Target } from "lucide-react";
 import type { Intern } from "@/lib/types";
 import {
   computeInternProgress,
@@ -7,10 +7,6 @@ import {
 } from "@/lib/intern-progress";
 import { formatDate } from "@/lib/format";
 
-/**
- * The "smart" header for an intern: how much of the 3-month window is used,
- * how many of the goal projects are done, and whether they're on track.
- */
 export default function InternProgressCard({
   intern,
   now,
@@ -18,140 +14,116 @@ export default function InternProgressCard({
   intern: Intern;
   now: Date;
 }) {
-  const p = computeInternProgress(intern, now);
-  const style = PROGRESS_STYLE[p.state];
-  const showTime = !["unscheduled", "withdrawn"].includes(p.state);
+  const progress = computeInternProgress(intern, now);
+  const style = PROGRESS_STYLE[progress.state];
+  const tracksTime = !["unscheduled", "withdrawn"].includes(progress.state);
+  const remainingProjects = Math.max(
+    0,
+    progress.projectGoal - progress.projectsDone
+  );
+
+  const projectMessage =
+    remainingProjects === 0
+      ? "Project goal reached"
+      : `${remainingProjects} project${remainingProjects === 1 ? "" : "s"} remaining`;
+
+  const paceMessage =
+    progress.state === "behind"
+      ? `${progress.expectedByNow} expected by this point`
+      : progress.state === "completed"
+        ? `${progress.projectPercent}% of the programme goal completed`
+        : projectMessage;
 
   return (
-    <div className="rounded-ios bg-white p-5 shadow-ios sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="overflow-hidden rounded-ios bg-white shadow-ios">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 sm:px-6">
         <div>
-          <p className="text-[12px] font-medium uppercase tracking-wide text-gray-400">
-            Programme progress
-          </p>
-          <p className="mt-1 text-[15px] text-gray-700">
-            Goal: <span className="font-semibold text-gray-900">{p.projectGoal} projects</span> in{" "}
-            <span className="font-semibold text-gray-900">
-              {intern.startDate && p.plannedEnd
-                ? `${formatDate(intern.startDate)} – ${formatDate(p.plannedEnd)}`
-                : "3 months"}
-            </span>
+          <h2 className="text-[16px] font-semibold text-gray-900">
+            Programme Progress
+          </h2>
+          <p className="mt-0.5 text-[13px] text-gray-500">
+            {progress.projectGoal} projects across the internship period
           </p>
         </div>
         <span
           className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] font-medium ${style.bg} ${style.text}`}
         >
           <span className={`h-2 w-2 rounded-full ${style.dot}`} />
-          {p.label}
+          {progress.label}
         </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat
-          icon={<Clock size={16} />}
-          label="Time left"
-          value={daysLeftLabel(p)}
-          sub={
-            showTime && p.totalDays > 0
-              ? `${p.elapsedDays} of ${p.totalDays} days used`
-              : "Set a start date to track"
-          }
-        />
-        <Stat
-          icon={<Target size={16} />}
-          label="Projects completed"
-          value={`${p.projectsDone} / ${p.projectGoal}`}
-          sub={
-            p.state === "completed" || p.state === "withdrawn"
-              ? `${p.projectPercent}% of goal`
-              : p.projectsDone >= p.projectGoal
-                ? "Goal reached"
-                : `${p.expectedByNow} expected by now`
-          }
-        />
-        <Stat
-          icon={<CalendarDays size={16} />}
-          label="Started"
-          value={intern.startDate ? formatDate(intern.startDate) : "—"}
-          sub={intern.department || intern.position || ""}
-        />
-        <Stat
-          icon={<Flag size={16} />}
-          label={intern.completionDate ? "Completed on" : "Planned end"}
-          value={
-            intern.completionDate
-              ? formatDate(intern.completionDate)
-              : p.plannedEnd
-                ? formatDate(p.plannedEnd)
-                : "—"
-          }
-          sub={intern.employmentStatus}
-        />
-      </div>
+      <div className="grid md:grid-cols-[1.2fr_1fr]">
+        <div className="border-b border-gray-100 p-5 sm:p-6 md:border-b-0 md:border-r">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-wide text-gray-400">
+                <Target size={14} /> Projects completed
+              </p>
+              <p className="mt-2 text-[34px] font-semibold leading-none tracking-tight text-gray-900">
+                {progress.projectsDone}
+                <span className="ml-1 text-[18px] font-medium text-gray-400">
+                  / {progress.projectGoal}
+                </span>
+              </p>
+            </div>
+            <p className="text-right text-[13px] font-medium text-gray-600">
+              {progress.projectPercent}%
+            </p>
+          </div>
 
-      <div className="mt-5 space-y-3">
-        <Bar
-          label="Internship window"
-          percent={showTime ? p.timePercent : 0}
-          right={showTime ? `${p.timePercent}%` : "—"}
-          color="bg-gray-800"
-        />
-        <Bar
-          label="Project goal"
-          percent={p.projectPercent}
-          right={`${p.projectsDone}/${p.projectGoal}`}
-          color={style.bar}
-        />
-      </div>
-    </div>
-  );
-}
+          <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className={`h-full rounded-full transition-all ${style.bar}`}
+              style={{ width: `${progress.projectPercent}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[12.5px] text-gray-500">{paceMessage}</p>
+        </div>
 
-function Stat({
-  icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  sub?: string;
-}) {
-  return (
-    <div className="rounded-xl bg-gray-50 px-4 py-3">
-      <p className="flex items-center gap-1.5 text-[12px] font-medium text-gray-400">
-        {icon} {label}
-      </p>
-      <p className="mt-1 text-[20px] font-semibold tracking-tight text-gray-900">{value}</p>
-      {sub ? <p className="truncate text-[12px] text-gray-500">{sub}</p> : null}
-    </div>
-  );
-}
+        <div className="p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-wide text-gray-400">
+                <Clock3 size={14} /> Time remaining
+              </p>
+              <p className="mt-2 text-[22px] font-semibold tracking-tight text-gray-900">
+                {daysLeftLabel(progress)}
+              </p>
+            </div>
+            {tracksTime && progress.totalDays > 0 && (
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[12px] font-medium text-gray-600">
+                {progress.timePercent}% elapsed
+              </span>
+            )}
+          </div>
 
-function Bar({
-  label,
-  percent,
-  right,
-  color,
-}: {
-  label: string;
-  percent: number;
-  right: string;
-  color: string;
-}) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-[12.5px]">
-        <span className="text-gray-600">{label}</span>
-        <span className="font-medium text-gray-900">{right}</span>
+          <div className="mt-5 flex items-center gap-3">
+            <CalendarRange size={16} className="shrink-0 text-gray-400" />
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-3 text-[12.5px]">
+              <div>
+                <p className="text-gray-400">Start</p>
+                <p className="mt-0.5 font-medium text-gray-800">
+                  {intern.startDate ? formatDate(intern.startDate) : "Not set"}
+                </p>
+              </div>
+              <div className="h-px min-w-4 flex-1 bg-gray-200" />
+              <div className="text-right">
+                <p className="text-gray-400">
+                  {intern.completionDate ? "Completed" : "Planned end"}
+                </p>
+                <p className="mt-0.5 font-medium text-gray-800">
+                  {intern.completionDate
+                    ? formatDate(intern.completionDate)
+                    : progress.plannedEnd
+                      ? formatDate(progress.plannedEnd)
+                      : "Not set"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-        <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
-        />
-      </div>
-    </div>
+    </section>
   );
 }

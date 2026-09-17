@@ -5,12 +5,14 @@ import { ensureSequentialCredentialNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState } from "@/components/ui";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
+import { requireSuperAdmin } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 // Self-healing may regenerate documents via headless Chromium.
 export const maxDuration = 60;
 
 export default async function InternCredentialsPage() {
+  await requireSuperAdmin();
   // Self-heal any stale (gappy) credential numbering before listing.
   await ensureSchema();
   await ensureSequentialCredentialNumbers(getSql());

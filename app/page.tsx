@@ -11,14 +11,18 @@ import {
 import { getDashboardStats, getCredentials, getAuditLogs } from "@/lib/queries";
 import { maskSecret, formatDateTime } from "@/lib/format";
 import { PageHeader, EnvBadge, StatusBadge } from "@/components/ui";
+import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  const canProjects = user?.permissions.includes("MANAGE_PROJECTS") ?? false;
+  const isSuperAdmin = user?.roleKey === "SUPER_ADMIN";
   const [stats, credentials, audit] = await Promise.all([
     getDashboardStats(),
-    getCredentials(),
-    getAuditLogs(6),
+    canProjects ? getCredentials() : Promise.resolve([]),
+    isSuperAdmin ? getAuditLogs(6) : Promise.resolve([]),
   ]);
 
   const recentCreds = credentials.slice(0, 5);
@@ -60,7 +64,12 @@ export default async function DashboardPage() {
       icon: TriangleAlert,
       tint: "#dc2626",
     },
-  ];
+  ].filter((card) => {
+    if (card.label === "Compliance Documents" || card.label.includes("24h")) {
+      return isSuperAdmin;
+    }
+    return canProjects;
+  });
 
   return (
     <div className="animate-ios-in">
@@ -91,9 +100,9 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-5">
+      {(canProjects || isSuperAdmin) && <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-5">
         {/* Recent credentials */}
-        <div className="overflow-hidden rounded-ios bg-white shadow-ios xl:col-span-3">
+        {canProjects && <div className="overflow-hidden rounded-ios bg-white shadow-ios xl:col-span-3">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <h2 className="text-[15px] font-semibold text-gray-900">
               Recent Credentials
@@ -134,10 +143,10 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
+        </div>}
 
         {/* Recent audit */}
-        <div className="overflow-hidden rounded-ios bg-white shadow-ios xl:col-span-2">
+        {isSuperAdmin && <div className="overflow-hidden rounded-ios bg-white shadow-ios xl:col-span-2">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <h2 className="text-[15px] font-semibold text-gray-900">
               Audit Trail
@@ -170,8 +179,8 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </div>}
+      </div>}
     </div>
   );
 }

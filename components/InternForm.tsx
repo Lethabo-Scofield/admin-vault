@@ -41,9 +41,11 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function InternForm({
   intern,
+  supervisors,
   onSaved,
 }: {
   intern?: Intern;
+  supervisors: { email: string; label: string }[];
   onSaved?: () => void;
 }) {
   const [pending, startTransition] = useTransition();
@@ -155,13 +157,25 @@ export default function InternForm({
               <option>Withdrawn</option>
             </select>
           </Field>
-          <Field label="Supervisor Name">
-            <input
-              name="supervisorName"
-              defaultValue={intern?.supervisorName ?? ""}
-              placeholder="John Smith"
+          <Field label="Supervisor">
+            <select
+              name="supervisorEmail"
+              defaultValue={intern?.supervisorEmail ?? ""}
               className="vault-input"
-            />
+            >
+              <option value="">Not assigned</option>
+              {supervisors.map((supervisor) => (
+                <option key={supervisor.email} value={supervisor.email}>
+                  {supervisor.label} · {supervisor.email}
+                </option>
+              ))}
+              {intern?.supervisorEmail &&
+                !supervisors.some((s) => s.email === intern.supervisorEmail) && (
+                  <option value={intern.supervisorEmail}>
+                    {intern.supervisorName || intern.supervisorEmail} · inactive
+                  </option>
+                )}
+            </select>
           </Field>
           <Field label="Start Date">
             <input

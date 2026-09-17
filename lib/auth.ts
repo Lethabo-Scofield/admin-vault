@@ -5,9 +5,17 @@ export const SESSION_COOKIE = "vault_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days, in seconds
 
 export type Role = "FOUNDER_ENGINEER" | "SUPER_ADMIN";
+export type Permission = "MANAGE_INTERNS" | "MANAGE_PROJECTS";
 
 export function roleLabel(role: Role): string {
-  return role === "SUPER_ADMIN" ? "Super Admin" : "Founder Engineer";
+  return role === "SUPER_ADMIN" ? "Super Admin" : "Workspace Account";
+}
+
+export function hasPermission(
+  session: { role: Role; permissions?: Permission[] },
+  permission: Permission
+): boolean {
+  return session.role === "SUPER_ADMIN" || Boolean(session.permissions?.includes(permission));
 }
 
 export function getAdminEmail(): string {
@@ -91,14 +99,15 @@ export async function verifyCredentials(
 
 export async function createSessionToken(
   email: string,
-  role: Role
+  role: Role,
+  permissions: Permission[] = []
 ): Promise<string> {
   if (!getSecret()) {
     throw new Error(
       "Session signing secret is not configured. Set SESSION_SECRET or ADMIN_PASSWORD."
     );
   }
-  const payload = { sub: email, role, exp: Date.now() + SESSION_MAX_AGE * 1000 };
+  const payload = { sub: email, role, permissions, exp: Date.now() + SESSION_MAX_AGE * 1000 };
   const payloadB64 = b64urlEncode(
     new TextEncoder().encode(JSON.stringify(payload))
   );
@@ -108,7 +117,7 @@ export async function createSessionToken(
 
 export async function verifySessionToken(
   token: string | undefined | null
-): Promise<{ email: string; role: Role } | null> {
+): Promise<{ email: string; role: Role; permissions: Permission[] } | null> {
   if (!token) return null;
   // Never accept a token when no signing secret is configured: an empty key is
   // publicly known and would make forged cookies verifiable.
@@ -124,7 +133,13 @@ export async function verifySessionToken(
     if (typeof payload.exp !== "number" || payload.exp < Date.now()) return null;
     const role: Role =
       payload.role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "FOUNDER_ENGINEER";
-    return { email: String(payload.sub ?? getAdminEmail()), role };
+    const permissions = Array.isArray(payload.permissions)
+      ? payload.permissions.filter(
+          (value: unknown): value is Permission =>
+            value === "MANAGE_INTERNS" || value === "MANAGE_PROJECTS"
+        )
+      : [];
+    return { email: String(payload.sub ?? getAdminEmail()), role, permissions };
   } catch {
     return null;
   }

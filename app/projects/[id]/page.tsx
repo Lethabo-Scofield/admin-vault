@@ -44,6 +44,8 @@ export default async function ProjectDetailPage({
 
   const currentUser = await getCurrentUser();
   const canManageAnalytics = currentUser?.roleKey === "SUPER_ADMIN";
+  const canManageProjects =
+    currentUser?.permissions.includes("MANAGE_PROJECTS") ?? false;
   const isSuspended = project.status === "SUSPENDED";
   const [credentials, documents, analytics] = await Promise.all([
     getCredentialsByProject(projectId),
@@ -83,7 +85,7 @@ export default async function ProjectDetailPage({
             <h1 className="text-[26px] font-bold tracking-tight text-gray-900 sm:text-[30px]">
               {project.name}
             </h1>
-            {canManageAnalytics && <EditProjectForm project={project} />}
+            {canManageProjects && <EditProjectForm project={project} />}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-gray-500">
             {project.category && <span>{project.category}</span>}
@@ -125,7 +127,7 @@ export default async function ProjectDetailPage({
               ({credentials.length})
             </span>
           </h2>
-          {!isSuspended && <AddCredentialForm projectId={projectId} />}
+          {canManageProjects && !isSuspended && <AddCredentialForm projectId={projectId} />}
         </div>
 
         {credentials.length === 0 ? (
@@ -153,7 +155,7 @@ export default async function ProjectDetailPage({
                   <div className="flex items-center gap-2">
                     <EnvBadge environment={c.environment} />
                     <StatusBadge status={c.status} />
-                    {!isSuspended && <EditCredentialForm credential={c} />}
+                    {canManageProjects && !isSuspended && <EditCredentialForm credential={c} />}
                   </div>
                 </div>
               ))}
