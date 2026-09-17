@@ -193,6 +193,52 @@ create table if not exists intern_projects (
 
 create index if not exists idx_intern_projects_intern on intern_projects(intern_id);
 
+-- One-time-compatible backfill for project lists saved before intern_projects
+-- became the single project-entry source. It is safe to run repeatedly.
+with legacy_lists as (
+  select id as intern_id, projects_completed as project_list, completion_date
+  from interns
+  where trim(projects_completed) <> ''
+  union all
+  select intern_id, projects_completed as project_list, completion_date
+  from intern_credentials
+  where trim(projects_completed) <> ''
+),
+legacy_titles as (
+  select
+    intern_id,
+    completion_date,
+    regexp_replace(
+      trim(raw_title),
+      '^([-*•▪◦‣–—]|[0-9]+[.)])[[:space:]]*',
+      ''
+    ) as title
+  from legacy_lists
+  cross join lateral regexp_split_to_table(project_list, E'[\\n,;]+') as raw_title
+),
+deduplicated_titles as (
+  select distinct on (intern_id, lower(title))
+    intern_id, title, completion_date
+  from legacy_titles
+  where title <> ''
+  order by intern_id, lower(title), completion_date desc nulls last
+)
+insert into intern_projects
+  (intern_id, title, status, completed_at, created_by)
+select
+  legacy.intern_id,
+  legacy.title,
+  'COMPLETED',
+  legacy.completion_date,
+  'Imported from previous project list'
+from deduplicated_titles legacy
+where not exists (
+  select 1
+  from intern_projects current_project
+  where current_project.intern_id = legacy.intern_id
+    and lower(trim(current_project.title)) = lower(trim(legacy.title))
+);
+
 -- Uploaded paperwork (NDA, acceptance letter, ...). Bytes live in the database
 -- so the same record works on Replit and Vercel without object storage.
 create table if not exists intern_documents (
