@@ -125,14 +125,17 @@ export default function InternCredentialForm({
             there whenever this credential is saved.
           </div>
         </div>
-        <Field label="Projects & Responsibilities Completed" full>
-          <textarea
-            name="projectsCompleted"
-            rows={4}
-            defaultValue={d?.projectsCompleted ?? ""}
-            className="vault-input resize-none"
-          />
-        </Field>
+        <div className="sm:col-span-2">
+          <p className="mb-1.5 text-[13px] font-medium text-gray-700">
+            Completed Projects
+          </p>
+          <div className="min-h-20 whitespace-pre-line rounded-xl bg-gray-50 px-4 py-3 text-[14px] text-gray-700">
+            {d?.projectsCompleted?.trim() || "No completed projects yet. Add and complete projects on the intern’s Projects tab."}
+          </div>
+          <p className="mt-1.5 text-[12px] text-gray-500">
+            Synced automatically from the intern’s Projects tab when this credential is saved.
+          </p>
+        </div>
         <Field label="Skills Demonstrated" full>
           <textarea
             name="skillsDemonstrated"

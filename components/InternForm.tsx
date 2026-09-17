@@ -194,14 +194,6 @@ export default function InternForm({
         <div
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${tab === "writeups" ? "" : "hidden"}`}
         >
-          <Field label="Projects Completed — write-up for certificates (one per line). Tracked projects live in the Projects tab." full>
-            <textarea
-              name="projectsCompleted"
-              rows={3}
-              defaultValue={intern?.projectsCompleted ?? ""}
-              className="vault-input resize-none"
-            />
-          </Field>
           <Field label="Responsibilities (one per line)" full>
             <textarea
               name="responsibilities"

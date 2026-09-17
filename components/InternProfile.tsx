@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, X, User, Briefcase, FileText, ListChecks, FolderKanban, Paperclip } from "lucide-react";
+import { Pencil, X, User, Briefcase, FileText, FolderKanban, Paperclip } from "lucide-react";
 import InternForm from "@/components/InternForm";
-import InternTasks from "@/components/InternTasks";
 import InternProjects from "@/components/InternProjects";
 import InternDocuments from "@/components/InternDocuments";
-import type { Intern, InternDocument, InternProject, InternTask } from "@/lib/types";
+import type { Intern, InternDocument, InternProject } from "@/lib/types";
 
 const PRONOUNS: Record<string, string> = {
   SHE_HER: "She / Her",
@@ -36,23 +35,20 @@ const TABS = [
   { id: "internship", label: "Internship", icon: Briefcase },
   { id: "projects", label: "Projects", icon: FolderKanban },
   { id: "documents", label: "Documents", icon: Paperclip },
-  { id: "tasks", label: "Tasks & PRs", icon: ListChecks },
   { id: "writeups", label: "Write-ups & Notes", icon: FileText },
 ] as const;
 
-const PANEL_TABS: ReadonlyArray<TabId> = ["projects", "documents", "tasks"];
+const PANEL_TABS: ReadonlyArray<TabId> = ["projects", "documents"];
 
 type TabId = (typeof TABS)[number]["id"];
 
 export default function InternProfile({
   intern,
-  tasks,
   projects,
   documents,
   initialTab = "projects",
 }: {
   intern: Intern;
-  tasks: InternTask[];
   projects: InternProject[];
   documents: InternDocument[];
   initialTab?: TabId;
@@ -115,16 +111,6 @@ export default function InternProfile({
           <InternDocuments internId={intern.id} documents={documents} />
         </div>
       )}
-      {tab === "tasks" && (
-        <div className="p-6">
-          <InternTasks
-            internId={intern.id}
-            tasks={tasks}
-            defaultAssignedBy={intern.supervisorName}
-          />
-        </div>
-      )}
-
       <dl
         className={`grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 ${PANEL_TABS.includes(tab) ? "hidden" : ""}`}
       >
@@ -150,7 +136,6 @@ export default function InternProfile({
         )}
         {tab === "writeups" && (
           <>
-            <Item label="Projects Completed" value={intern.projectsCompleted} full />
             <Item label="Responsibilities" value={intern.responsibilities} full />
             <Item label="Skills Demonstrated" value={intern.skillsDemonstrated} full />
             <Item label="Supervisor Recommendation" value={intern.supervisorRecommendation} full />

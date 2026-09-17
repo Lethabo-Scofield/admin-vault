@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { GraduationCap, Plus, Search } from "lucide-react";
+import { GraduationCap, Plus } from "lucide-react";
 import { getInterns, getInternCounts, type InternStatusFilter } from "@/lib/intern-queries";
 import { ensureSequentialInternNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState, StatusBadge } from "@/components/ui";
 import { computeInternProgress, daysLeftLabel, PROGRESS_STYLE } from "@/lib/intern-progress";
+import InternSearch from "@/components/InternSearch";
 
 export const dynamic = "force-dynamic";
 
@@ -76,37 +77,7 @@ export default async function InternsPage({
         ))}
       </div>
 
-      <form className="mb-5 flex flex-wrap items-center gap-3">
-        <input type="hidden" name="status" value={status} />
-        <div className="relative flex-1 min-w-[220px]">
-          <Search
-            size={16}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search by name, number, position, department…"
-            className="vault-input pl-10"
-          />
-        </div>
-        <label className="flex items-center gap-2 text-[13px] text-gray-600">
-          <input
-            type="checkbox"
-            name="archived"
-            value="1"
-            defaultChecked={archived === "1"}
-            className="rounded"
-          />
-          Include archived
-        </label>
-        <button
-          type="submit"
-          className="tap rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-800 hover:bg-gray-200"
-        >
-          Filter
-        </button>
-      </form>
+      <InternSearch query={q} includeArchived={archived === "1"} />
 
       {interns.length === 0 ? (
         <EmptyState

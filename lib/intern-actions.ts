@@ -111,7 +111,7 @@ export async function createIntern(formData: FormData): Promise<void> {
          ${text(formData, "department", 200)}, ${startDate},
          ${dateOrNull(formData.get("completionDate"))},
          ${text(formData, "employmentStatus", 50) || "Active"},
-         ${text(formData, "projectsCompleted")}, ${text(formData, "responsibilities")},
+          ${""}, ${text(formData, "responsibilities")},
          ${text(formData, "skillsDemonstrated")}, ${text(formData, "supervisorName", 200)},
          ${text(formData, "supervisorRecommendation")}, ${text(formData, "internalNotes")},
          ${plannedEndDate}, ${projectGoal})
@@ -192,7 +192,6 @@ export async function updateIntern(formData: FormData): Promise<void> {
         planned_end_date = ${plannedEndDate},
         project_goal = ${projectGoal},
         employment_status = ${text(formData, "employmentStatus", 50) || "Active"},
-        projects_completed = ${text(formData, "projectsCompleted")},
         responsibilities = ${text(formData, "responsibilities")},
         skills_demonstrated = ${text(formData, "skillsDemonstrated")},
         supervisor_name = ${text(formData, "supervisorName", 200)},
@@ -277,7 +276,6 @@ export async function archiveIntern(formData: FormData): Promise<void> {
 function credentialFields(formData: FormData) {
   return {
     programmeTitle: text(formData, "programmeTitle", 300),
-    projectsCompleted: text(formData, "projectsCompleted"),
     responsibilities: text(formData, "responsibilities"),
     skillsDemonstrated: text(formData, "skillsDemonstrated"),
     publicRecommendation: text(formData, "publicRecommendation"),
@@ -303,6 +301,7 @@ async function internProfileFields(internId: number) {
       pronouns: string;
       startDate: string | null;
       completionDate: string | null;
+      projectsCompleted: string;
     }[]
   >`
     select
@@ -310,7 +309,12 @@ async function internProfileFields(internId: number) {
       department,
       pronouns,
       start_date::text      as "startDate",
-      completion_date::text as "completionDate"
+      completion_date::text as "completionDate",
+      coalesce((
+        select string_agg(p.title, E'\n' order by p.completed_at, p.id)
+        from intern_projects p
+        where p.intern_id = interns.id and p.status = 'COMPLETED'
+      ), '') as "projectsCompleted"
     from interns where id = ${internId}
   `;
   return row ?? null;
@@ -346,7 +350,7 @@ export async function createInternCredential(formData: FormData): Promise<void> 
       values
         (${internId}, ${credentialNumber}, ${token}, ${f.programmeTitle}, ${profile.position},
          ${profile.department}, ${profile.pronouns}, ${profile.startDate}, ${profile.completionDate},
-         ${f.projectsCompleted}, ${f.responsibilities}, ${f.skillsDemonstrated},
+          ${profile.projectsCompleted}, ${f.responsibilities}, ${f.skillsDemonstrated},
          ${f.publicRecommendation},
          ${f.founderName}, ${f.founderTitle}, ${f.founderRecommendation},
          ${f.managerName}, ${f.managerTitle}, ${f.managerRecommendation},
@@ -443,7 +447,7 @@ export async function updateInternCredential(formData: FormData): Promise<void> 
         pronouns = ${profile.pronouns},
         start_date = ${profile.startDate},
         completion_date = ${profile.completionDate},
-        projects_completed = ${f.projectsCompleted},
+        projects_completed = ${profile.projectsCompleted},
         responsibilities = ${f.responsibilities},
         skills_demonstrated = ${f.skillsDemonstrated},
         public_recommendation = ${f.publicRecommendation},

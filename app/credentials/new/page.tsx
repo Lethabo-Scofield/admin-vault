@@ -1,4 +1,4 @@
-import { getIntern, getInterns } from "@/lib/intern-queries";
+import { getIntern, getInternProjects, getInterns } from "@/lib/intern-queries";
 import { PageHeader } from "@/components/ui";
 import InternCredentialForm from "@/components/InternCredentialForm";
 import type { InternCredential } from "@/lib/types";
@@ -18,6 +18,7 @@ export default async function NewInternCredentialPage({
   let defaults: Partial<InternCredential> | undefined;
   const intern = internId ? await getIntern(Number(internId)) : null;
   if (intern) {
+    const projects = await getInternProjects(intern.id);
     defaults = {
       programmeTitle: intern.position ? `${intern.position} Internship` : "",
       position: intern.position,
@@ -25,7 +26,10 @@ export default async function NewInternCredentialPage({
       pronouns: intern.pronouns,
       startDate: intern.startDate,
       completionDate: intern.completionDate,
-      projectsCompleted: intern.projectsCompleted,
+      projectsCompleted: projects
+        .filter((project) => project.status === "COMPLETED")
+        .map((project) => project.title)
+        .join("\n"),
       responsibilities: intern.responsibilities,
       skillsDemonstrated: intern.skillsDemonstrated,
       publicRecommendation: intern.supervisorRecommendation,

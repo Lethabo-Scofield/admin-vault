@@ -135,7 +135,7 @@ created automatically on first DB access.
 ## Development
 
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
-- Replit's package firewall blocks `next` < 16.3.3; the lockfile pins 16.3.4.
+- Replit's package firewall blocks `next` < 16.3.3; use a supported 16.3.x release.
 - Local login: `demo` / `demo` (both fields) outside production.
 - Deployment: autoscale, `build = npm run build`, `run = npm run start`.
 
@@ -172,8 +172,8 @@ created automatically on first DB access.
 
 ## Internship Programme (interns, projects, documents)
 
-- **Access**: `/interns` (list, create, edit, archive, projects, documents,
-  tasks) is open to every signed-in admin — super admins *and* founder
+- **Access**: `/interns` (list, create, edit, archive, projects, documents)
+  is open to every signed-in admin — super admins *and* founder
   engineers (`requireUser`). Issuing/managing official credentials
   (`/credentials`, the "Credentials Issued" section) and permanently deleting an
   intern stay `requireSuperAdmin`; the detail page hides those controls for
@@ -188,8 +188,11 @@ created automatically on first DB access.
 - **Projects**: `intern_projects` (title, description, link, status
   IN_PROGRESS|COMPLETED, started_at, completed_at). Full CRUD in
   `components/InternProjects.tsx` via `lib/intern-project-actions.ts`.
-  `projectsDone` = count of COMPLETED rows. The older free-text
-  `projects_completed` field remains the certificate write-up.
+  This is the single place admins enter intern projects. `projectsDone` is the
+  count of COMPLETED rows, and completed project titles sync automatically into
+  credentials when they are saved. Do not add a second project write-up field.
+- **Tasks and PRs**: intentionally not part of the internship UI. Project
+  records cover the work an intern completes.
 - **Documents**: `intern_documents` stores uploaded NDA / acceptance letter /
   ID / CV / other files as `bytea` (PDF, doc/docx, png/jpg/webp; ≤10 MB;
   sha256 recorded). Upload via `uploadInternDocument` (`useActionState`);

@@ -5,7 +5,6 @@ import type {
   InternCredential,
   InternDocument,
   InternProject,
-  InternTask,
 } from "@/lib/types";
 
 async function db() {
@@ -102,27 +101,6 @@ export async function getIntern(id: number): Promise<Intern | null> {
     [id]
   );
   return rows[0] ?? null;
-}
-
-export async function getInternTasks(internId: number): Promise<InternTask[]> {
-  await requireUser();
-  const sql = await db();
-  return sql<InternTask[]>`
-    select id,
-           intern_id   as "internId",
-           title,
-           description,
-           status,
-           pr_link     as "prLink",
-           review_note as "reviewNote",
-           assigned_by as "assignedBy",
-           due_date::text as "dueDate",
-           created_at  as "createdAt",
-           updated_at  as "updatedAt"
-    from intern_tasks
-    where intern_id = ${internId}
-    order by (status = 'APPROVED'), created_at desc
-  `;
 }
 
 const CREDENTIAL_COLUMNS = `

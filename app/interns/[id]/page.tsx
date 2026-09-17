@@ -4,7 +4,6 @@ import { Plus, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import {
   getIntern,
   getInternCredentials,
-  getInternTasks,
   getInternProjects,
   getInternDocuments,
 } from "@/lib/intern-queries";
@@ -39,12 +38,11 @@ export default async function InternDetailPage({
   const currentUser = await getCurrentUser();
   const isSuperAdmin = currentUser?.roleKey === "SUPER_ADMIN";
   // Official credentials are super-admin only; everyone else still manages the
-  // intern's profile, projects, documents and tasks.
+  // intern's profile, projects and documents.
   if (isSuperAdmin) await ensureSequentialCredentialNumbers(getSql());
-  const [intern, credentials, tasks, projects, documents] = await Promise.all([
+  const [intern, credentials, projects, documents] = await Promise.all([
     getIntern(internId),
     isSuperAdmin ? getInternCredentials({ internId }) : Promise.resolve([]),
-    getInternTasks(internId),
     getInternProjects(internId),
     getInternDocuments(internId),
   ]);
@@ -52,7 +50,7 @@ export default async function InternDetailPage({
 
   const archived = Boolean(intern.archivedAt);
   const initialTab =
-    tab === "documents" || tab === "tasks" || tab === "personal" || tab === "internship" || tab === "writeups"
+    tab === "documents" || tab === "personal" || tab === "internship" || tab === "writeups"
       ? tab
       : "projects";
 
@@ -108,7 +106,6 @@ export default async function InternDetailPage({
       <section>
         <InternProfile
           intern={intern}
-          tasks={tasks}
           projects={projects}
           documents={documents}
           initialTab={initialTab}
