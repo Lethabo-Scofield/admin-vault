@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, X, Trash2 } from "lucide-react";
-import { updateProject, deleteProject } from "@/lib/actions";
+import { Pencil, X, Trash2, PauseCircle, PlayCircle } from "lucide-react";
+import { updateProject, deleteProject, setProjectStatus } from "@/lib/actions";
 import type { Project } from "@/lib/types";
 
 export default function EditProjectForm({ project }: { project: Project }) {
@@ -22,6 +22,16 @@ export default function EditProjectForm({ project }: { project: Project }) {
     formData.set("projectId", String(project.id));
     startTransition(async () => {
       await deleteProject(formData);
+    });
+  }
+
+  function changeStatus() {
+    const formData = new FormData();
+    formData.set("projectId", String(project.id));
+    formData.set("status", project.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED");
+    startTransition(async () => {
+      await setProjectStatus(formData);
+      setOpen(false);
     });
   }
 
@@ -121,7 +131,16 @@ export default function EditProjectForm({ project }: { project: Project }) {
           </button>
         </form>
 
-        <div className="mt-5 border-t border-gray-100 pt-4">
+        <div className="mt-5 space-y-2 border-t border-gray-100 pt-4">
+          <button
+            type="button"
+            onClick={changeStatus}
+            disabled={pending}
+            className="tap flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 py-2.5 text-[14px] font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+          >
+            {project.status === "SUSPENDED" ? <PlayCircle size={16} /> : <PauseCircle size={16} />}
+            {project.status === "SUSPENDED" ? "Reactivate Project" : "Suspend Project"}
+          </button>
           {confirmDelete ? (
             <div className="rounded-xl bg-red-50 p-3">
               <p className="mb-3 text-[13px] font-medium text-red-700">

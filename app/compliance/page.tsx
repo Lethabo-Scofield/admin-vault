@@ -17,7 +17,7 @@ export default async function CompliancePage() {
         subtitle={`${documents.length} document${
           documents.length === 1 ? "" : "s"
         } with verified SHA-256 checksums`}
-        action={<UploadDocumentForm projects={projects.map(({ id, name }) => ({ id, name }))} />}
+        action={<UploadDocumentForm projects={projects.filter((project) => project.status === "ACTIVE").map(({ id, name }) => ({ id, name }))} />}
       />
       <ComplianceTable documents={documents} />
     </div>

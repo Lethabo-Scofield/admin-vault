@@ -57,6 +57,8 @@ create table if not exists projects (
 alter table projects add column if not exists logo_url text not null default '';
 alter table projects add column if not exists analytics_db_url_enc text not null default '';
 alter table projects add column if not exists analytics_db_host text not null default '';
+alter table projects add column if not exists status text not null default 'ACTIVE';
+alter table projects add column if not exists suspended_at timestamptz;
 
 create table if not exists credentials (
   id            serial primary key,

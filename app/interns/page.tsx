@@ -6,6 +6,7 @@ import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState, StatusBadge } from "@/components/ui";
 import { computeInternProgress, daysLeftLabel, PROGRESS_STYLE } from "@/lib/intern-progress";
 import InternSearch from "@/components/InternSearch";
+import { initials } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -119,15 +120,29 @@ export default async function InternsPage({
                       {i.internNumber}
                     </Link>
                   </td>
-                  <td className="px-5 py-3.5 font-medium text-gray-900">
-                    <Link href={`/interns/${i.id}`} className="hover:underline">
-                      {i.fullName}
-                    </Link>
-                    {i.archivedAt && (
-                      <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">
-                        Archived
-                      </span>
-                    )}
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/interns/${i.id}`}
+                        aria-label={`Open ${i.fullName}'s profile`}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600 ring-1 ring-gray-200 hover:bg-gray-200"
+                      >
+                        {initials(i.fullName)}
+                      </Link>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/interns/${i.id}`}
+                          className="font-medium text-gray-900 hover:underline"
+                        >
+                          {i.fullName}
+                        </Link>
+                        {i.archivedAt && (
+                          <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">
+                            Archived
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-3.5 text-gray-600">
                     <p>{i.position || "—"}</p>

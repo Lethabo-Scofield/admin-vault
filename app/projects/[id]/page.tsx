@@ -44,6 +44,7 @@ export default async function ProjectDetailPage({
 
   const currentUser = await getCurrentUser();
   const canManageAnalytics = currentUser?.roleKey === "SUPER_ADMIN";
+  const isSuspended = project.status === "SUSPENDED";
   const [credentials, documents, analytics] = await Promise.all([
     getCredentialsByProject(projectId),
     canManageAnalytics ? getDocumentsByProject(projectId) : Promise.resolve([]),
@@ -82,10 +83,15 @@ export default async function ProjectDetailPage({
             <h1 className="text-[26px] font-bold tracking-tight text-gray-900 sm:text-[30px]">
               {project.name}
             </h1>
-            <EditProjectForm project={project} />
+            {canManageAnalytics && <EditProjectForm project={project} />}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-gray-500">
             {project.category && <span>{project.category}</span>}
+            <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
+              isSuspended ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-600"
+            }`}>
+              {isSuspended ? "Suspended" : "Active"}
+            </span>
             <span className="text-gray-300">·</span>
             <span>Created {formatDate(project.createdAt)}</span>
           </div>
@@ -97,11 +103,17 @@ export default async function ProjectDetailPage({
         </div>
       </div>
 
+      {isSuspended && (
+        <div className="mb-6 rounded-ios border border-gray-200 bg-white px-5 py-4 text-[14px] text-gray-700 shadow-ios">
+          This project is suspended. Its credentials, analytics connection, and documents are read-only until a Super Admin reactivates it.
+        </div>
+      )}
+
       <ProjectAnalyticsSection
         projectId={projectId}
         analytics={analytics}
         connectedHost={project.analyticsDbHost}
-        canManage={canManageAnalytics}
+        canManage={canManageAnalytics && !isSuspended}
       />
 
       {/* Credentials */}
@@ -113,7 +125,7 @@ export default async function ProjectDetailPage({
               ({credentials.length})
             </span>
           </h2>
-          <AddCredentialForm projectId={projectId} />
+          {!isSuspended && <AddCredentialForm projectId={projectId} />}
         </div>
 
         {credentials.length === 0 ? (
@@ -141,7 +153,7 @@ export default async function ProjectDetailPage({
                   <div className="flex items-center gap-2">
                     <EnvBadge environment={c.environment} />
                     <StatusBadge status={c.status} />
-                    <EditCredentialForm credential={c} />
+                    {!isSuspended && <EditCredentialForm credential={c} />}
                   </div>
                 </div>
               ))}
@@ -159,7 +171,7 @@ export default async function ProjectDetailPage({
               ({documents.length})
             </span>
           </h2>
-          <UploadDocumentForm projectId={projectId} />
+          {!isSuspended && <UploadDocumentForm projectId={projectId} />}
         </div>
 
         {documents.length === 0 ? (

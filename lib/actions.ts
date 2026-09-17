@@ -58,6 +58,16 @@ async function writeAudit(
   `;
 }
 
+async function requireActiveProject(sql: Sql, projectId: number): Promise<void> {
+  const [project] = await sql<{ status: string }[]>`
+    select status from projects where id = ${projectId}
+  `;
+  if (!project) throw new Error("Project not found.");
+  if (project.status === "SUSPENDED") {
+    throw new Error("This project is suspended and read-only.");
+  }
+}
+
 export async function createProject(formData: FormData): Promise<void> {
   const name = String(formData.get("name") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
@@ -67,7 +77,7 @@ export async function createProject(formData: FormData): Promise<void> {
 
   const logoUrl = (await logoToDataUrl(formData.get("logo"))) ?? "";
 
-  const user = await requireUser();
+  const user = await requireSuperAdmin();
   const sql = await db();
   await sql.begin(async (tx) => {
     await tx`
@@ -93,7 +103,7 @@ export async function updateProject(formData: FormData): Promise<void> {
 
   const newLogo = await logoToDataUrl(formData.get("logo"));
 
-  const user = await requireUser();
+  const user = await requireSuperAdmin();
   const sql = await db();
   await sql.begin(async (tx) => {
     let rows: { id: number }[];
@@ -136,7 +146,7 @@ export async function deleteProject(formData: FormData): Promise<void> {
   const projectId = Number(formData.get("projectId"));
   if (!projectId) return;
 
-  const user = await requireUser();
+  const user = await requireSuperAdmin();
   const sql = await db();
   await sql.begin(async (tx) => {
     const [row] = await tx<{ name: string }[]>`
@@ -159,6 +169,35 @@ export async function deleteProject(formData: FormData): Promise<void> {
   redirect("/projects");
 }
 
+export async function setProjectStatus(formData: FormData): Promise<void> {
+  const projectId = Number(formData.get("projectId"));
+  const status = formData.get("status") === "SUSPENDED" ? "SUSPENDED" : "ACTIVE";
+  if (!projectId) return;
+
+  const user = await requireSuperAdmin();
+  const sql = await db();
+  await sql.begin(async (tx) => {
+    const [row] = await tx<{ name: string }[]>`
+      update projects
+      set status = ${status},
+          suspended_at = ${status === "SUSPENDED" ? new Date() : null}
+      where id = ${projectId}
+      returning name
+    `;
+    if (row) {
+      await writeAudit(
+        tx,
+        user,
+        `${status === "SUSPENDED" ? "Suspended" : "Reactivated"} project "${row.name}"`
+      );
+    }
+  });
+
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/audit-logs");
+}
+
 export type AnalyticsDbResult = { error?: string; tables?: number };
 
 /**
@@ -177,6 +216,8 @@ export async function setProjectAnalyticsDb(
   // Connecting an outbound database is a privileged capability: it makes the
   // server open network connections and surfaces third-party data.
   const user = await requireSuperAdmin();
+  const projectSql = await db();
+  await requireActiveProject(projectSql, projectId);
 
   try {
     assertPostgresUrl(url);
@@ -195,7 +236,7 @@ export async function setProjectAnalyticsDb(
 
   const host = connectionHost(url);
   const enc = encryptString(url);
-  const sql = await db();
+  const sql = projectSql;
   await sql.begin(async (tx) => {
     const rows = await tx<{ name: string }[]>`
       update projects
@@ -223,6 +264,7 @@ export async function clearProjectAnalyticsDb(formData: FormData): Promise<void>
 
   const user = await requireSuperAdmin();
   const sql = await db();
+  await requireActiveProject(sql, projectId);
   await sql.begin(async (tx) => {
     const rows = await tx<{ name: string; enc: string; host: string }[]>`
       select name, analytics_db_url_enc as enc, analytics_db_host as host
@@ -263,6 +305,7 @@ export async function addCredential(formData: FormData): Promise<void> {
 
   const user = await requireUser();
   const sql = await db();
+  await requireActiveProject(sql, projectId);
   await sql.begin(async (tx) => {
     await tx`
       insert into credentials
@@ -292,6 +335,11 @@ export async function updateCredential(formData: FormData): Promise<void> {
 
   const user = await requireUser();
   const sql = await db();
+  const [credentialProject] = await sql<{ projectId: number }[]>`
+    select project_id as "projectId" from credentials where id = ${credentialId}
+  `;
+  if (!credentialProject) return;
+  await requireActiveProject(sql, credentialProject.projectId);
   let projectId: number | null = null;
   await sql.begin(async (tx) => {
     // Blank secret keeps the existing value.
@@ -334,6 +382,11 @@ export async function deleteCredential(formData: FormData): Promise<void> {
 
   const user = await requireUser();
   const sql = await db();
+  const [credentialProject] = await sql<{ projectId: number }[]>`
+    select project_id as "projectId" from credentials where id = ${credentialId}
+  `;
+  if (!credentialProject) return;
+  await requireActiveProject(sql, credentialProject.projectId);
   let projectId: number | null = null;
   await sql.begin(async (tx) => {
     const rows = await tx<{ projectId: number; serviceName: string }[]>`
@@ -367,6 +420,7 @@ export async function uploadDocument(formData: FormData): Promise<void> {
 
   const user = await requireSuperAdmin();
   const sql = await db();
+  await requireActiveProject(sql, projectId);
   await sql.begin(async (tx) => {
     await tx`
       insert into documents
@@ -392,6 +446,11 @@ export async function deleteDocument(formData: FormData): Promise<void> {
 
   const user = await requireSuperAdmin();
   const sql = await db();
+  const [documentProject] = await sql<{ projectId: number }[]>`
+    select project_id as "projectId" from documents where id = ${documentId}
+  `;
+  if (!documentProject) return;
+  await requireActiveProject(sql, documentProject.projectId);
   let projectId: number | null = null;
   await sql.begin(async (tx) => {
     const [row] = await tx<{ fileName: string; projectId: number }[]>`

@@ -1,32 +1,24 @@
 import Link from "next/link";
-import { FolderLock, KeyRound, FileText, ChevronRight, Users, Activity, Database, AlertTriangle } from "lucide-react";
+import { FolderLock, KeyRound, FileText, ChevronRight, Database } from "lucide-react";
 import { getProjects } from "@/lib/queries";
-import { getProjectUsageSnapshot, type ProjectUsageSnapshot } from "@/lib/analytics";
-import { initials, accentColor, formatDate, timeAgo } from "@/lib/format";
+import { initials, formatDate } from "@/lib/format";
 import { PageHeader, EmptyState } from "@/components/ui";
 import CreateProjectForm from "@/components/CreateProjectForm";
+import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
   const projects = await getProjects();
-  const now = new Date();
-  // Live usage for connected projects, fetched in parallel with a per-project timeout.
-  const snapshots = new Map<number, ProjectUsageSnapshot | null>(
-    await Promise.all(
-      projects.map(async (p) => {
-        if (!p.hasAnalyticsDb) return [p.id, null] as const;
-        return [p.id, await getProjectUsageSnapshot(p.id)] as const;
-      })
-    )
-  );
+  const currentUser = await getCurrentUser();
+  const isSuperAdmin = currentUser?.roleKey === "SUPER_ADMIN";
 
   return (
     <div className="animate-ios-in">
       <PageHeader
         title="Projects"
         subtitle="Every Olyxee product — usage, credentials and compliance in one place"
-        action={<CreateProjectForm />}
+        action={isSuperAdmin ? <CreateProjectForm /> : undefined}
       />
 
       {projects.length === 0 ? (
@@ -36,123 +28,65 @@ export default async function ProjectsPage() {
           description="Create your first project to start securing credentials and compliance documents."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {projects.map((p) => {
-            const tint = accentColor(p.name);
-            return (
+        <div className="overflow-hidden rounded-ios bg-white shadow-ios">
+          <div className="divide-y divide-gray-100">
+          {projects.map((p) => (
               <Link
                 key={p.id}
                 href={`/projects/${p.id}`}
-                className="group tap flex flex-col rounded-ios bg-white p-5 shadow-ios hover:shadow-ios-md"
+                className="group tap flex items-center gap-4 px-5 py-4 hover:bg-gray-50"
               >
-                <div className="mb-4 flex items-center gap-3">
                   {p.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={p.logoUrl}
                       alt={`${p.name} logo`}
-                      className="h-12 w-12 shrink-0 rounded-2xl bg-white object-cover shadow-ios"
+                      className="h-11 w-11 shrink-0 rounded-xl bg-white object-cover ring-1 ring-gray-200"
                     />
                   ) : (
                     <div
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl text-[16px] font-bold text-white"
-                      style={{ backgroundColor: tint }}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-[14px] font-semibold text-gray-600"
                     >
                       {initials(p.name)}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
                     <p className="truncate text-[16px] font-semibold text-gray-900">
                       {p.name}
                     </p>
+                    {p.status === "SUSPENDED" && (
+                      <span className="rounded-full bg-gray-200 px-2.5 py-0.5 text-[11px] font-medium text-gray-700">
+                        Suspended
+                      </span>
+                    )}
+                    </div>
                     {p.category && (
                       <p className="truncate text-[13px] text-gray-400">
                         {p.category}
                       </p>
                     )}
                   </div>
-                  <ChevronRight
-                    size={18}
-                    className="text-gray-300 transition-transform group-hover:translate-x-0.5"
-                  />
-                </div>
-
-                {p.description && (
-                  <p className="mb-4 line-clamp-2 text-[13.5px] leading-relaxed text-gray-500">
-                    {p.description}
-                  </p>
-                )}
-
-                <UsageStrip snapshot={snapshots.get(p.id) ?? null} connected={p.hasAnalyticsDb} now={now} />
-
-                <div className="mt-auto flex items-center gap-4 border-t border-gray-100 pt-4 text-[13px] text-gray-500">
+                <div className="hidden items-center gap-5 text-[13px] text-gray-500 sm:flex">
                   <span className="flex items-center gap-1.5">
                     <KeyRound size={15} /> {p.keyCount} keys
                   </span>
                   <span className="flex items-center gap-1.5">
                     <FileText size={15} /> {p.docCount} docs
                   </span>
-                  <span className="ml-auto text-[12px] text-gray-300">
+                  <span className="flex items-center gap-1.5">
+                    <Database size={14} /> {p.hasAnalyticsDb ? "Connected" : "Not connected"}
+                  </span>
+                  <span className="text-[12px] text-gray-400">
                     {formatDate(p.createdAt)}
                   </span>
                 </div>
+                <ChevronRight size={18} className="text-gray-300 transition-transform group-hover:translate-x-0.5" />
               </Link>
-            );
-          })}
+          ))}
+          </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function UsageStrip({
-  snapshot,
-  connected,
-  now,
-}: {
-  snapshot: ProjectUsageSnapshot | null;
-  connected: boolean;
-  now: Date;
-}) {
-  if (!connected) {
-    return (
-      <div className="mb-4 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-[12.5px] text-gray-400">
-        <Database size={14} /> No usage data — connect the product database
-      </div>
-    );
-  }
-  if (!snapshot || !snapshot.ok) {
-    return (
-      <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-[12.5px] text-red-600">
-        <AlertTriangle size={14} className="shrink-0" />
-        <span className="truncate">{snapshot?.error ?? "Could not reach the product database"}</span>
-      </div>
-    );
-  }
-  const live = snapshot.activeUsers7d > 0;
-  return (
-    <div className="mb-4 grid grid-cols-3 gap-2 rounded-xl bg-gray-50 px-3 py-2.5">
-      <div>
-        <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
-          <Users size={12} /> Users
-        </p>
-        <p className="text-[16px] font-semibold text-gray-900">{snapshot.totalUsers}</p>
-      </div>
-      <div>
-        <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
-          <Activity size={12} /> Active 7d
-        </p>
-        <p className="flex items-center gap-1.5 text-[16px] font-semibold text-gray-900">
-          <span className={`h-2 w-2 rounded-full ${live ? "bg-green-500" : "bg-gray-300"}`} />
-          {snapshot.activeUsers7d}
-        </p>
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Last activity</p>
-        <p className="truncate text-[13px] font-medium text-gray-700">
-          {timeAgo(snapshot.lastActivityAt, now)}
-        </p>
-      </div>
     </div>
   );
 }

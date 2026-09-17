@@ -71,6 +71,11 @@ checksums), run the internship programme, and view an immutable audit trail.
     optional uploads (≤1 MB, PNG/JPEG/WebP/GIF/SVG) stored as base64 data URLs
     in `projects.logo_url`; editing a credential with a blank secret keeps the
     existing value.
+  - Project lifecycle management is super-admin-only. Projects can be ACTIVE or
+    SUSPENDED; suspended projects remain visible but credentials, analytics
+    connections, and company-document mutations are rejected server-side until
+    the project is reactivated. Project deletion permanently cascades to its
+    credentials and company documents.
   - `format.ts` — display helpers (secret masking, file size, checksum, initials,
     accent color, environment colors).
   - `auth.ts` — edge-safe session crypto (Web Crypto HMAC), credential check,

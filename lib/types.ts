@@ -11,6 +11,8 @@ export interface Project {
   hasAnalyticsDb: boolean;
   /** Hostname of the connected analytics database (never the full URL). */
   analyticsDbHost: string;
+  status: "ACTIVE" | "SUSPENDED";
+  suspendedAt: string | null;
 }
 
 export interface AnalyticsUser {
