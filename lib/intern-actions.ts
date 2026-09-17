@@ -8,6 +8,7 @@ import type { InternCredential } from "@/lib/types";
 import { getSql, ensureSchema } from "@/lib/db";
 import { requireSuperAdmin, requireUser, type CurrentUser } from "@/lib/session";
 import { defaultPlannedEnd, DEFAULT_PROJECT_GOAL } from "@/lib/intern-progress";
+import { parseListItems } from "@/lib/list-items";
 import { getInternCredential } from "@/lib/intern-queries";
 import { validateIssueDate } from "@/lib/documents/fields";
 import {
@@ -90,6 +91,10 @@ export async function createIntern(formData: FormData): Promise<void> {
   const fullName = text(formData, "fullName", 200);
   if (!fullName) return;
   const startDate = dateOrNull(formData.get("startDate"));
+  const completionDate = dateOrNull(formData.get("completionDate"));
+  const initialProjects = parseListItems(text(formData, "initialProjects")).map(
+    (title) => title.slice(0, 300)
+  );
   const { plannedEndDate, projectGoal } = programmeFields(formData, startDate);
 
   const sql = await db();
@@ -109,7 +114,7 @@ export async function createIntern(formData: FormData): Promise<void> {
         (${`TMP-NEW-${Math.random().toString(36).slice(2)}`}, ${fullName}, ${text(formData, "email", 320)},
          ${pronounsOrEmpty(formData.get("pronouns"))}, ${text(formData, "position", 200)},
          ${text(formData, "department", 200)}, ${startDate},
-         ${dateOrNull(formData.get("completionDate"))},
+          ${completionDate},
          ${text(formData, "employmentStatus", 50) || "Active"},
           ${""}, ${text(formData, "responsibilities")},
          ${text(formData, "skillsDemonstrated")}, ${text(formData, "supervisorName", 200)},
@@ -118,12 +123,27 @@ export async function createIntern(formData: FormData): Promise<void> {
       returning id
     `;
     internId = row.id;
+    for (const title of initialProjects) {
+      await tx`
+        insert into intern_projects
+          (intern_id, title, status, started_at, completed_at, created_by)
+        values
+          (${internId}, ${title}, ${"COMPLETED"}, ${startDate}, ${completionDate}, ${user.email})
+      `;
+    }
     await resequenceInternNumbers(tx);
     const [assigned] = await tx<{ internNumber: string }[]>`
       select intern_number as "internNumber" from interns where id = ${internId}
     `;
     internNumber = assigned.internNumber;
     await writeAudit(tx, user, `Created intern ${internNumber} ("${fullName}")`);
+    if (initialProjects.length > 0) {
+      await writeAudit(
+        tx,
+        user,
+        `Added ${initialProjects.length} completed project${initialProjects.length === 1 ? "" : "s"} while creating intern ${internNumber}`
+      );
+    }
   });
 
   revalidatePath("/interns");

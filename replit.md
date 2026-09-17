@@ -61,6 +61,9 @@ checksums), run the internship programme, and view an immutable audit trail.
 - `components/` — `AppShell` (responsive sidebar + mobile drawer, logout,
   Settings link), reusable UI (`ui.tsx`, `Skeleton.tsx`), client widgets
   (forms, `SecretCell`, search tables), `LoginForm`, `ThemeToggle`.
+  - Completed projects entered while creating an intern are written directly to
+    `intern_projects`; the intern Projects tab remains the single project record
+    source and credentials sync completed titles from there.
 - `lib/`
   - `db.ts` — lazy postgres.js client + `ensureSchema()` (runs `CREATE TABLE IF
     NOT EXISTS` once per process). Reads `DATABASE_URL`.

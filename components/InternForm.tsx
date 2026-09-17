@@ -194,6 +194,14 @@ export default function InternForm({
               className="vault-input"
             />
           </Field>
+          {!isEdit && (
+            <Field label="Completed Projects" full>
+              <ColoredListInput
+                name="initialProjects"
+                placeholder="Paste or type the projects already completed…"
+              />
+            </Field>
+          )}
           <Field label="Actual Completion Date (leave empty while active)">
             <input
               name="completionDate"
