@@ -136,7 +136,8 @@ export async function getCredentials(): Promise<VaultCredential[]> {
       c.owner_email  as "ownerEmail",
       c.department,
       c.status,
-      c.created_at   as "createdAt"
+      c.created_at   as "createdAt",
+      p.status       as "projectStatus"
     from credentials c
     left join projects p on p.id = c.project_id
     order by c.created_at desc
@@ -158,7 +159,8 @@ export async function getCredentialsByProject(
       c.owner_email  as "ownerEmail",
       c.department,
       c.status,
-      c.created_at   as "createdAt"
+      c.created_at   as "createdAt",
+      p.status       as "projectStatus"
     from credentials c
     left join projects p on p.id = c.project_id
     where c.project_id = ${projectId}

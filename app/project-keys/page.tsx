@@ -11,9 +11,9 @@ export default async function ProjectKeysPage() {
     <div className="animate-ios-in">
       <PageHeader
         title="Project Keys"
-        subtitle={`${credentials.length} secret${
+        subtitle={`${credentials.length} key${
           credentials.length === 1 ? "" : "s"
-        } across all projects · read-only`}
+        } across all projects · organized by service type`}
       />
       <CredentialsTable credentials={credentials} />
     </div>

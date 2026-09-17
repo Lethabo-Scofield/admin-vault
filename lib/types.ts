@@ -111,6 +111,7 @@ export interface VaultCredential {
   department: string;
   status: string;
   createdAt: string;
+  projectStatus: "ACTIVE" | "SUSPENDED" | null;
 }
 
 export interface ComplianceDocument {
