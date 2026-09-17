@@ -7,6 +7,7 @@ import {
   updateInternCredential,
 } from "@/lib/intern-actions";
 import type { Intern, InternCredential } from "@/lib/types";
+import ColoredListInput from "@/components/ColoredListInput";
 
 function Field({
   label,
@@ -137,19 +138,17 @@ export default function InternCredentialForm({
           </p>
         </div>
         <Field label="Skills Demonstrated" full>
-          <textarea
+          <ColoredListInput
             name="skillsDemonstrated"
-            rows={3}
             defaultValue={d?.skillsDemonstrated ?? ""}
-            className="vault-input resize-none"
+            placeholder="Paste or type skills…"
           />
         </Field>
         <Field label="Responsibilities" full>
-          <textarea
+          <ColoredListInput
             name="responsibilities"
-            rows={3}
             defaultValue={d?.responsibilities ?? ""}
-            className="vault-input resize-none"
+            placeholder="Paste or type responsibilities…"
           />
         </Field>
         <Field label="Public Supervisor Recommendation" full>

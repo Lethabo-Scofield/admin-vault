@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, FileText, ShieldCheck } from "lucide-react";
+import { Search, FileText, ShieldCheck, Eye, Download, Trash2 } from "lucide-react";
 import type { ComplianceDocument } from "@/lib/types";
 import { formatFileSize, shortChecksum, formatDate } from "@/lib/format";
 import { EmptyState } from "@/components/ui";
+import ConfirmButton from "@/components/ConfirmButton";
+import { deleteDocument } from "@/lib/actions";
 
 export default function ComplianceTable({
   documents,
@@ -46,7 +48,7 @@ export default function ComplianceTable({
           description={
             q
               ? "Try a different search term."
-              : "Documents uploaded inside projects appear here."
+               : "Upload company documents here or from a project."
           }
         />
       ) : (
@@ -56,7 +58,8 @@ export default function ComplianceTable({
             <span className="col-span-3">Checksum (SHA-256)</span>
             <span className="col-span-2">Project</span>
             <span className="col-span-1">Size</span>
-            <span className="col-span-2">Classification</span>
+            <span className="col-span-1">Classification</span>
+            <span className="col-span-1 text-right">Actions</span>
           </div>
           <div className="divide-y divide-gray-100">
             {filtered.map((d) => (
@@ -82,7 +85,7 @@ export default function ComplianceTable({
                     {shortChecksum(d.sha256) || "—"}
                   </code>
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   {d.projectName ? (
                     <Link
                       href={`/projects/${d.projectId}`}
@@ -93,6 +96,45 @@ export default function ComplianceTable({
                   ) : (
                     <span className="text-[13.5px] text-gray-400">—</span>
                   )}
+                </div>
+                <div className="flex items-center justify-end gap-1 md:col-span-1">
+                  {d.hasContent ? (
+                    <>
+                      <a
+                        href={`/compliance/documents/${d.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`View ${d.fileName}`}
+                        title="View"
+                        className="tap flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        <Eye size={15} />
+                      </a>
+                      <a
+                        href={`/compliance/documents/${d.id}?download=1`}
+                        aria-label={`Download ${d.fileName}`}
+                        title="Download"
+                        className="tap flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        <Download size={15} />
+                      </a>
+                    </>
+                  ) : (
+                    <span className="mr-1 text-[11px] text-amber-600" title="This record was created before file storage was enabled.">
+                      Re-upload
+                    </span>
+                  )}
+                  <form action={deleteDocument}>
+                    <input type="hidden" name="documentId" value={d.id} />
+                    <ConfirmButton
+                      message={`Delete "${d.fileName}"? This cannot be undone.`}
+                      aria-label={`Delete ${d.fileName}`}
+                      title="Delete"
+                      className="tap flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 size={15} />
+                    </ConfirmButton>
+                  </form>
                 </div>
                 <div className="text-[13px] text-gray-600 md:col-span-1">
                   {formatFileSize(d.fileSizeBytes)}

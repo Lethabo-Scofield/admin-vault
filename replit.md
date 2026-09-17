@@ -46,9 +46,9 @@ checksums), run the internship programme, and view an immutable audit trail.
 - `app/` — App Router pages. Each data page is `force-dynamic` and fetches via
   server components. Route-level `loading.tsx` files provide skeleton states.
   - `/` dashboard, `/projects`, `/projects/[id]`, `/project-keys` (the
-    engineer-facing secrets vault, formerly `/credentials`), `/compliance`,
+    engineer-facing secrets vault, formerly `/credentials`),
     `/audit-logs`, `/settings`, and a public `/login`.
-  - Super-admin-only: `/interns` (+ `/new`, `/[id]`), `/credentials`
+  - Super-admin-only: `/compliance` (Company Documents), `/interns` (+ `/new`, `/[id]`), `/credentials`
     (internship credentials: list, `/new`, `/[id]`, `/[id]/preview`),
     . Public read-only API:
     `GET /api/public/credentials/[verificationToken]` (narrow CORS for
@@ -83,10 +83,13 @@ checksums), run the internship programme, and view an immutable audit trail.
 ## Database
 
 Tables (snake_case): `projects`, `credentials`, `documents`, `audit_logs`,
-`interns`, `intern_credentials`, `number_counters` (atomic, never-reused
+  `interns`, `intern_credentials`, `number_counters` (atomic, never-reused
 intern/credential number allocation via upsert-increment; unique constraints on
 intern_number, credential_number, verification_token).
-Credentials and documents cascade-delete with their project. The schema is
+Credentials and company documents cascade-delete with their project. Company
+documents store file bytes, MIME type, SHA-256 checksum, classification, and
+upload metadata; only super admins can list, upload, view, download, or delete
+them. The schema is
 created automatically on first DB access.
 
 ## Authentication & Roles

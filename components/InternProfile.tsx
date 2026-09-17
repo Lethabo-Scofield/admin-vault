@@ -6,6 +6,7 @@ import InternForm from "@/components/InternForm";
 import InternProjects from "@/components/InternProjects";
 import InternDocuments from "@/components/InternDocuments";
 import type { Intern, InternDocument, InternProject } from "@/lib/types";
+import { itemColor, parseListItems } from "@/lib/list-items";
 
 const PRONOUNS: Record<string, string> = {
   SHE_HER: "She / Her",
@@ -25,6 +26,33 @@ function Item({ label, value, full }: { label: string; value?: string | null; fu
       </dt>
       <dd className="mt-1 whitespace-pre-line text-[14.5px] text-gray-900">
         {value?.trim() ? value : <span className="text-gray-300">—</span>}
+      </dd>
+    </div>
+  );
+}
+
+function ColoredItems({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | null;
+}) {
+  const items = parseListItems(value);
+  return (
+    <div className="sm:col-span-2">
+      <dt className="text-[12px] font-medium uppercase tracking-wide text-gray-400">
+        {label}
+      </dt>
+      <dd className="mt-2 flex flex-wrap gap-2">
+        {items.length > 0 ? items.map((item, index) => (
+          <span
+            key={`${item}-${index}`}
+            className={`rounded-full px-3 py-1.5 text-[13px] font-medium ring-1 ${itemColor(index)}`}
+          >
+            {item}
+          </span>
+        )) : <span className="text-gray-300">—</span>}
       </dd>
     </div>
   );
@@ -136,8 +164,8 @@ export default function InternProfile({
         )}
         {tab === "writeups" && (
           <>
-            <Item label="Responsibilities" value={intern.responsibilities} full />
-            <Item label="Skills Demonstrated" value={intern.skillsDemonstrated} full />
+            <ColoredItems label="Responsibilities" value={intern.responsibilities} />
+            <ColoredItems label="Skills Demonstrated" value={intern.skillsDemonstrated} />
             <Item label="Supervisor Recommendation" value={intern.supervisorRecommendation} full />
             <Item label="Internal Notes (never public)" value={intern.internalNotes} full />
           </>

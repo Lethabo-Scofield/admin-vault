@@ -17,6 +17,7 @@ import {
 } from "@/lib/analytics";
 
 const MAX_LOGO_BYTES = 1024 * 1024; // 1 MB
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 const ALLOWED_LOGO_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -357,23 +358,53 @@ export async function uploadDocument(formData: FormData): Promise<void> {
   const file = formData.get("file");
 
   if (!projectId || !(file instanceof File) || file.size === 0) return;
+  if (file.size > MAX_DOCUMENT_BYTES) {
+    throw new Error("Company documents must be 10 MB or smaller.");
+  }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const sha256 = createHash("sha256").update(buffer).digest("hex");
 
-  const user = await requireUser();
+  const user = await requireSuperAdmin();
   const sql = await db();
   await sql.begin(async (tx) => {
     await tx`
       insert into documents
-        (project_id, file_name, file_size_bytes, sha256, uploaded_by, classification)
+        (project_id, file_name, file_size_bytes, sha256, uploaded_by, classification,
+         mime_type, content)
       values
-        (${projectId}, ${file.name}, ${file.size}, ${sha256}, ${user.email}, ${classification})
+        (${projectId}, ${file.name.replace(/[\\/]/g, "_").slice(0, 255)}, ${file.size},
+         ${sha256}, ${user.email}, ${classification},
+         ${file.type || "application/octet-stream"}, ${buffer})
     `;
     await writeAudit(tx, user, `Uploaded document "${file.name}"`);
   });
 
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/compliance");
+  revalidatePath("/audit-logs");
+  revalidatePath("/");
+}
+
+export async function deleteDocument(formData: FormData): Promise<void> {
+  const documentId = Number(formData.get("documentId"));
+  if (!documentId) return;
+
+  const user = await requireSuperAdmin();
+  const sql = await db();
+  let projectId: number | null = null;
+  await sql.begin(async (tx) => {
+    const [row] = await tx<{ fileName: string; projectId: number }[]>`
+      delete from documents
+      where id = ${documentId}
+      returning file_name as "fileName", project_id as "projectId"
+    `;
+    if (!row) return;
+    projectId = row.projectId;
+    await writeAudit(tx, user, `Deleted company document "${row.fileName}"`);
+  });
+
+  if (projectId) revalidatePath(`/projects/${projectId}`);
   revalidatePath("/compliance");
   revalidatePath("/audit-logs");
   revalidatePath("/");

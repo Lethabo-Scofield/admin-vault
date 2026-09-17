@@ -3,7 +3,9 @@
 import { useState, useTransition } from "react";
 import { User, Briefcase, FileText } from "lucide-react";
 import { createIntern, updateIntern } from "@/lib/intern-actions";
+import { defaultPlannedEnd } from "@/lib/intern-progress";
 import type { Intern } from "@/lib/types";
+import ColoredListInput from "@/components/ColoredListInput";
 
 function Field({
   label,
@@ -46,6 +48,12 @@ export default function InternForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<TabId>("personal");
+  const initialStartDate = toDateInput(intern?.startDate);
+  const [plannedEndDate, setPlannedEndDate] = useState(
+    toDateInput(intern?.plannedEndDate) ||
+      defaultPlannedEnd(initialStartDate) ||
+      ""
+  );
   const isEdit = Boolean(intern);
 
   function action(formData: FormData) {
@@ -159,16 +167,21 @@ export default function InternForm({
             <input
               name="startDate"
               type="date"
-              defaultValue={toDateInput(intern?.startDate)}
+              defaultValue={initialStartDate}
+              onChange={(event) => {
+                setPlannedEndDate(defaultPlannedEnd(event.target.value) ?? "");
+              }}
               className="vault-input"
             />
           </Field>
-          <Field label="Planned End Date (defaults to start + 3 months)">
+          <Field label="Planned End Date (automatically set to 3 months)">
             <input
               name="plannedEndDate"
               type="date"
-              defaultValue={toDateInput(intern?.plannedEndDate)}
-              className="vault-input"
+              value={plannedEndDate}
+              readOnly
+              aria-readonly="true"
+              className="vault-input cursor-not-allowed text-gray-500"
             />
           </Field>
           <Field label="Project Goal (programme standard: 3)">
@@ -195,19 +208,17 @@ export default function InternForm({
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${tab === "writeups" ? "" : "hidden"}`}
         >
           <Field label="Responsibilities (one per line)" full>
-            <textarea
+            <ColoredListInput
               name="responsibilities"
-              rows={3}
               defaultValue={intern?.responsibilities ?? ""}
-              className="vault-input resize-none"
+              placeholder="Paste or type responsibilities…"
             />
           </Field>
           <Field label="Skills Demonstrated" full>
-            <textarea
+            <ColoredListInput
               name="skillsDemonstrated"
-              rows={3}
               defaultValue={intern?.skillsDemonstrated ?? ""}
-              className="vault-input resize-none"
+              placeholder="Paste or type skills…"
             />
           </Field>
           <Field label="Supervisor Recommendation" full>

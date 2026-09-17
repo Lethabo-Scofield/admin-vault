@@ -3,19 +3,15 @@
 export default function ConfirmButton({
   message,
   children,
-  className,
-  disabled,
+  ...buttonProps
 }: {
   message: string;
   children: React.ReactNode;
-  className?: string;
-  disabled?: boolean;
-}) {
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type" | "onClick">) {
   return (
     <button
+      {...buttonProps}
       type="submit"
-      className={className}
-      disabled={disabled}
       onClick={(e) => {
         if (!window.confirm(message)) e.preventDefault();
       }}

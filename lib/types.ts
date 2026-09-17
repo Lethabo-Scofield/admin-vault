@@ -121,6 +121,8 @@ export interface ComplianceDocument {
   uploadedAt: string;
   uploadedBy: string;
   classification: string;
+  mimeType: string;
+  hasContent: boolean;
 }
 
 export interface AuditLog {

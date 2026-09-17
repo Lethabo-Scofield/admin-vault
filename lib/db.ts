@@ -80,6 +80,8 @@ create table if not exists documents (
   uploaded_by      text not null default '',
   classification   text not null default ''
 );
+alter table documents add column if not exists mime_type text not null default 'application/octet-stream';
+alter table documents add column if not exists content bytea;
 
 create table if not exists audit_logs (
   id           serial primary key,

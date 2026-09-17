@@ -25,7 +25,13 @@ const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; 
       { href: "/", label: "Dashboard", icon: LayoutDashboard },
       { href: "/projects", label: "Projects", icon: FolderLock },
       { href: "/project-keys", label: "Project Keys", icon: KeyRound },
-      { href: "/compliance", label: "Compliance", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "Company",
+    superAdmin: true,
+    items: [
+      { href: "/compliance", label: "Company Docs", icon: ShieldCheck },
     ],
   },
   {

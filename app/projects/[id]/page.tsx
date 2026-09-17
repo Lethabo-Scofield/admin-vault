@@ -42,13 +42,13 @@ export default async function ProjectDetailPage({
   const project = await getProject(projectId);
   if (!project) notFound();
 
-  const [credentials, documents, analytics, currentUser] = await Promise.all([
-    getCredentialsByProject(projectId),
-    getDocumentsByProject(projectId),
-    project.hasAnalyticsDb ? getProjectAnalytics(projectId) : Promise.resolve(null),
-    getCurrentUser(),
-  ]);
+  const currentUser = await getCurrentUser();
   const canManageAnalytics = currentUser?.roleKey === "SUPER_ADMIN";
+  const [credentials, documents, analytics] = await Promise.all([
+    getCredentialsByProject(projectId),
+    canManageAnalytics ? getDocumentsByProject(projectId) : Promise.resolve([]),
+    project.hasAnalyticsDb ? getProjectAnalytics(projectId) : Promise.resolve(null),
+  ]);
 
   const tint = accentColor(project.name);
 
@@ -150,11 +150,11 @@ export default async function ProjectDetailPage({
         )}
       </section>
 
-      {/* Documents */}
-      <section>
+      {/* Company documents are restricted to super admins. */}
+      {canManageAnalytics && <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-[17px] font-semibold text-gray-900">
-            <ShieldCheck size={18} /> Compliance Documents
+            <ShieldCheck size={18} /> Company Documents
             <span className="text-[14px] font-normal text-gray-400">
               ({documents.length})
             </span>
@@ -198,7 +198,7 @@ export default async function ProjectDetailPage({
             </div>
           </div>
         )}
-      </section>
+      </section>}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import type {
   Project,
   VaultCredential,
 } from "@/lib/types";
+import { requireSuperAdmin } from "@/lib/session";
 
 async function db() {
   await ensureSchema();
@@ -158,6 +159,7 @@ export async function getCredentialsByProject(
 }
 
 export async function getDocuments(): Promise<ComplianceDocument[]> {
+  await requireSuperAdmin();
   const sql = await db();
   return sql<ComplianceDocument[]>`
     select
@@ -169,7 +171,9 @@ export async function getDocuments(): Promise<ComplianceDocument[]> {
       d.sha256,
       d.uploaded_at     as "uploadedAt",
       d.uploaded_by     as "uploadedBy",
-      d.classification
+      d.classification,
+      d.mime_type       as "mimeType",
+      (d.content is not null) as "hasContent"
     from documents d
     left join projects p on p.id = d.project_id
     order by d.uploaded_at desc
@@ -179,6 +183,7 @@ export async function getDocuments(): Promise<ComplianceDocument[]> {
 export async function getDocumentsByProject(
   projectId: number
 ): Promise<ComplianceDocument[]> {
+  await requireSuperAdmin();
   const sql = await db();
   return sql<ComplianceDocument[]>`
     select
@@ -190,12 +195,29 @@ export async function getDocumentsByProject(
       d.sha256,
       d.uploaded_at     as "uploadedAt",
       d.uploaded_by     as "uploadedBy",
-      d.classification
+      d.classification,
+      d.mime_type       as "mimeType",
+      (d.content is not null) as "hasContent"
     from documents d
     left join projects p on p.id = d.project_id
     where d.project_id = ${projectId}
     order by d.uploaded_at desc
   `;
+}
+
+export async function getDocumentContent(id: number): Promise<{
+  fileName: string;
+  mimeType: string;
+  content: Uint8Array;
+} | null> {
+  await requireSuperAdmin();
+  const sql = await db();
+  const rows = await sql<{ fileName: string; mimeType: string; content: Uint8Array }[]>`
+    select file_name as "fileName", mime_type as "mimeType", content
+    from documents
+    where id = ${id} and content is not null
+  `;
+  return rows[0] ?? null;
 }
 
 export async function getAuditLogs(limit = 200): Promise<AuditLog[]> {
