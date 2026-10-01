@@ -19,20 +19,20 @@ export default function SecretCell({ secret }: { secret: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <code className="max-w-[180px] truncate font-mono text-[12.5px] text-gray-600 sm:max-w-[260px]">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+      <code className="min-w-0 max-w-full flex-1 break-all font-mono text-[12px] leading-relaxed text-gray-600 sm:max-w-[260px]">
         {revealed ? secret : maskSecret(secret)}
       </code>
       <button
         onClick={() => setRevealed((v) => !v)}
-        className="tap flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+        className="tap flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         aria-label={revealed ? "Hide secret" : "Reveal secret"}
       >
         {revealed ? <EyeOff size={15} /> : <Eye size={15} />}
       </button>
       <button
         onClick={copy}
-        className="tap flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+        className="tap flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         aria-label="Copy secret"
       >
         {copied ? (

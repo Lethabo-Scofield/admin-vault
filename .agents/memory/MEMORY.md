@@ -8,3 +8,4 @@
 - [Replit npm firewall](replit-npm-firewall.md) — package firewall 403s `next` < 16.3.3; on "next: command not found" after import, install with an allowed patch instead of retrying npm ci.
 - [Server Action uploads](server-action-uploads.md) — body limit 12mb in next.config; oversized files must be refused client-side; never export constants from "use server" files.
 - [Workspace account authorization](workspace-account-authorization.md) — default admin email is Super Admin-only; invited accounts use live database permissions and the shared workspace password.
+- [Focused project details](focused-project-details.md) — keep project tasks separate; load only selected information rather than hiding a fully fetched dashboard.
