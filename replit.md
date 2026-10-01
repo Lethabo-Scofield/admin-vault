@@ -145,10 +145,16 @@ created automatically on first DB access.
 
 ## Development
 
+- Use Node.js 22 (matches `package.json`); the Replit runtime is configured accordingly.
 - Workflow "Start application" runs `npm run dev` (`next dev` on `0.0.0.0:5000`).
 - Replit's package firewall blocks `next` < 16.3.3; use a supported 16.3.x release.
 - Local login: `demo` / `demo` (both fields) outside production.
-- Deployment: autoscale, `build = npm run build`, `run = npm run start`.
+- Preview uses the managed Replit `DATABASE_URL` and `SESSION_SECRET`; no production
+  database connection is required. The schema initializes automatically on first use.
+  Real account login needs `SUPERADMIN_PASSWORD` (or its hash) and `ADMIN_PASSWORD`
+  in Replit Secrets; demo access does not need those passwords.
+- Checks: `npm test` and `npx tsc --noEmit`.
+- Production remains on Vercel; this setup only runs the development preview on Replit.
 
 ## Generated Documents (Certificate & Recommendation Letter)
 
