@@ -13,7 +13,7 @@ export default async function ProjectKeysPage() {
         title="Project Keys"
         subtitle={`${credentials.length} key${
           credentials.length === 1 ? "" : "s"
-        } across all projects · organized by service type`}
+        } across all projects · organized by key type`}
       />
       <CredentialsTable credentials={credentials} />
     </div>

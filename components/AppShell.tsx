@@ -175,7 +175,7 @@ export default function AppShell({
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-gray-200/70 bg-white lg:flex">
+      <aside className="app-canvas sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between lg:flex">
         <div>
           {brand}
           {navList}
@@ -196,7 +196,7 @@ export default function AppShell({
           }`}
         />
         <aside
-          className={`absolute left-0 top-0 flex h-full w-72 flex-col justify-between bg-white shadow-ios-md transition-transform duration-300 ease-out ${
+          className={`app-canvas absolute left-0 top-0 flex h-full w-72 flex-col justify-between shadow-ios-md transition-transform duration-300 ease-out ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -220,7 +220,7 @@ export default function AppShell({
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
-        <header className="ios-glass sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200/60 px-4 py-3 lg:hidden">
+        <header className="app-canvas sticky top-0 z-30 flex items-center gap-3 px-4 py-3 lg:hidden">
           <button
             onClick={() => setOpen(true)}
             className="tap flex h-9 w-9 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100"

@@ -295,6 +295,7 @@ export async function clearProjectAnalyticsDb(formData: FormData): Promise<void>
 export async function addCredential(formData: FormData): Promise<void> {
   const projectId = Number(formData.get("projectId"));
   const serviceName = String(formData.get("serviceName") ?? "").trim();
+  const keyType = String(formData.get("keyType") ?? "").trim();
   const environment = String(formData.get("environment") ?? "").trim();
   const secretValue = String(formData.get("secretValue") ?? "");
   const ownerEmail = String(formData.get("ownerEmail") ?? "").trim();
@@ -302,6 +303,9 @@ export async function addCredential(formData: FormData): Promise<void> {
   const status = String(formData.get("status") ?? "Active").trim() || "Active";
 
   if (!projectId || !serviceName || !secretValue) return;
+  if (!keyType || keyType.length > 100) {
+    throw new Error("Enter a key type of 100 characters or fewer.");
+  }
 
   const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
@@ -309,9 +313,9 @@ export async function addCredential(formData: FormData): Promise<void> {
   await sql.begin(async (tx) => {
     await tx`
       insert into credentials
-        (project_id, service_name, environment, secret_value, owner_email, department, status)
+        (project_id, service_name, key_type, environment, secret_value, owner_email, department, status)
       values
-        (${projectId}, ${serviceName}, ${environment}, ${secretValue}, ${ownerEmail}, ${department}, ${status})
+        (${projectId}, ${serviceName}, ${keyType}, ${environment}, ${secretValue}, ${ownerEmail}, ${department}, ${status})
     `;
     await writeAudit(tx, user, `Added credential "${serviceName}" (${environment || "n/a"})`);
   });
@@ -325,6 +329,7 @@ export async function addCredential(formData: FormData): Promise<void> {
 export async function updateCredential(formData: FormData): Promise<void> {
   const credentialId = Number(formData.get("credentialId"));
   const serviceName = String(formData.get("serviceName") ?? "").trim();
+  const keyType = String(formData.get("keyType") ?? "").trim();
   const environment = String(formData.get("environment") ?? "").trim();
   const secretValue = String(formData.get("secretValue") ?? "");
   const ownerEmail = String(formData.get("ownerEmail") ?? "").trim();
@@ -332,6 +337,9 @@ export async function updateCredential(formData: FormData): Promise<void> {
   const status = String(formData.get("status") ?? "Active").trim() || "Active";
 
   if (!credentialId || !serviceName) return;
+  if (!keyType || keyType.length > 100) {
+    throw new Error("Enter a key type of 100 characters or fewer.");
+  }
 
   const user = await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
@@ -346,7 +354,7 @@ export async function updateCredential(formData: FormData): Promise<void> {
     const rows = secretValue
       ? await tx<{ projectId: number }[]>`
           update credentials
-          set service_name = ${serviceName}, environment = ${environment},
+          set service_name = ${serviceName}, key_type = ${keyType}, environment = ${environment},
               secret_value = ${secretValue}, owner_email = ${ownerEmail},
               department = ${department}, status = ${status}
           where id = ${credentialId}
@@ -354,7 +362,7 @@ export async function updateCredential(formData: FormData): Promise<void> {
         `
       : await tx<{ projectId: number }[]>`
           update credentials
-          set service_name = ${serviceName}, environment = ${environment},
+          set service_name = ${serviceName}, key_type = ${keyType}, environment = ${environment},
               owner_email = ${ownerEmail}, department = ${department},
               status = ${status}
           where id = ${credentialId}

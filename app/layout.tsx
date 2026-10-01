@@ -19,7 +19,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`}
+          {`(function(){var theme;try{theme=localStorage.getItem('theme');}catch(e){}document.documentElement.classList.toggle('dark',theme==='dark'||(theme!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches));})();`}
         </Script>
         <AppShell user={user}>{children}</AppShell>
       </body>

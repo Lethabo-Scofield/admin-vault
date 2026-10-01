@@ -37,7 +37,7 @@ export default function AddCredentialForm({
         onClick={() => !pending && setOpen(false)}
         className="absolute inset-0 bg-gray-900/30 backdrop-blur-sm"
       />
-      <div className="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-ios-md animate-ios-in sm:rounded-ios-lg">
+      <div className="relative max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-6 shadow-ios-md animate-ios-in sm:rounded-ios-lg">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-[18px] font-semibold text-gray-900">
             Add Credential
@@ -58,6 +58,15 @@ export default function AddCredentialForm({
               required
               autoFocus
               placeholder="Stripe API Key"
+              className="vault-input"
+            />
+          </Field>
+          <Field label="Key Type">
+            <input
+              name="keyType"
+              required
+              maxLength={100}
+              placeholder="e.g. Database, API, Authentication"
               className="vault-input"
             />
           </Field>

@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/format";
 import { EnvBadge, StatusBadge, EmptyState } from "@/components/ui";
 import SecretCell from "@/components/SecretCell";
 import EditCredentialForm from "@/components/EditCredentialForm";
+import { credentialCategory, credentialTypeLabel, type CredentialCategory } from "@/lib/credential-categories";
 
 export default function CredentialsTable({
   credentials,
@@ -26,7 +27,7 @@ export default function CredentialsTable({
       other: 0,
     };
     credentials.forEach((credential) => {
-      result[credentialCategory(credential.serviceName)] += 1;
+      result[credentialCategory(credential.keyType, credential.serviceName)] += 1;
     });
     return result;
   }, [credentials]);
@@ -37,13 +38,14 @@ export default function CredentialsTable({
       .filter(
         (credential) =>
           category === "all" ||
-          credentialCategory(credential.serviceName) === category
+          credentialCategory(credential.keyType, credential.serviceName) === category
       )
       .filter(
         (credential) =>
           !term ||
           [
             credential.serviceName,
+            credentialTypeLabel(credential.keyType, credential.serviceName),
             credential.projectName,
             credential.ownerEmail,
             credential.department,
@@ -111,13 +113,13 @@ export default function CredentialsTable({
               ? "Try a different search term or another category."
               : category === "all"
                 ? "Keys added inside projects appear here."
-                : "Keys are categorized automatically from their service names."
+                 : "Set a key type when adding or editing a key to organize it here."
           }
         />
       ) : (
         <div className="overflow-hidden rounded-ios bg-white shadow-ios">
           <div className="hidden grid-cols-12 gap-4 border-b border-gray-100 px-5 py-3 text-[12px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
-            <span className="col-span-3">Service</span>
+            <span className="col-span-3">Service / Type</span>
             <span className="col-span-3">Secret</span>
             <span className="col-span-2">Project</span>
             <span className="col-span-2">Environment</span>
@@ -133,6 +135,9 @@ export default function CredentialsTable({
                 <div className="md:col-span-3">
                   <p className="text-[14px] font-medium text-gray-900">
                     {c.serviceName}
+                  </p>
+                  <p className="mt-1 text-[12px] font-medium text-gray-600">
+                    {credentialTypeLabel(c.keyType, c.serviceName)}
                   </p>
                   <p className="text-[12px] text-gray-400">
                     {c.ownerEmail || "No owner"}
@@ -178,8 +183,6 @@ export default function CredentialsTable({
   );
 }
 
-type CredentialCategory = "all" | "database" | "services" | "security" | "other";
-
 const CATEGORY_TABS: {
   id: CredentialCategory;
   label: string;
@@ -191,30 +194,3 @@ const CATEGORY_TABS: {
   { id: "security", label: "Auth & Security", icon: ShieldCheck },
   { id: "other", label: "Other", icon: Boxes },
 ];
-
-function credentialCategory(serviceName: string): Exclude<CredentialCategory, "all"> {
-  const name = serviceName.toLowerCase();
-
-  if (
-    /(database|\bdb\b|postgres|mysql|mariadb|mongo|redis|supabase|neon|planetscale|cockroach|sqlite|dynamo|firestore)/.test(
-      name
-    )
-  ) {
-    return "database";
-  }
-  if (
-    /(auth|oauth|jwt|session|clerk|auth0|captcha|turnstile|encryption|signing|security)/.test(
-      name
-    )
-  ) {
-    return "security";
-  }
-  if (
-    /(api|webhook|stripe|paypal|sendgrid|mailgun|twilio|openai|anthropic|aws|azure|google|github|gitlab|vercel|netlify|cloudflare|slack|notion|shopify)/.test(
-      name
-    )
-  ) {
-    return "services";
-  }
-  return "other";
-}

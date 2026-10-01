@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --ios-bg: #f5f5f7;
+  --ios-bg: #ffffff;
   --ios-card: #ffffff;
 }
 
@@ -14,8 +14,11 @@
 }
 
 @theme inline {
-  --color-canvas: #f5f5f7;
+  --color-canvas: var(--ios-bg);
 }
+
+/* Navigation and page canvas use the same theme surface. */
+.app-canvas { background-color: var(--ios-bg); }
 
 html {
   -webkit-font-smoothing: antialiased;
@@ -173,8 +176,10 @@ button:active { transform: scale(0.97); }
 .dark .border-gray-200\/70 { border-color: rgba(56, 56, 58, 0.7); }
 .dark .border-gray-200\/60 { border-color: rgba(56, 56, 58, 0.6); }
 .dark .border-gray-900 { border-color: #f5f5f7; }
-.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]) { border-color: #252527; }
-.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #2c2c2e; }
+.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-50 > :not(:last-child) { border-color: #252527; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-100 > :not(:last-child) { border-color: #2c2c2e; }
 .dark .ring-gray-200 { --tw-ring-color: #48484a; }
 .dark .ring-gray-900\/10 { --tw-ring-color: rgba(255, 255, 255, 0.12); }
 
@@ -196,6 +201,8 @@ button:active { transform: scale(0.97); }
 .dark .text-amber-800 { color: #fbbf24; }
 .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.16); }
 .dark .text-blue-700 { color: #93c5fd; }
+.dark .bg-sky-50 { background-color: rgba(14, 165, 233, 0.16); }
+.dark .text-sky-700 { color: #7dd3fc; }
 .dark .ring-blue-100 { --tw-ring-color: rgba(96, 165, 250, 0.25); }
 .dark .bg-violet-50 { background-color: rgba(139, 92, 246, 0.16); }
 .dark .text-violet-700 { color: #c4b5fd; }

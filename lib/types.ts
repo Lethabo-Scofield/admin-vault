@@ -105,6 +105,7 @@ export interface VaultCredential {
   projectId: number;
   projectName: string | null;
   serviceName: string;
+  keyType: string;
   environment: string;
   secretValue: string;
   ownerEmail: string;

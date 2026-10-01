@@ -65,9 +65,9 @@ export default function InternSearch({
         <input
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="Type a name, intern number, position, or department…"
+          placeholder="Search name, role or department…"
           aria-label="Search interns"
-          className="vault-input pl-10 pr-10"
+          className="vault-input !pl-10 !pr-10"
         />
         {value && (
           <button

@@ -10,6 +10,20 @@ export default function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     setDark(document.documentElement.classList.contains("dark"));
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    function sync() {
+      let saved: string | null = null;
+      try { saved = localStorage.getItem("theme"); } catch { /* unavailable */ }
+      const next = saved === "dark" || (saved !== "light" && media.matches);
+      document.documentElement.classList.toggle("dark", next);
+      setDark(next);
+    }
+    media.addEventListener("change", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      media.removeEventListener("change", sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   function toggle() {

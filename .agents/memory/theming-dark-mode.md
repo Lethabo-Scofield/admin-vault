@@ -5,6 +5,15 @@ description: Why dark mode is done via global .dark CSS overrides instead of per
 
 # Centralized `.dark` override theming
 
+Keep the navigation and main page canvas visually continuous in both themes,
+rather than giving the sidebar a separate background color.
+
+**Why:** The user explicitly requested no color separation between the sidebar
+and main page, with a white canvas in light mode and matching dark surfaces.
+
+**How to apply:** Preserve that design constraint when adjusting theme palettes
+or adding navigation surfaces; cards and active items may still have contrast.
+
 Dark mode is class-based (`.dark` on `<html>`). Rather than sprinkling
 `dark:` variants on every element, all dark styling lives in one place:
 `app/globals.css` defines `.dark`-scoped overrides of the neutral Tailwind

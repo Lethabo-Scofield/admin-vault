@@ -146,6 +146,9 @@ export default async function ProjectDetailPage({
                     <p className="text-[14.5px] font-medium text-gray-900">
                       {c.serviceName}
                     </p>
+                    {c.keyType && (
+                      <p className="text-[12px] font-medium text-gray-600">{c.keyType}</p>
+                    )}
                     <p className="text-[12.5px] text-gray-400">
                       {c.ownerEmail || "No owner"}
                       {c.department ? ` · ${c.department}` : ""}

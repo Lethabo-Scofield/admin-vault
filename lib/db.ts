@@ -64,6 +64,7 @@ create table if not exists credentials (
   id            serial primary key,
   project_id    integer not null references projects(id) on delete cascade,
   service_name  text not null,
+  key_type      text not null default '',
   environment   text not null default '',
   secret_value  text not null default '',
   owner_email   text not null default '',
@@ -71,6 +72,8 @@ create table if not exists credentials (
   status        text not null default 'Active',
   created_at    timestamptz not null default now()
 );
+
+alter table credentials add column if not exists key_type text not null default '';
 
 create table if not exists documents (
   id               serial primary key,

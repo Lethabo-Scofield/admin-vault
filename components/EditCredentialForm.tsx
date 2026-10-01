@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Pencil, X, Trash2 } from "lucide-react";
 import { updateCredential, deleteCredential } from "@/lib/actions";
 import type { VaultCredential } from "@/lib/types";
+import { credentialTypeLabel } from "@/lib/credential-categories";
 
 const ENVIRONMENTS = ["Production", "Staging", "Development"];
 const STATUSES = ["Active", "Revoked"];
@@ -81,6 +82,16 @@ export default function EditCredentialForm({
               name="serviceName"
               required
               defaultValue={credential.serviceName}
+              className="vault-input"
+            />
+          </Field>
+          <Field label="Key Type">
+            <input
+              name="keyType"
+              required
+              maxLength={100}
+              defaultValue={credentialTypeLabel(credential.keyType, credential.serviceName)}
+              placeholder="e.g. Database, API, Authentication"
               className="vault-input"
             />
           </Field>

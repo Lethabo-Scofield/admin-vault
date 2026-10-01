@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Plus } from "lucide-react";
+import { ChevronRight, GraduationCap, Plus } from "lucide-react";
 import { getInterns, getInternCounts, type InternStatusFilter } from "@/lib/intern-queries";
 import { ensureSequentialInternNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
@@ -9,6 +9,17 @@ import InternSearch from "@/components/InternSearch";
 import { initials } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+
+function readableDate(value: string | null) {
+  if (!value) return null;
+  const date = new Date(`${value.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
 
 export default async function InternsPage({
   searchParams,
@@ -55,7 +66,7 @@ export default async function InternsPage({
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 inline-flex max-w-full gap-1 rounded-xl bg-gray-100 p-1">
         {(
           [
             ["active", "Active", counts.active],
@@ -66,12 +77,13 @@ export default async function InternsPage({
           <Link
             key={s}
             href={filterHref(s)}
-            className={`tap inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13.5px] font-medium ${
-              status === s ? "bg-gray-900 text-white shadow-ios" : "bg-white text-gray-700 shadow-ios hover:bg-gray-50"
+            aria-current={status === s ? "page" : undefined}
+            className={`tap inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium ${
+              status === s ? "bg-white text-gray-900 shadow-ios" : "text-gray-500 hover:text-gray-900"
             }`}
           >
             {label}
-            <span className={`rounded-full px-1.5 text-[11.5px] ${status === s ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+            <span className="text-[11px] tabular-nums text-gray-500">
               {n}
             </span>
           </Link>
@@ -95,96 +107,92 @@ export default async function InternsPage({
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-ios bg-white shadow-ios">
-          <table className="w-full min-w-[960px] text-left">
-            <thead>
-              <tr className="border-b border-gray-100 text-[12px] uppercase tracking-wide text-gray-400">
-                <th className="px-5 py-3.5 font-medium">Intern #</th>
-                <th className="px-5 py-3.5 font-medium">Name</th>
-                <th className="px-5 py-3.5 font-medium">Position</th>
-                <th className="px-5 py-3.5 font-medium">Projects</th>
-                <th className="px-5 py-3.5 font-medium">Time</th>
-                <th className="px-5 py-3.5 font-medium">Progress</th>
-                <th className="px-5 py-3.5 font-medium">Docs</th>
-                <th className="px-5 py-3.5 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ intern: i, progress: p }) => (
-                <tr
-                  key={i.id}
-                  className="border-b border-gray-50 text-[14px] last:border-0 hover:bg-gray-50/60"
-                >
-                  <td className="whitespace-nowrap px-5 py-3.5 font-mono text-[13px] text-gray-600">
-                    <Link href={`/interns/${i.id}`} className="hover:underline">
-                      {i.internNumber}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <Link
-                        href={`/interns/${i.id}`}
-                        aria-label={`Open ${i.fullName}'s profile`}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600 ring-1 ring-gray-200 hover:bg-gray-200"
-                      >
-                        {initials(i.fullName)}
+        <div className="overflow-hidden rounded-ios border border-gray-200 bg-white">
+          <div className="hidden grid-cols-12 gap-4 border-b border-gray-100 bg-gray-50 px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-gray-500 xl:grid">
+            <div className="col-span-4">Intern & role</div>
+            <div className="col-span-2">Projects completed</div>
+            <div className="col-span-2">Time remaining</div>
+            <div className="col-span-2">Programme progress</div>
+            <div className="col-span-2">Employment</div>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {rows.map(({ intern: i, progress: p }) => (
+              <article
+                key={i.id}
+                className="group grid grid-cols-2 gap-x-4 gap-y-4 px-4 py-5 transition-colors hover:bg-gray-50 sm:px-5 xl:grid-cols-12 xl:items-center xl:gap-y-0"
+              >
+                <div className="col-span-2 flex min-w-0 items-center gap-3 xl:col-span-4">
+                  <Link
+                    href={`/interns/${i.id}`}
+                    aria-label={`Open ${i.fullName}'s profile`}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600 ring-1 ring-gray-200 transition-colors group-hover:bg-gray-200"
+                  >
+                    {initials(i.fullName)}
+                  </Link>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <Link href={`/interns/${i.id}`} className="break-words text-[14px] font-semibold text-gray-900 hover:underline">
+                        {i.fullName}
                       </Link>
-                      <div className="min-w-0">
-                        <Link
-                          href={`/interns/${i.id}`}
-                          className="font-medium text-gray-900 hover:underline"
-                        >
-                          {i.fullName}
-                        </Link>
-                        {i.archivedAt && (
-                          <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">
-                            Archived
-                          </span>
-                        )}
-                      </div>
+                      {i.archivedAt && (
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                          Archived
+                        </span>
+                      )}
                     </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-gray-600">
-                    <p>{i.position || "—"}</p>
-                    {i.department && <p className="text-[12px] text-gray-400">{i.department}</p>}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className={`h-full rounded-full ${PROGRESS_STYLE[p.state].bar}`}
-                          style={{ width: `${p.projectPercent}%` }}
-                        />
-                      </div>
-                      <span className="text-[13px] font-medium text-gray-800">
-                        {p.projectsDone}/{p.projectGoal}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-gray-600">
-                    <p className="whitespace-nowrap text-[13.5px]">{daysLeftLabel(p)}</p>
-                    {p.plannedEnd && p.state !== "completed" && (
-                      <p className="whitespace-nowrap text-[12px] text-gray-400">ends {p.plannedEnd}</p>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-medium ${PROGRESS_STYLE[p.state].bg} ${PROGRESS_STYLE[p.state].text}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${PROGRESS_STYLE[p.state].dot}`} />
-                      {p.label}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-gray-600">
-                    <Link href={`/interns/${i.id}?tab=documents`} className="hover:underline">
-                      {i.documentCount ?? 0}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge status={i.employmentStatus} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <p className="mt-1 break-words text-[12px] text-gray-500">
+                      {i.position || "Role not set"}
+                      {i.department ? ` · ${i.department}` : ""}
+                    </p>
+                  </div>
+                  <Link href={`/interns/${i.id}`} aria-label={`View ${i.fullName}'s profile`} className="text-gray-400 xl:hidden">
+                    <ChevronRight size={18} />
+                  </Link>
+                </div>
+
+                <div className="min-w-0 xl:col-span-2">
+                  <span className="mb-1.5 block text-[11px] text-gray-500 xl:hidden">Projects completed</span>
+                  <p className="text-[14px] font-semibold tabular-nums text-gray-800">
+                    {p.projectsDone}<span className="font-normal text-gray-500"> of {p.projectGoal}</span>
+                  </p>
+                  <div
+                    role="progressbar"
+                    aria-label={`${i.fullName}: projects completed`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={p.projectPercent}
+                    aria-valuetext={`${p.projectsDone} of ${p.projectGoal} projects completed`}
+                    className="mt-2 h-1 max-w-24 overflow-hidden rounded-full bg-gray-100"
+                  >
+                    <div className={`h-full rounded-full ${PROGRESS_STYLE[p.state].bar}`} style={{ width: `${p.projectPercent}%` }} />
+                  </div>
+                </div>
+
+                <div className="min-w-0 xl:col-span-2">
+                  <span className="mb-1.5 block text-[11px] text-gray-500 xl:hidden">Time remaining</span>
+                  <p className="text-[13px] font-medium text-gray-700">{p.state === "unscheduled" ? "Dates not set" : daysLeftLabel(p)}</p>
+                  {i.completionDate ? (
+                    <p className="mt-1 text-[11px] text-gray-500">Finished {readableDate(i.completionDate)}</p>
+                  ) : p.plannedEnd && p.state !== "completed" && p.state !== "withdrawn" ? (
+                    <p className="mt-1 text-[11px] text-gray-500">{p.state === "not_started" ? `Starts ${readableDate(i.startDate)}` : `Ends ${readableDate(p.plannedEnd)}`}</p>
+                  ) : null}
+                </div>
+
+                <div className="min-w-0 xl:col-span-2">
+                  <span className="mb-1.5 block text-[11px] text-gray-500 xl:hidden">Programme progress</span>
+                  <span className={`inline-flex max-w-full items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-medium ${PROGRESS_STYLE[p.state].bg} ${PROGRESS_STYLE[p.state].text}`}>
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PROGRESS_STYLE[p.state].dot}`} />
+                    {p.label}
+                  </span>
+                </div>
+
+                <div className="min-w-0 xl:col-span-2">
+                  <span className="mb-1.5 block text-[11px] text-gray-500 xl:hidden">Employment</span>
+                  <StatusBadge status={i.employmentStatus} />
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       )}
     </div>
