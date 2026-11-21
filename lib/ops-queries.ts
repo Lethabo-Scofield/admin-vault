@@ -34,7 +34,11 @@ export type OpsDepartment = {
 };
 
 export async function getOpsDepartments(): Promise<OpsDepartment[]> {
-  const people = await getOpsPeople();
+  const completedInterns = new Set((await getSql()< { email: string }[]>`
+    select lower(email) as email from interns
+    where completion_date is not null or lower(coalesce(employment_status, '')) in ('completed', 'inactive', 'withdrawn', 'archived')
+  `).map((row) => row.email));
+  const people = (await getOpsPeople()).filter((person) => !completedInterns.has(person.email.toLowerCase()));
   const sql = getOpsSql();
   const hierarchy = sql ? await sql<{ name: string; parentName: string | null }[]>`
     select d.name, parent.name as "parentName"
