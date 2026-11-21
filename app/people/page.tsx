@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { ArrowUpRight, Mail, Search, UserRound, Users } from "lucide-react";
+import { ArrowUpRight, Mail, Search, UserPlus, UserRound, Users } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/ui";
 import { getPeopleDirectory } from "@/lib/organisation-queries";
+import { createEmployee } from "@/lib/organisation-actions";
+import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,7 @@ export default async function PeoplePage({
 }: { searchParams: Promise<{ q?: string; type?: string }> }) {
   const { q = "", type = "all" } = await searchParams;
   const people = await getPeopleDirectory();
+  const currentUser = await getCurrentUser();
   const term = q.trim().toLowerCase();
   const filtered = people.filter((person) =>
     (type === "all" || person.type.toLowerCase() === type.toLowerCase()) &&
@@ -38,6 +41,8 @@ export default async function PeoplePage({
   return (
     <div className="animate-ios-in">
       <PageHeader title="People" subtitle="Everyone who works with Olyxee" />
+
+      {currentUser?.roleKey === "SUPER_ADMIN" && <details className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"><summary className="flex cursor-pointer list-none items-center gap-2 text-[13px] font-semibold text-gray-800"><UserPlus size={16} className="text-gray-500" /> Add person</summary><form action={createEmployee} className="mt-4 grid gap-3 sm:grid-cols-3"><input name="fullName" required placeholder="Full name" className="vault-input" /><input name="email" type="email" required placeholder="Email address" className="vault-input" /><input name="jobTitle" placeholder="Role / title" className="vault-input" /><select name="engagementType" defaultValue="EMPLOYEE" className="vault-input"><option value="EMPLOYEE">Employee</option><option value="CONTRACTOR">Contractor</option><option value="ADVISOR">Advisor</option></select><div className="sm:col-span-2"><button type="submit" className="rounded-full bg-gray-900 px-4 py-2 text-[13px] font-medium text-white hover:bg-gray-800">Create person</button></div></form></details>}
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="inline-flex w-fit gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1">
