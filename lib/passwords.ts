@@ -67,11 +67,12 @@ export async function resolveLoginRole(
   }
   if (!normalized || normalized === getAdminEmail()) return null;
   const admin = process.env.ADMIN_PASSWORD;
-  if (admin && timingSafeEqualStr(password, admin)) {
-    const account = await findActiveWorkspaceAccount(normalized);
-    if (account) {
-      return { role: "FOUNDER_ENGINEER", ...account };
-    }
+  const account = await findActiveWorkspaceAccount(normalized);
+  if (account) {
+    const validPassword = account.passwordHash
+      ? await bcrypt.compare(password, account.passwordHash)
+      : Boolean(admin && timingSafeEqualStr(password, admin));
+    if (validPassword) return { role: "FOUNDER_ENGINEER", email: account.email, permissions: account.permissions };
   }
   return null;
 }

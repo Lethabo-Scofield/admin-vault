@@ -111,6 +111,7 @@ create table if not exists workspace_accounts (
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now()
 );
+alter table workspace_accounts add column if not exists password_hash text not null default '';
 create unique index if not exists idx_workspace_accounts_email_lower
   on workspace_accounts (lower(email));
 

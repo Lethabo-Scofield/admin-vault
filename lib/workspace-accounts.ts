@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ensureSchema, getSql } from "@/lib/db";
 import { getAdminEmail, type Permission } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 
 export interface WorkspaceAccount {
   id: number;
@@ -11,6 +12,7 @@ export interface WorkspaceAccount {
   manageInterns: boolean;
   manageProjects: boolean;
   active: boolean;
+  hasPassword: boolean;
   createdAt: string;
 }
 
@@ -23,6 +25,7 @@ export async function findActiveWorkspaceAccount(email: string): Promise<{
   email: string;
   displayName: string;
   permissions: Permission[];
+  passwordHash: string;
 } | null> {
   const sql = await db();
   const [row] = await sql<{
@@ -30,9 +33,10 @@ export async function findActiveWorkspaceAccount(email: string): Promise<{
     displayName: string;
     manageInterns: boolean;
     manageProjects: boolean;
+    passwordHash: string;
   }[]>`
     select email, display_name as "displayName", manage_interns as "manageInterns",
-      manage_projects as "manageProjects"
+      manage_projects as "manageProjects", password_hash as "passwordHash"
     from workspace_accounts
     where lower(email) = ${email.trim().toLowerCase()} and active = true
   `;
@@ -40,7 +44,7 @@ export async function findActiveWorkspaceAccount(email: string): Promise<{
   const permissions: Permission[] = [];
   if (row.manageInterns) permissions.push("MANAGE_INTERNS");
   if (row.manageProjects) permissions.push("MANAGE_PROJECTS");
-  return { email: row.email.toLowerCase(), displayName: row.displayName, permissions };
+  return { email: row.email.toLowerCase(), displayName: row.displayName, permissions, passwordHash: row.passwordHash };
 }
 
 export async function getWorkspaceAccounts(): Promise<WorkspaceAccount[]> {
@@ -51,6 +55,7 @@ export async function getWorkspaceAccounts(): Promise<WorkspaceAccount[]> {
     select id, email, display_name as "displayName",
       manage_interns as "manageInterns",
       manage_projects as "manageProjects", active,
+      (password_hash <> '') as "hasPassword",
       created_at as "createdAt"
     from workspace_accounts order by active desc, display_name, email
   `;
@@ -89,10 +94,13 @@ export async function saveWorkspaceAccount(formData: FormData): Promise<void> {
   const manageInterns = formData.get("manageInterns") === "on";
   const manageProjects = formData.get("manageProjects") === "on";
   const active = formData.get("active") === "on";
+  const password = value(formData, "password", 200);
+  if (!id && !password) throw new Error("Generate a login password for this account.");
   if (!manageInterns && !manageProjects) {
     throw new Error("Select at least one permission.");
   }
   const sql = await db();
+  const passwordHash = password ? await bcrypt.hash(password, 12) : "";
   await sql.begin(async (tx) => {
     if (id) {
       await tx`
@@ -101,11 +109,12 @@ export async function saveWorkspaceAccount(formData: FormData): Promise<void> {
           active=${active}, updated_at=now()
         where id=${id}
       `;
+      if (passwordHash) await tx`update workspace_accounts set password_hash=${passwordHash} where id=${id}`;
     } else {
       await tx`
         insert into workspace_accounts
-          (email, display_name, manage_interns, manage_projects, active, created_by)
-        values (${email}, ${displayName}, ${manageInterns}, ${manageProjects}, ${active}, ${actor.email})
+          (email, display_name, manage_interns, manage_projects, active, created_by, password_hash)
+        values (${email}, ${displayName}, ${manageInterns}, ${manageProjects}, ${active}, ${actor.email}, ${passwordHash})
       `;
     }
     await tx`
