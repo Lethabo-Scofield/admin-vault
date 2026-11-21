@@ -45,6 +45,10 @@ export async function getPeopleDirectory() {
       '' as title, case when manage_interns and manage_projects then 'People & Project Administrator' when manage_interns then 'People Administrator' when manage_projects then 'Project Administrator' else 'Read-only account' end as role, null as "functionName", '' as "managerId", 'workspace_accounts' as source
     from workspace_accounts order by display_name, email
   `;
+  const completedInternEmails = new Set((await sql<{ email: string }[]>`
+    select lower(email) as email from interns
+    where archived_at is null and (completion_date is not null or lower(coalesce(employment_status, '')) in ('completed', 'inactive', 'withdrawn', 'archived'))
+  `).map((row) => row.email));
   const employees = await sql<typeof interns[number][]>`
     select stable_id as "stableId", full_name as name, email,
       engagement_type as type, case when p.active then 'ACTIVE' else 'SUSPENDED' end as status,
@@ -95,7 +99,7 @@ export async function getPeopleDirectory() {
   const emittedOpsNames = new Set<string>();
   return [...merged, ...ops.filter((person) => {
     const nameKey = person.name.trim().toLowerCase().replace(/\s+/g, " ");
-    if (localEmails.has(person.email.toLowerCase()) || localNames.has(nameKey) || emittedOpsNames.has(nameKey)) return false;
+    if (localEmails.has(person.email.toLowerCase()) || completedInternEmails.has(person.email.toLowerCase()) || localNames.has(nameKey) || emittedOpsNames.has(nameKey)) return false;
     emittedOpsNames.add(nameKey);
     return true;
   }).map((person) => ({

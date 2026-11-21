@@ -43,6 +43,7 @@ export async function getOpsDepartments(): Promise<OpsDepartment[]> {
   ` : [];
   const parentByName = new Map(hierarchy.map((row) => [row.name, row.parentName]));
   const groups = new Map<string, OpsPerson[]>();
+  for (const row of hierarchy) groups.set(row.name, []);
   for (const person of people) {
     const name = person.functionName?.trim();
     if (!name) continue;
