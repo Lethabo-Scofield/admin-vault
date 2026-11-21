@@ -21,6 +21,7 @@ export type OpsPerson = {
   managerRef: string;
   tasksTotal: number;
   tasksCompleted: number;
+  hasProfile: boolean;
 };
 
 export type OpsIdentityLink = {
@@ -41,8 +42,8 @@ export async function getOpsPeople(): Promise<OpsPerson[]> {
   const sql = getOpsSql();
   if (!sql) return [];
   const [users, assignments, relationships, taskCounts] = await Promise.all([
-    sql<{ id: string; email: string; name: string; role: string; active: boolean }[]>`
-      select id::text, email::text, display_name as name, role, active
+    sql<{ id: string; email: string; name: string; role: string; active: boolean; profileData: Record<string, unknown> }[]>`
+      select id::text, email::text, display_name as name, role, active, profile_data as "profileData"
       from ops_users where active = true order by display_name
     `,
     sql<{ personRef: string; title: string; functionName: string | null }[]>`
@@ -80,6 +81,18 @@ export async function getOpsPeople(): Promise<OpsPerson[]> {
       managerRef: managerMap.get(`user-${user.id}`) ?? "",
       tasksTotal: tasks?.total ?? 0,
       tasksCompleted: tasks?.completed ?? 0,
+      hasProfile: Object.keys(user.profileData ?? {}).length > 0,
     };
   });
+}
+
+export async function getOpsProfile(stableRef: string) {
+  const sql = getOpsSql();
+  if (!sql || !stableRef.startsWith("ops:")) return null;
+  const id = stableRef.slice(4);
+  const rows = await sql<{ email: string; name: string; role: string; active: boolean; profileData: Record<string, unknown> }[]>`
+    select email::text, display_name as name, role, active, profile_data as "profileData"
+    from ops_users where id = ${id}::uuid limit 1
+  `;
+  return rows[0] ?? null;
 }
