@@ -37,6 +37,7 @@ export async function getPeopleDirectory() {
     left join people_identity p on p.source_type = 'INTERN' and p.source_id = i.id
     left join organisation_functions f on f.id = p.function_id
     where i.archived_at is null
+      and lower(coalesce(i.employment_status, '')) not in ('completed', 'inactive', 'withdrawn', 'archived')
   `;
   const accounts = await sql<typeof interns[number][]>`
     select 'account:' || id as "stableId", coalesce(display_name, email) as name, email,

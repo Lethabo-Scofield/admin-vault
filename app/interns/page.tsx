@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { ChevronRight, GraduationCap, Plus } from "lucide-react";
+import { ChevronRight, GraduationCap, Plus, UserRound } from "lucide-react";
 import { getInterns, getInternCounts, type InternStatusFilter } from "@/lib/intern-queries";
 import { ensureSequentialInternNumbers } from "@/lib/intern-numbering";
 import { getSql, ensureSchema } from "@/lib/db";
 import { PageHeader, EmptyState, StatusBadge } from "@/components/ui";
 import { computeInternProgress, daysLeftLabel, PROGRESS_STYLE } from "@/lib/intern-progress";
 import InternSearch from "@/components/InternSearch";
-import { initials } from "@/lib/format";
+import { getOpsPeople } from "@/lib/ops-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +32,12 @@ export default async function InternsPage({
   // Self-heal any stale (gappy) intern numbering before listing.
   await ensureSchema();
   await ensureSequentialInternNumbers(getSql());
-  const [interns, counts] = await Promise.all([
+  const [interns, counts, opsPeople] = await Promise.all([
     getInterns({ search: q, includeArchived: archived === "1", status }),
     getInternCounts(),
+    getOpsPeople(),
   ]);
+  const avatarByEmail = new Map(opsPeople.map((person) => [person.email.toLowerCase(), person.avatarUrl]));
   const now = new Date();
   const rows = interns.map((i) => ({ intern: i, progress: computeInternProgress(i, now) }));
   const behind = rows.filter((r) => r.progress.state === "behind" || r.progress.state === "overdue").length;
@@ -125,9 +127,9 @@ export default async function InternsPage({
                   <Link
                     href={`/interns/${i.id}`}
                     aria-label={`Open ${i.fullName}'s profile`}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600 ring-1 ring-gray-200 transition-colors group-hover:bg-gray-200"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 text-gray-400 ring-1 ring-gray-200 transition-colors group-hover:bg-gray-200"
                   >
-                    {initials(i.fullName)}
+                    {avatarByEmail.get(i.email.toLowerCase()) ? <img src={avatarByEmail.get(i.email.toLowerCase())} alt={`${i.fullName} profile`} className="h-full w-full object-cover" /> : <UserRound size={23} strokeWidth={1.5} />}
                   </Link>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
