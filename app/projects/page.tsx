@@ -35,7 +35,6 @@ export default async function ProjectsPage() {
               <Link key={project.id} href={`/projects/${project.id}`} className="group flex min-w-0 flex-col items-center rounded-3xl px-2 py-3 text-center outline-none transition-transform duration-200 ease-out hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-gray-400 active:scale-95">
                 <div className="relative flex h-[76px] w-[76px] items-center justify-center rounded-[24px] bg-gray-100 text-gray-700 shadow-sm transition-all duration-200 ease-out group-hover:scale-110 group-hover:bg-gray-900 group-hover:text-white group-hover:shadow-lg">
                   {project.logoUrl ? <img src={project.logoUrl} alt="" className="h-12 w-12 rounded-2xl object-contain transition-transform duration-200 group-hover:scale-105" /> : <Icon size={31} strokeWidth={1.8} />}
-                  <span className={`absolute -right-1 -top-1 h-3 w-3 rounded-full ring-4 ring-white ${project.status === "SUSPENDED" ? "bg-gray-400" : "bg-emerald-500"}`} aria-label={project.status === "SUSPENDED" ? "Suspended" : "Active"} />
                 </div>
                 <span className="mt-3 max-w-[130px] truncate text-[13px] font-semibold text-gray-900">{project.name}</span>
                 <span className="mt-1 max-w-[140px] truncate text-[11px] text-gray-400">{project.category || "Product workspace"}</span>
