@@ -92,7 +92,7 @@ export async function getOpsCareerHistory(personRefs: string[]): Promise<OpsCare
   const rows = await sql<OpsCareerEvent[]>`
     select id::text, person_ref as "personRef", title, effective_from as "from", effective_to as "to"
     from org_assignments
-    where person_ref in ${sql([...refs])}
+    where person_ref in ${sql([...refs])} and lower(title) <> 'title not set'
     order by effective_from asc
   `;
   // Ops can record the same title more than once during sync; collapse adjacent
@@ -118,7 +118,7 @@ export async function getOpsPeople(): Promise<OpsPerson[]> {
       from ops_users where active = true order by display_name
     `,
     sql<{ personRef: string; title: string; functionName: string | null }[]>`
-      select distinct on (a.person_ref) a.person_ref as "personRef", a.title, d.name as "functionName"
+      select distinct on (a.person_ref) a.person_ref as "personRef", coalesce(nullif(a.title, 'Title not set'), '') as title, d.name as "functionName"
       from org_assignments a left join org_departments d on d.id = a.department_id
       where a.effective_to is null order by a.person_ref, a.effective_from desc
     `,
