@@ -63,9 +63,9 @@ export async function getInterns(opts?: {
            or i.position ilike $2 or i.department ilike $2)
       and ($3 or i.archived_at is null)
       and ($4 = 'all'
-           or ($4 = 'active'    and lower(i.employment_status) = 'active')
-           or ($4 = 'completed' and lower(i.employment_status) = 'completed'))
-    order by (lower(i.employment_status) = 'active') desc, i.intern_number desc
+           or ($4 = 'active'    and lower(i.employment_status) = 'active' and i.completion_date is null)
+           or ($4 = 'completed' and (lower(i.employment_status) = 'completed' or i.completion_date is not null)))
+    order by (lower(i.employment_status) = 'active' and i.completion_date is null) desc, i.intern_number desc
     `,
     [search, like, Boolean(opts?.includeArchived), status]
   );
@@ -86,8 +86,8 @@ export async function getInternCounts(): Promise<{
   const sql = await db();
   const [row] = await sql<{ active: number; completed: number; all: number }[]>`
     select
-      count(*) filter (where lower(employment_status) = 'active')::int  as active,
-      count(*) filter (where lower(employment_status) = 'completed')::int as completed,
+      count(*) filter (where lower(employment_status) = 'active' and completion_date is null)::int  as active,
+      count(*) filter (where lower(employment_status) = 'completed' or completion_date is not null)::int as completed,
       count(*)::int as all
     from interns where archived_at is null
   `;
