@@ -23,7 +23,16 @@ export default async function PeoplePage({
       .filter(Boolean)
       .some((value) => value!.toLowerCase().includes(term)))
   );
-  filtered.sort((a, b) => Number(Boolean(b.hasProfile)) - Number(Boolean(a.hasProfile)) || a.name.localeCompare(b.name));
+  const timelineOrder = new Map([
+    ["scofield@olyxee.com", 0],
+    ["alisha.fatima@olyxee.com", 1],
+    ["mosamaseko17@gmail.com", 2],
+    ["emmanuel.stakio@olyxee.com", 3],
+    ["thokozani.dlomo@olyxee.com", 4],
+    ["zaid.muhammad.dev@gmail.com", 5],
+    ["munibashami07@gmail.com", 6],
+  ]);
+  filtered.sort((a, b) => (timelineOrder.get(a.email.toLowerCase()) ?? 100) - (timelineOrder.get(b.email.toLowerCase()) ?? 100) || Number(Boolean(b.hasProfile)) - Number(Boolean(a.hasProfile)) || a.name.localeCompare(b.name));
   const hrefFor = (nextType: string) => `/people?type=${nextType}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
 
   return (

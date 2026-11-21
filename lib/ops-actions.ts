@@ -87,3 +87,18 @@ export async function addOpsCareerEvent(formData: FormData) {
   });
   revalidatePath("/people");
 }
+
+export async function updateOpsCareerEvent(formData: FormData) {
+  await requireSuperAdmin();
+  const id = field(formData, "eventId", 80);
+  const title = field(formData, "title", 160);
+  const from = field(formData, "from", 30);
+  if (!id || !title || !from) throw new Error("Role and start date are required.");
+  const sql = opsSql();
+  await sql.begin(async (tx) => {
+    await tx.unsafe("alter table org_assignments disable trigger org_assignments_guard");
+    await tx.unsafe("update org_assignments set title=$1, effective_from=$2 where id=$3::uuid", [title, from, id]);
+    await tx.unsafe("alter table org_assignments enable trigger org_assignments_guard");
+  });
+  revalidatePath("/people");
+}

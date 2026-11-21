@@ -66,6 +66,8 @@ export type OpsIdentityLink = {
 };
 
 export type OpsCareerEvent = {
+  id: string;
+  personRef: string;
   title: string;
   from: string;
   to: string | null;
@@ -84,7 +86,7 @@ export async function getOpsCareerHistory(personRefs: string[]): Promise<OpsCare
     }
   }
   const rows = await sql<OpsCareerEvent[]>`
-    select title, effective_from as "from", effective_to as "to"
+    select id::text, person_ref as "personRef", title, effective_from as "from", effective_to as "to"
     from org_assignments
     where person_ref in ${sql([...refs])}
     order by effective_from asc
