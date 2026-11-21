@@ -65,7 +65,10 @@ export async function getInterns(opts?: {
       and ($4 = 'all'
            or ($4 = 'active'    and lower(i.employment_status) = 'active' and i.completion_date is null)
            or ($4 = 'completed' and (lower(i.employment_status) = 'completed' or i.completion_date is not null)))
-    order by (lower(i.employment_status) = 'active' and i.completion_date is null) desc, i.intern_number desc
+    order by
+      case when ($4 = 'completed') then i.start_date end asc nulls last,
+      (lower(i.employment_status) = 'active' and i.completion_date is null) desc,
+      i.intern_number desc
     `,
     [search, like, Boolean(opts?.includeArchived), status]
   );
