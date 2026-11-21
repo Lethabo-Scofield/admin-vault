@@ -46,11 +46,11 @@ export default async function ProjectDetailPage({
     currentUser?.permissions.includes("MANAGE_PROJECTS") ?? false;
   const isSuspended = project.status === "SUSPENDED";
   const view =
-    requestedView === "keys"
-      ? "keys"
+    requestedView === "usage"
+      ? "usage"
       : requestedView === "documents" && canManageAnalytics
         ? "documents"
-        : "usage";
+        : "keys";
   const [credentials, documents, analytics] = await Promise.all([
     view === "keys" ? getCredentialsByProject(projectId) : Promise.resolve([]),
     view === "documents" && canManageAnalytics
@@ -120,11 +120,11 @@ export default async function ProjectDetailPage({
       )}
 
       <nav aria-label="Project sections" className="no-scrollbar mb-6 inline-flex w-fit max-w-full flex-nowrap gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1">
-        <SectionLink href={`/projects/${projectId}?view=usage`} selected={view === "usage"}>
-          Usage
-        </SectionLink>
         <SectionLink href={`/projects/${projectId}?view=keys`} selected={view === "keys"}>
           Keys <span className="tabular-nums text-gray-500">{project.keyCount}</span>
+        </SectionLink>
+        <SectionLink href={`/projects/${projectId}?view=usage`} selected={view === "usage"}>
+          Usage
         </SectionLink>
         {canManageAnalytics && (
           <SectionLink href={`/projects/${projectId}?view=documents`} selected={view === "documents"}>
