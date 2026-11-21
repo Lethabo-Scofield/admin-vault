@@ -16,6 +16,7 @@ import { PageHeader, StatusBadge } from "@/components/ui";
 import InternProfile from "@/components/InternProfile";
 import ConfirmButton from "@/components/ConfirmButton";
 import { getActiveSupervisors } from "@/lib/workspace-accounts";
+import { getEmployeeNumber } from "@/lib/employee-numbers";
 import { getOpsCareerHistory } from "@/lib/ops-queries";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +62,7 @@ export default async function InternDetailPage({
     <div className="animate-ios-in space-y-8">
       <PageHeader
         title={intern.fullName}
-        subtitle={`${intern.internNumber} · ${intern.position || "No position"}${
+        subtitle={`${getEmployeeNumber(intern.email, intern.fullName) ?? intern.internNumber} · ${intern.position || "No position"}${
           archived ? " · Archived" : ""
         }`}
         action={

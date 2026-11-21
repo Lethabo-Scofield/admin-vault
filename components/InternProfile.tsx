@@ -9,6 +9,7 @@ import InternDocuments from "@/components/InternDocuments";
 import type { Intern, InternCredential, InternDocument, InternProject } from "@/lib/types";
 import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 import { itemColor, parseListItems } from "@/lib/list-items";
+import { getEmployeeNumber } from "@/lib/employee-numbers";
 
 const PRONOUNS: Record<string, string> = {
   SHE_HER: "She / Her",
@@ -168,7 +169,7 @@ export default function InternProfile({
             <Item label="Full Name" value={intern.fullName} />
             <Item label="Email Address" value={intern.email} />
             <Item label="Pronouns" value={PRONOUNS[intern.pronouns ?? ""] ?? ""} />
-            <Item label="Intern Number" value={intern.internNumber} />
+            <Item label={getEmployeeNumber(intern.email, intern.fullName) ? "Employee Number" : "Intern Number"} value={getEmployeeNumber(intern.email, intern.fullName) ?? intern.internNumber} />
           </>
         )}
         {tab === "internship" && (
