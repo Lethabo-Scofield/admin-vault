@@ -55,7 +55,7 @@ export default async function InternDetailPage({
   const initialTab =
     tab === "documents" || tab === "personal" || tab === "internship" || tab === "writeups" || tab === "certificates"
       ? tab
-      : "projects";
+      : (isSuperAdmin ? "certificates" : "projects");
 
   return (
     <div className="animate-ios-in space-y-8">

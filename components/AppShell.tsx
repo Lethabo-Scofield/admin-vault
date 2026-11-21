@@ -10,6 +10,7 @@ import {
   LogOut,
   Settings,
   Users,
+  Building2,
 } from "lucide-react";
 import { GraduationCap } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
@@ -27,6 +28,7 @@ const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; 
     items: [
       { href: "/projects", label: "Projects", icon: FolderLock },
       { href: "/people", label: "People", icon: Users },
+      { href: "/people/departments", label: "Departments", icon: Building2 },
     ],
   },
   {

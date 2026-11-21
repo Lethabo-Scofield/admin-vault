@@ -120,7 +120,7 @@ export default function InternProfile({
     <div className="rounded-ios bg-white shadow-ios">
       <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 pt-3">
         <div className="flex gap-1 overflow-x-auto">
-          {TABS.filter(({ id }) => id !== "certificates" || showCertificates).map(({ id, label, icon: Icon }) => (
+          {TABS.filter(({ id }) => id !== "personal" && (id !== "certificates" || showCertificates)).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
@@ -155,9 +155,9 @@ export default function InternProfile({
         </div>
       )}
       {tab === "certificates" && showCertificates && (
-        <div className="space-y-4 p-6">
-          <div className="flex items-center justify-between"><p className="text-[13px] text-gray-500">Official certificates and letters issued for this person.</p><Link href={`/credentials/new?internId=${intern.id}`} className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-[13px] font-medium text-white"><Plus size={15} /> Issue credential</Link></div>
-          {credentials.length === 0 ? <p className="rounded-xl bg-gray-50 px-4 py-5 text-[13px] text-gray-500">No certificates issued yet.</p> : <div className="divide-y divide-gray-100 rounded-xl border border-gray-100">{credentials.map((c) => <div key={c.id} className="flex items-center justify-between gap-3 px-4 py-3"><div><Link href={`/credentials/${c.id}`} className="font-medium text-gray-900 hover:underline">{c.credentialNumber}</Link><p className="text-[12px] text-gray-500">{c.programmeTitle || "Credential"} · {c.issueDate ? String(c.issueDate).slice(0, 10) : "Draft"}</p></div><CredentialStatusBadge status={c.status} /></div>)}</div>}
+        <div className="space-y-6 p-6 sm:p-8">
+          <div className="flex flex-col gap-4 rounded-3xl bg-gray-50 p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">Credential workspace</p><h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Official documents</h2><p className="mt-1 text-[13px] text-gray-500">Issue, review and manage certificates and completion letters for {intern.fullName}.</p></div><Link href={`/credentials/new?internId=${intern.id}`} className="inline-flex w-fit items-center gap-2 rounded-full bg-gray-900 px-4 py-2.5 text-[13px] font-medium text-white shadow-sm transition hover:bg-gray-800"><Plus size={15} /> Issue credential</Link></div>
+          {credentials.length === 0 ? <div className="rounded-2xl border border-dashed border-gray-200 px-5 py-12 text-center"><p className="text-[14px] font-medium text-gray-700">No credentials yet</p><p className="mt-1 text-[13px] text-gray-400">Create the first certificate or completion letter for this intern.</p><Link href={`/credentials/new?internId=${intern.id}`} className="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-200"><Plus size={14} /> Create credential</Link></div> : <div className="grid gap-3 sm:grid-cols-2">{credentials.map((c) => <Link key={c.id} href={`/credentials/${c.id}`} className="group rounded-2xl border border-gray-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm"><div className="flex items-start justify-between gap-3"><div><p className="text-[14px] font-semibold text-gray-900 group-hover:underline">{c.credentialNumber}</p><p className="mt-1 text-[12px] text-gray-500">{c.programmeTitle || "Credential"}</p></div><CredentialStatusBadge status={c.status} /></div><p className="mt-5 text-[11px] text-gray-400">{c.issueDate ? `Issued ${String(c.issueDate).slice(0, 10)}` : "Draft — needs review"}</p></Link>)}</div>}
         </div>
       )}
       <dl

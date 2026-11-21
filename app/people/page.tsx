@@ -37,7 +37,6 @@ export default async function PeoplePage({
               {label}
             </Link>
           ))}
-          <Link href="/people/departments" className="rounded-xl px-4 py-2 text-[13px] font-medium text-gray-500 transition hover:text-gray-900">Departments</Link>
         </div>
         <form className="relative w-full sm:w-80">
           <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />

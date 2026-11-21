@@ -28,12 +28,20 @@ export type OpsPerson = {
 
 export type OpsDepartment = {
   name: string;
+  parentName: string | null;
   lead: OpsPerson | null;
   members: OpsPerson[];
 };
 
 export async function getOpsDepartments(): Promise<OpsDepartment[]> {
   const people = await getOpsPeople();
+  const sql = getOpsSql();
+  const hierarchy = sql ? await sql<{ name: string; parentName: string | null }[]>`
+    select d.name, parent.name as "parentName"
+    from org_departments d left join org_departments parent on parent.id = d.parent_id
+    where d.active = true
+  ` : [];
+  const parentByName = new Map(hierarchy.map((row) => [row.name, row.parentName]));
   const groups = new Map<string, OpsPerson[]>();
   for (const person of people) {
     const name = person.functionName?.trim();
@@ -43,9 +51,12 @@ export async function getOpsDepartments(): Promise<OpsDepartment[]> {
     groups.set(name, members);
   }
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, members]) => {
-    const lead = members.find((person) => /lead|head|manager|director|founder|chief|ceo|superadmin/i.test(`${person.title} ${person.role}`)) ?? null;
-    return { name, lead, members: members.sort((a, b) => a.name.localeCompare(b.name)) };
-  });
+    const explicitLead = name === "Growth & Partnerships"
+      ? people.find((person) => person.name.trim().toLowerCase() === "lethabo scofield")
+      : null;
+    const lead = explicitLead ?? members.find((person) => /lead|head|manager|director|founder|chief|ceo|superadmin/i.test(`${person.title} ${person.role}`)) ?? null;
+    return { name, parentName: parentByName.get(name) ?? null, lead, members: members.sort((a, b) => a.name.localeCompare(b.name)) };
+  }).sort((a, b) => (a.parentName ?? a.name).localeCompare(b.parentName ?? b.name) || Number(Boolean(a.parentName)) - Number(Boolean(b.parentName)) || a.name.localeCompare(b.name));
 }
 
 export type OpsIdentityLink = {
@@ -63,10 +74,18 @@ export type OpsCareerEvent = {
 export async function getOpsCareerHistory(personRefs: string[]): Promise<OpsCareerEvent[]> {
   const sql = getOpsSql();
   if (!sql || personRefs.length === 0) return [];
+  const links = await getOpsIdentityLinks();
+  const refs = new Set(personRefs);
+  for (const link of links) {
+    if (refs.has(link.canonicalRef) || refs.has(link.supersededRef)) {
+      refs.add(link.canonicalRef);
+      refs.add(link.supersededRef);
+    }
+  }
   const rows = await sql<OpsCareerEvent[]>`
     select title, effective_from as "from", effective_to as "to"
     from org_assignments
-    where person_ref in ${sql(personRefs)}
+    where person_ref in ${sql([...refs])}
     order by effective_from asc
   `;
   // Ops can record the same title more than once during sync; collapse adjacent
@@ -141,8 +160,8 @@ export async function getOpsProfile(stableRef: string) {
   const sql = getOpsSql();
   if (!sql || !stableRef.startsWith("ops:")) return null;
   const id = stableRef.slice(4);
-  const rows = await sql<{ email: string; name: string; role: string; active: boolean; profileData: Record<string, unknown> }[]>`
-    select email::text, display_name as name, role, active, profile_data as "profileData"
+  const rows = await sql<{ id: string; email: string; name: string; role: string; active: boolean; profileData: Record<string, unknown> }[]>`
+    select id::text, email::text, display_name as name, role, active, profile_data as "profileData"
     from ops_users where id = ${id}::uuid limit 1
   `;
   return rows[0] ?? null;
