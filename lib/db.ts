@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { encryptString } from "@/lib/crypto";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -74,6 +75,7 @@ create table if not exists credentials (
 );
 
 alter table credentials add column if not exists key_type text not null default '';
+alter table credentials add column if not exists secret_value_enc text not null default '';
 
 create table if not exists documents (
   id               serial primary key,
@@ -111,6 +113,52 @@ create table if not exists workspace_accounts (
 );
 create unique index if not exists idx_workspace_accounts_email_lower
   on workspace_accounts (lower(email));
+
+-- Unified administrative identity and organisation foundations. Existing interns
+-- and workspace accounts remain authoritative records; these tables add stable
+-- employee identifiers and reporting metadata without duplicating profiles.
+create table if not exists organisation_functions (
+  id serial primary key,
+  name text not null unique,
+  description text not null default '',
+  leader_email text not null default '',
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists people_identity (
+  id serial primary key,
+  stable_id text not null unique,
+  source_type text not null,
+  source_id integer not null,
+  engagement_type text not null default 'EMPLOYEE',
+  job_title text not null default '',
+  function_id integer references organisation_functions(id) on delete set null,
+  manager_stable_id text not null default '',
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(source_type, source_id)
+);
+alter table people_identity add column if not exists full_name text not null default '';
+alter table people_identity add column if not exists email text not null default '';
+alter table people_identity add column if not exists start_date date;
+alter table people_identity add column if not exists end_date date;
+
+create table if not exists ops_sync_events (
+  id bigserial primary key,
+  event_key text not null unique,
+  event_type text not null,
+  aggregate_id text not null,
+  payload jsonb not null default '{}'::jsonb,
+  status text not null default 'PENDING',
+  attempts integer not null default 0,
+  last_error text not null default '',
+  created_at timestamptz not null default now(),
+  processed_at timestamptz
+);
+create index if not exists idx_ops_sync_events_status on ops_sync_events(status, created_at);
 
 create table if not exists interns (
   id                         serial primary key,
@@ -311,7 +359,26 @@ export function ensureSchema(): Promise<void> {
     const sql = getSql();
     globalForDb.__schemaReady = sql
       .unsafe(SCHEMA_SQL)
-      .then(() => undefined)
+      .then(async () => {
+        // One-time compatibility migration: encrypt legacy plaintext secrets
+        // before clearing them. This keeps existing records usable while
+        // ensuring new database reads never encounter plaintext at rest.
+        const legacy = await sql<{ id: number; secret: string }[]>`
+          select id, secret_value as secret
+          from credentials
+          where coalesce(secret_value_enc, '') = '' and secret_value <> ''
+        `;
+        if (legacy.length === 0) return;
+        await sql.begin(async (tx) => {
+          for (const row of legacy) {
+            await tx`
+              update credentials
+              set secret_value_enc = ${encryptString(row.secret)}, secret_value = ''
+              where id = ${row.id} and coalesce(secret_value_enc, '') = ''
+            `;
+          }
+        });
+      })
       .catch((err) => {
         // Reset so a later request can retry schema creation.
         globalForDb.__schemaReady = undefined;

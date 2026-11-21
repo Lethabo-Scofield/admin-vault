@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, X, User, Briefcase, FileText, FolderKanban, Paperclip } from "lucide-react";
+import Link from "next/link";
+import { Pencil, X, User, Briefcase, FileText, FolderKanban, Paperclip, Award, Plus } from "lucide-react";
 import InternForm from "@/components/InternForm";
 import InternProjects from "@/components/InternProjects";
 import InternDocuments from "@/components/InternDocuments";
-import type { Intern, InternDocument, InternProject } from "@/lib/types";
+import type { Intern, InternCredential, InternDocument, InternProject } from "@/lib/types";
+import CredentialStatusBadge from "@/components/CredentialStatusBadge";
 import { itemColor, parseListItems } from "@/lib/list-items";
 
 const PRONOUNS: Record<string, string> = {
@@ -64,9 +66,10 @@ const TABS = [
   { id: "projects", label: "Projects", icon: FolderKanban },
   { id: "documents", label: "Documents", icon: Paperclip },
   { id: "writeups", label: "Write-ups & Notes", icon: FileText },
+  { id: "certificates", label: "Certificates", icon: Award },
 ] as const;
 
-const PANEL_TABS: ReadonlyArray<TabId> = ["projects", "documents"];
+const PANEL_TABS: ReadonlyArray<TabId> = ["projects", "documents", "certificates"];
 
 type TabId = (typeof TABS)[number]["id"];
 
@@ -74,13 +77,17 @@ export default function InternProfile({
   intern,
   projects,
   documents,
+  credentials,
   supervisors,
+  showCertificates = false,
   initialTab = "projects",
 }: {
   intern: Intern;
   projects: InternProject[];
   documents: InternDocument[];
+  credentials: InternCredential[];
   supervisors: { email: string; label: string }[];
+  showCertificates?: boolean;
   initialTab?: TabId;
 }) {
   const [editing, setEditing] = useState(false);
@@ -111,7 +118,7 @@ export default function InternProfile({
     <div className="rounded-ios bg-white shadow-ios">
       <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 pt-3">
         <div className="flex gap-1 overflow-x-auto">
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.filter(({ id }) => id !== "certificates" || showCertificates).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
@@ -143,6 +150,12 @@ export default function InternProfile({
       {tab === "documents" && (
         <div className="p-6">
           <InternDocuments internId={intern.id} documents={documents} />
+        </div>
+      )}
+      {tab === "certificates" && showCertificates && (
+        <div className="space-y-4 p-6">
+          <div className="flex items-center justify-between"><p className="text-[13px] text-gray-500">Official certificates and letters issued for this person.</p><Link href={`/credentials/new?internId=${intern.id}`} className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-[13px] font-medium text-white"><Plus size={15} /> Issue credential</Link></div>
+          {credentials.length === 0 ? <p className="rounded-xl bg-gray-50 px-4 py-5 text-[13px] text-gray-500">No certificates issued yet.</p> : <div className="divide-y divide-gray-100 rounded-xl border border-gray-100">{credentials.map((c) => <div key={c.id} className="flex items-center justify-between gap-3 px-4 py-3"><div><Link href={`/credentials/${c.id}`} className="font-medium text-gray-900 hover:underline">{c.credentialNumber}</Link><p className="text-[12px] text-gray-500">{c.programmeTitle || "Credential"} · {c.issueDate ? String(c.issueDate).slice(0, 10) : "Draft"}</p></div><CredentialStatusBadge status={c.status} /></div>)}</div>}
         </div>
       )}
       <dl

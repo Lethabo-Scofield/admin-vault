@@ -7,6 +7,7 @@ import type {
   VaultCredential,
 } from "@/lib/types";
 import { requirePermission, requireSuperAdmin, requireUser } from "@/lib/session";
+import { decryptString } from "@/lib/crypto";
 
 async function db() {
   await ensureSchema();
@@ -129,7 +130,7 @@ export async function getProject(id: number): Promise<Project | null> {
 export async function getCredentials(): Promise<VaultCredential[]> {
   await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
-  return sql<VaultCredential[]>`
+  const rows = await sql<Array<Omit<VaultCredential, "secretValue"> & { secretValueEnc: string; secretValue: string }>>`
     select
       c.id,
       c.project_id   as "projectId",
@@ -137,6 +138,7 @@ export async function getCredentials(): Promise<VaultCredential[]> {
       c.service_name as "serviceName",
       c.key_type     as "keyType",
       c.environment,
+      c.secret_value_enc as "secretValueEnc",
       c.secret_value as "secretValue",
       c.owner_email  as "ownerEmail",
       c.department,
@@ -147,6 +149,7 @@ export async function getCredentials(): Promise<VaultCredential[]> {
     left join projects p on p.id = c.project_id
     order by c.created_at desc
   `;
+  return rows.map((row) => ({ ...row, secretValue: decryptSecret(row.secretValueEnc, row.secretValue) }));
 }
 
 export async function getCredentialsByProject(
@@ -154,7 +157,7 @@ export async function getCredentialsByProject(
 ): Promise<VaultCredential[]> {
   await requirePermission("MANAGE_PROJECTS");
   const sql = await db();
-  return sql<VaultCredential[]>`
+  const rows = await sql<Array<Omit<VaultCredential, "secretValue"> & { secretValueEnc: string; secretValue: string }>>`
     select
       c.id,
       c.project_id   as "projectId",
@@ -162,6 +165,7 @@ export async function getCredentialsByProject(
       c.service_name as "serviceName",
       c.key_type     as "keyType",
       c.environment,
+      c.secret_value_enc as "secretValueEnc",
       c.secret_value as "secretValue",
       c.owner_email  as "ownerEmail",
       c.department,
@@ -173,6 +177,12 @@ export async function getCredentialsByProject(
     where c.project_id = ${projectId}
     order by c.created_at desc
   `;
+  return rows.map((row) => ({ ...row, secretValue: decryptSecret(row.secretValueEnc, row.secretValue) }));
+}
+
+function decryptSecret(encrypted: string, legacy: string): string {
+  if (!encrypted) return legacy;
+  try { return decryptString(encrypted); } catch { return "[unavailable]"; }
 }
 
 export async function getDocuments(): Promise<ComplianceDocument[]> {

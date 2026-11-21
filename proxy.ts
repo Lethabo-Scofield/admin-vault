@@ -13,6 +13,7 @@ export async function proxy(req: NextRequest) {
   // Public read-only verification API and verification pages — no session.
   if (
     pathname.startsWith("/api/public/") ||
+    pathname === "/api/internal/ops/sync" ||
     pathname === "/verify" ||
     pathname.startsWith("/verify/")
   ) {

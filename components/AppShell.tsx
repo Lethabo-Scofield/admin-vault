@@ -4,13 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard,
   FolderLock,
-  KeyRound,
   Menu,
   X,
   LogOut,
   Settings,
+  Users,
 } from "lucide-react";
 import { GraduationCap } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
@@ -26,9 +25,8 @@ const NAV_GROUPS: { title: string; superAdmin?: boolean; items: { href: string; 
   {
     title: "Platform",
     items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
       { href: "/projects", label: "Projects", icon: FolderLock },
-      { href: "/project-keys", label: "Project Keys", icon: KeyRound },
+      { href: "/people", label: "People", icon: Users },
     ],
   },
   {
