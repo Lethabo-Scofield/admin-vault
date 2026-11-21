@@ -22,6 +22,7 @@ export type OpsPerson = {
   tasksTotal: number;
   tasksCompleted: number;
   hasProfile: boolean;
+  avatarUrl: string;
 };
 
 export type OpsIdentityLink = {
@@ -82,6 +83,7 @@ export async function getOpsPeople(): Promise<OpsPerson[]> {
       tasksTotal: tasks?.total ?? 0,
       tasksCompleted: tasks?.completed ?? 0,
       hasProfile: Object.keys(user.profileData ?? {}).length > 0,
+      avatarUrl: typeof user.profileData?.avatarUrl === "string" ? user.profileData.avatarUrl : "",
     };
   });
 }

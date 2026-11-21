@@ -71,7 +71,7 @@ export async function getPeopleDirectory() {
   const opsByEmail = new Map(ops.map((person) => [person.email.toLowerCase(), person]));
   const merged = local.map((person) => {
     const opsPerson = opsByEmail.get(person.email.toLowerCase());
-    if (!opsPerson) return { ...person, hasProfile: person.type === "INTERN", profileRef: undefined };
+    if (!opsPerson) return { ...person, hasProfile: person.type === "INTERN", profileRef: undefined, avatarUrl: "" };
     return {
       ...person,
       type: person.type === "INTERN" ? "INTERN" : "EMPLOYEE",
@@ -81,6 +81,7 @@ export async function getPeopleDirectory() {
       status: opsPerson.status,
       hasProfile: opsPerson.hasProfile || person.type === "INTERN",
       profileRef: opsPerson.stableRef,
+      avatarUrl: opsPerson.avatarUrl,
     };
   });
   const localEmails = new Set(local.map((person) => person.email.toLowerCase()));
@@ -90,5 +91,6 @@ export async function getPeopleDirectory() {
     functionName: person.functionName, managerId: person.managerRef, source: "ops",
     hasProfile: person.hasProfile,
     profileRef: person.stableRef,
+    avatarUrl: person.avatarUrl,
   }))];
 }
