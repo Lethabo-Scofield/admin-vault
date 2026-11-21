@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { getSql } from "@/lib/db";
 
 type OpsSql = ReturnType<typeof postgres>;
 const globalOps = globalThis as unknown as { sql?: OpsSql };
@@ -24,6 +25,28 @@ export type OpsPerson = {
   hasProfile: boolean;
   avatarUrl: string;
 };
+
+export type OpsDepartment = {
+  name: string;
+  lead: OpsPerson | null;
+  members: OpsPerson[];
+};
+
+export async function getOpsDepartments(): Promise<OpsDepartment[]> {
+  const people = await getOpsPeople();
+  const groups = new Map<string, OpsPerson[]>();
+  for (const person of people) {
+    const name = person.functionName?.trim();
+    if (!name) continue;
+    const members = groups.get(name) ?? [];
+    members.push(person);
+    groups.set(name, members);
+  }
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, members]) => {
+    const lead = members.find((person) => /lead|head|manager|director|founder|chief|ceo|superadmin/i.test(`${person.title} ${person.role}`)) ?? null;
+    return { name, lead, members: members.sort((a, b) => a.name.localeCompare(b.name)) };
+  });
+}
 
 export type OpsIdentityLink = {
   supersededRef: string;
@@ -87,10 +110,15 @@ export async function getOpsPeople(): Promise<OpsPerson[]> {
   const assignmentMap = new Map(assignments.map((x) => [x.personRef, x]));
   const managerMap = new Map(relationships.map((x) => [x.subjectRef, x.managerRef]));
   const taskMap = new Map(taskCounts.map((x) => [x.ref, x]));
+  const localRefs = await getSql()< { ref: string; email: string }[]>`
+    select 'intern-' || id as ref, email from interns
+    union all select 'account-' || id as ref, email from workspace_accounts
+  `;
+  const refByEmail = new Map(localRefs.map((row) => [row.email.toLowerCase(), row.ref]));
   return users.map((user) => {
     // Ops uses account-/intern- refs for organisation records; email remains
     // the stable cross-system fallback until an identity link is confirmed.
-    const assignment = assignmentMap.get(`user-${user.id}`);
+    const assignment = assignmentMap.get(`user-${user.id}`) ?? assignmentMap.get(refByEmail.get(user.email.toLowerCase()) ?? "");
     const tasks = taskMap.get(user.email) ?? taskMap.get(user.id);
     return {
       stableRef: `ops:${user.id}`,

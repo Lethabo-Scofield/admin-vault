@@ -37,6 +37,7 @@ export default async function PeoplePage({
               {label}
             </Link>
           ))}
+          <Link href="/people/departments" className="rounded-xl px-4 py-2 text-[13px] font-medium text-gray-500 transition hover:text-gray-900">Departments</Link>
         </div>
         <form className="relative w-full sm:w-80">
           <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -62,7 +63,7 @@ export default async function PeoplePage({
               const internId = person.stableId.startsWith("intern:") ? person.stableId.slice(7) : null;
               return (
                 <div key={person.stableId} className="grid gap-4 px-5 py-4 lg:grid-cols-12 lg:items-center">
-                  <div className="flex min-w-0 items-center gap-3 lg:col-span-3"><div className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl ${person.avatarUrl ? "bg-gray-200" : "bg-gray-100 text-gray-400"}`}>{person.avatarUrl ? <img src={person.avatarUrl} alt={`${person.name} profile`} className="h-full w-full object-cover" /> : <UserRound size={19} strokeWidth={1.5} />}</div><div className="min-w-0"><p className="truncate text-[14px] font-semibold text-gray-900">{person.name}</p></div></div>
+                  <div className="flex min-w-0 items-center gap-3 lg:col-span-3"><div className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl ${person.avatarUrl ? "bg-gray-200" : "bg-gray-100 text-gray-400"}`}>{person.avatarUrl ? <img src={person.avatarUrl} alt={`${person.name} profile`} className="h-full w-full object-cover" /> : <UserRound size={22} strokeWidth={1.5} />}</div><div className="min-w-0"><p className="truncate text-[14px] font-semibold text-gray-900">{person.name}</p></div></div>
                   <div className="min-w-0 lg:col-span-3"><p className="flex min-w-0 items-center gap-1.5 truncate text-[13px] text-gray-600"><Mail size={14} className="shrink-0 text-gray-400" />{person.email || "No email recorded"}</p></div>
                   <div className="min-w-0 lg:col-span-2"><p className="truncate text-[13px] text-gray-700">{person.role || "Role not assigned"}</p>{person.functionName && <p className="mt-0.5 truncate text-[11px] text-gray-400">{person.functionName}</p>}</div>
                   <div className="lg:col-span-1"><span className="inline-flex items-center gap-1.5 text-[12px] text-gray-500"><span className={`h-1.5 w-1.5 rounded-full ${person.status === "ACTIVE" ? "bg-gray-900" : "bg-gray-300"}`} />{person.status}</span></div>
