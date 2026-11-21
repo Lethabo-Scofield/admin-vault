@@ -16,6 +16,7 @@ import { PageHeader, StatusBadge } from "@/components/ui";
 import InternProfile from "@/components/InternProfile";
 import ConfirmButton from "@/components/ConfirmButton";
 import { getActiveSupervisors } from "@/lib/workspace-accounts";
+import { getOpsCareerHistory } from "@/lib/ops-queries";
 
 export const dynamic = "force-dynamic";
 // Self-healing may regenerate documents via headless Chromium.
@@ -40,12 +41,13 @@ export default async function InternDetailPage({
   // Official credentials are super-admin only; everyone else still manages the
   // intern's profile, projects and documents.
   if (isSuperAdmin) await ensureSequentialCredentialNumbers(getSql());
-  const [intern, credentials, projects, documents, supervisors] = await Promise.all([
+  const [intern, credentials, projects, documents, supervisors, careerHistory] = await Promise.all([
     getIntern(internId),
     isSuperAdmin ? getInternCredentials({ internId }) : Promise.resolve([]),
     getInternProjects(internId),
     getInternDocuments(internId),
     getActiveSupervisors(),
+    getOpsCareerHistory([`intern-${internId}`]),
   ]);
   if (!intern) notFound();
 
@@ -113,6 +115,7 @@ export default async function InternDetailPage({
           supervisors={supervisors}
           showCertificates={isSuperAdmin}
           initialTab={initialTab}
+          careerHistory={careerHistory}
         />
       </section>
 

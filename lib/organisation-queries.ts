@@ -69,8 +69,13 @@ export async function getPeopleDirectory() {
     return !superseded.has(ref);
   });
   const opsByEmail = new Map(ops.map((person) => [person.email.toLowerCase(), person]));
+  const opsByName = new Map<string, (typeof ops)[number]>();
+  for (const person of ops) {
+    const key = person.name.trim().toLowerCase().replace(/\s+/g, " ");
+    if (key && !opsByName.has(key)) opsByName.set(key, person);
+  }
   const merged = local.map((person) => {
-    const opsPerson = opsByEmail.get(person.email.toLowerCase());
+    const opsPerson = opsByEmail.get(person.email.toLowerCase()) ?? opsByName.get(person.name.trim().toLowerCase().replace(/\s+/g, " "));
     if (!opsPerson) return { ...person, hasProfile: person.type === "INTERN", profileRef: undefined, avatarUrl: "" };
     return {
       ...person,
@@ -85,7 +90,14 @@ export async function getPeopleDirectory() {
     };
   });
   const localEmails = new Set(local.map((person) => person.email.toLowerCase()));
-  return [...merged, ...ops.filter((person) => !localEmails.has(person.email.toLowerCase())).map((person) => ({
+  const localNames = new Set(local.map((person) => person.name.trim().toLowerCase().replace(/\s+/g, " ")));
+  const emittedOpsNames = new Set<string>();
+  return [...merged, ...ops.filter((person) => {
+    const nameKey = person.name.trim().toLowerCase().replace(/\s+/g, " ");
+    if (localEmails.has(person.email.toLowerCase()) || localNames.has(nameKey) || emittedOpsNames.has(nameKey)) return false;
+    emittedOpsNames.add(nameKey);
+    return true;
+  }).map((person) => ({
     stableId: person.stableRef, name: person.name, email: person.email, type: "EMPLOYEE",
     status: person.status, title: person.title, role: person.title || person.role,
     functionName: person.functionName, managerId: person.managerRef, source: "ops",

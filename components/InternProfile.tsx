@@ -81,6 +81,7 @@ export default function InternProfile({
   supervisors,
   showCertificates = false,
   initialTab = "projects",
+  careerHistory = [],
 }: {
   intern: Intern;
   projects: InternProject[];
@@ -89,6 +90,7 @@ export default function InternProfile({
   supervisors: { email: string; label: string }[];
   showCertificates?: boolean;
   initialTab?: TabId;
+  careerHistory?: { title: string; from: string; to: string | null }[];
 }) {
   const [editing, setEditing] = useState(false);
   const [tab, setTab] = useState<TabId>(initialTab);
@@ -179,6 +181,19 @@ export default function InternProfile({
             <Item label="Planned End (3-month window)" value={date(intern.plannedEndDate)} />
             <Item label="Completion Date (actual)" value={date(intern.completionDate)} />
             <Item label="Project Goal" value={`${intern.projectsDone} of ${intern.projectGoal} completed`} />
+            {careerHistory.length > 0 && (
+              <div className="sm:col-span-2 mt-2 border-t border-gray-100 pt-5">
+                <p className="text-[12px] font-medium uppercase tracking-wide text-gray-400">Career timeline</p>
+                <div className="mt-3 space-y-3">
+                  {careerHistory.map((event, index) => (
+                    <div key={`${event.title}-${event.from}-${index}`} className="flex items-start gap-3">
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gray-900" />
+                      <div><p className="text-[14px] font-medium text-gray-900">{event.title}</p><p className="text-[12px] text-gray-500">{date(event.from)}{event.to ? ` — ${date(event.to)}` : " — Present"}</p></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
         {tab === "writeups" && (

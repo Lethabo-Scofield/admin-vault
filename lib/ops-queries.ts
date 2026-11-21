@@ -30,6 +30,27 @@ export type OpsIdentityLink = {
   canonicalRef: string;
 };
 
+export type OpsCareerEvent = {
+  title: string;
+  from: string;
+  to: string | null;
+};
+
+/** Historical role assignments, used to show a LinkedIn-style career path. */
+export async function getOpsCareerHistory(personRefs: string[]): Promise<OpsCareerEvent[]> {
+  const sql = getOpsSql();
+  if (!sql || personRefs.length === 0) return [];
+  const rows = await sql<OpsCareerEvent[]>`
+    select title, effective_from as "from", effective_to as "to"
+    from org_assignments
+    where person_ref in ${sql(personRefs)}
+    order by effective_from asc
+  `;
+  // Ops can record the same title more than once during sync; collapse adjacent
+  // duplicates so the profile reads as a career timeline, not an audit dump.
+  return rows.filter((row, index) => index === 0 || row.title !== rows[index - 1].title);
+}
+
 export async function getOpsIdentityLinks(): Promise<OpsIdentityLink[]> {
   const sql = getOpsSql();
   if (!sql) return [];
