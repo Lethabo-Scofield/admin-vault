@@ -47,7 +47,7 @@ export async function getPeopleDirectory() {
   `;
   const completedInternEmails = new Set((await sql<{ email: string }[]>`
     select lower(email) as email from interns
-    where archived_at is null and (completion_date is not null or lower(coalesce(employment_status, '')) in ('completed', 'inactive', 'withdrawn', 'archived'))
+    where archived_at is null and lower(coalesce(employment_status, '')) in ('completed', 'inactive', 'withdrawn', 'archived')
   `).map((row) => row.email));
   const employees = await sql<typeof interns[number][]>`
     select stable_id as "stableId", full_name as name, email,
